@@ -1,26 +1,48 @@
-import { Injectable } from '@nestjs/common';
-import { CreateTeamDto } from './dto/create-team.dto';
-import { UpdateTeamDto } from './dto/update-team.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/sequelize";
+import { Transaction } from "sequelize";
+import { CreateTeamDto } from "./dto/create-team.dto";
+import { UpdateTeamDto } from "./dto/update-team.dto";
+import { Team } from "./entities/team.entity";
 
 @Injectable()
 export class TeamsService {
-  create(createTeamDto: CreateTeamDto) {
-    return 'This action adds a new team';
-  }
+    constructor(@InjectModel(Team) private teamRepository: typeof Team) {}
 
-  findAll() {
-    return `This action returns all teams`;
-  }
+    async create(createTeamDto: CreateTeamDto, transaction?: Transaction) {
+        return await this.teamRepository.create(createTeamDto, { transaction });
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} team`;
-  }
+    async findAll(limit: number, offset: number, transaction?: Transaction) {
+        return await this.teamRepository.findAll({
+            limit,
+            offset,
+            transaction,
+        });
+    }
 
-  update(id: number, updateTeamDto: UpdateTeamDto) {
-    return `This action updates a #${id} team`;
-  }
+    async findOne(id: number, transaction?: Transaction) {
+        return await this.teamRepository.findOne({
+            where: { id },
+            transaction,
+        });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} team`;
-  }
+    async update(
+        id: number,
+        updateTeamDto: UpdateTeamDto,
+        transaction?: Transaction,
+    ) {
+        return await this.teamRepository.update(updateTeamDto, {
+            where: { id },
+            transaction,
+        });
+    }
+
+    async remove(id: number, transaction?: Transaction) {
+        return await this.teamRepository.destroy({
+            where: { id },
+            transaction,
+        });
+    }
 }

@@ -4,14 +4,14 @@ export class CreateUserDto {
     @ApiProperty({
         example: "example@mail.ru",
         description: "E-mail",
-        required: true,
+        nullable: false,
     })
     readonly email: string;
 
     @ApiProperty({
         example: "123456",
         description: "Пароль",
-        required: true,
+        nullable: false,
     })
     readonly password: string;
 
