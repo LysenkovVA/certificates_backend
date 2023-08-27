@@ -15,12 +15,29 @@ export class UsersService {
     ) {}
 
     async createUser(dto: CreateUserDto, transaction?: Transaction) {
+        if (!dto.email) {
+            throw new HttpException(
+                "Email пользователя не задан!",
+                HttpStatus.BAD_REQUEST,
+                { description: "Ошибка при создании пользователя" },
+            );
+        }
+
+        if (!dto.password) {
+            throw new HttpException(
+                "Пароль пользователя не задан!",
+                HttpStatus.BAD_REQUEST,
+                { description: "Ошибка при создании пользователя" },
+            );
+        }
+
         const candidate = await this.getUserByEmail(dto.email, transaction);
 
         if (candidate) {
             throw new HttpException(
-                `Пользователь ${dto.email} уже зарегистрирован`,
+                `Пользователь ${dto.email} уже зарегистрирован!`,
                 HttpStatus.BAD_REQUEST,
+                { description: "Ошибка при создании пользователя" },
             );
         }
 

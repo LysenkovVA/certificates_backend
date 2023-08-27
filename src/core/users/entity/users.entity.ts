@@ -8,8 +8,10 @@ import {
 } from "sequelize-typescript";
 import { Role } from "../../roles/entities/roles.entity";
 import { Subscription } from "../../subscriptions/entities/subscription.entity";
+import { Team } from "../../teams/entities/team.entity";
 import { UserRoles } from "../../user-roles/entities/user-roles.entity";
 import { UserSubscription } from "../../user-subscriptions/entities/user-subscription.entity";
+import { UserTeam } from "../../user-teams/entities/user-teams.entity";
 
 interface IUserCreationAttrs {
     email: string;
@@ -108,4 +110,7 @@ export class User extends Model<User, IUserCreationAttrs> {
 
     @BelongsToMany(() => Subscription, () => UserSubscription)
     subscriptions: Subscription[];
+
+    @BelongsToMany(() => Team, () => UserTeam)
+    teams: Team[];
 }

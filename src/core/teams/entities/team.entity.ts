@@ -11,7 +11,10 @@ import { Organization } from "../../organizations/entities/organization.entity";
 import { UserTeam } from "../../user-teams/entities/user-teams.entity";
 import { User } from "../../users/entity/users.entity";
 
-export interface ITeamCreationAttrs {}
+export interface ITeamCreationAttrs {
+    value: string;
+    description: string;
+}
 
 @Table({
     tableName: "teams",

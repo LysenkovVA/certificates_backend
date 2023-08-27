@@ -2,6 +2,8 @@ import { forwardRef, Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import * as process from "process";
 import { RolesModule } from "../roles/roles.module";
+import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
+import { TeamsModule } from "../teams/teams.module";
 import { UsersModule } from "../users/users.module";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
@@ -12,6 +14,8 @@ import { AuthService } from "./auth.service";
     imports: [
         forwardRef(() => UsersModule),
         forwardRef(() => RolesModule),
+        SubscriptionsModule,
+        TeamsModule,
         JwtModule.register({
             secret: process.env.PRIVATE_KEY || "PRIVATE_KEY",
             signOptions: {

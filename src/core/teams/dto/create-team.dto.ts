@@ -11,7 +11,7 @@ export class CreateTeamDto {
     @ApiProperty({
         example: "Это моя самая лучшая команда",
         description: "Описание",
-        nullable: false,
+        nullable: true,
     })
     readonly description: string;
 }

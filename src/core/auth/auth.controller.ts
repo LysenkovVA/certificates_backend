@@ -18,13 +18,7 @@ export class AuthController {
     @Post("/register?")
     @ApiQuery({
         name: "type",
-        enum: [
-            "ADMIN",
-            "USER",
-            "OHS_ENGINEER",
-            "STUDY_CENTER_OWNER",
-            "STUDY_CENTER_MANAGER",
-        ],
+        enum: ["ADMIN", "USER"],
     })
     // TODO Разобраться с документацией ответов (как показывать что вернется)
     @ApiResponse({

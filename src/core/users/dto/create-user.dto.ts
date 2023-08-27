@@ -42,18 +42,4 @@ export class CreateUserDto {
         nullable: true,
     })
     readonly birthDate: Date;
-
-    @ApiPropertyOptional({
-        example: "Мой учебный центр",
-        description: "Название учебного центра",
-        nullable: true,
-    })
-    readonly studyCenterName: string;
-
-    @ApiPropertyOptional({
-        example: "3",
-        description: "Идентификатор УЦ",
-        nullable: true,
-    })
-    readonly studyCenterId: number;
 }

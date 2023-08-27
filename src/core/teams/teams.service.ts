@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Transaction } from "sequelize";
 import { CreateTeamDto } from "./dto/create-team.dto";
@@ -10,7 +10,16 @@ export class TeamsService {
     constructor(@InjectModel(Team) private teamRepository: typeof Team) {}
 
     async create(createTeamDto: CreateTeamDto, transaction?: Transaction) {
-        return await this.teamRepository.create(createTeamDto, { transaction });
+        if (!createTeamDto.value) {
+            throw new HttpException(
+                "Не задано имя команды!",
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        return await this.teamRepository.create(createTeamDto, {
+            transaction,
+        });
     }
 
     async findAll(limit: number, offset: number, transaction?: Transaction) {

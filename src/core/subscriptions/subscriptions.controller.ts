@@ -1,34 +1,52 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SubscriptionsService } from './subscriptions.service';
-import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+} from "@nestjs/common";
+import { CreateSubscriptionDto } from "./dto/create-subscription.dto";
+import { UpdateSubscriptionDto } from "./dto/update-subscription.dto";
+import { SubscriptionsService } from "./subscriptions.service";
 
-@Controller('subscriptions')
+@Controller("subscriptions")
 export class SubscriptionsController {
-  constructor(private readonly subscriptionsService: SubscriptionsService) {}
+    constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
-  @Post()
-  create(@Body() createSubscriptionDto: CreateSubscriptionDto) {
-    return this.subscriptionsService.create(createSubscriptionDto);
-  }
+    @Post()
+    async create(@Body() createSubscriptionDto: CreateSubscriptionDto) {
+        return await this.subscriptionsService.create(createSubscriptionDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.subscriptionsService.findAll();
-  }
+    @Get()
+    async findAll(
+        @Query("limit") limit: number,
+        @Query("offset") offset: number,
+    ) {
+        return await this.subscriptionsService.findAll(limit, offset);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.subscriptionsService.findOne(+id);
-  }
+    @Get(":id")
+    async findOne(@Param("id") id: string) {
+        return await this.subscriptionsService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSubscriptionDto: UpdateSubscriptionDto) {
-    return this.subscriptionsService.update(+id, updateSubscriptionDto);
-  }
+    @Patch(":id")
+    async update(
+        @Param("id") id: string,
+        @Body() updateSubscriptionDto: UpdateSubscriptionDto,
+    ) {
+        return await this.subscriptionsService.update(
+            +id,
+            updateSubscriptionDto,
+        );
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.subscriptionsService.remove(+id);
-  }
+    @Delete(":id")
+    async remove(@Param("id") id: string) {
+        return await this.subscriptionsService.remove(+id);
+    }
 }
