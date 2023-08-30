@@ -1,34 +1,58 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ConstructionObjectsService } from './construction-objects.service';
-import { CreateConstructionObjectDto } from './dto/create-construction-object.dto';
-import { UpdateConstructionObjectDto } from './dto/update-construction-object.dto';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+} from "@nestjs/common";
+import { ConstructionObjectsService } from "./construction-objects.service";
+import { CreateConstructionObjectDto } from "./dto/create-construction-object.dto";
+import { UpdateConstructionObjectDto } from "./dto/update-construction-object.dto";
 
-@Controller('construction-objects')
+@Controller("construction-objects")
 export class ConstructionObjectsController {
-  constructor(private readonly constructionObjectsService: ConstructionObjectsService) {}
+    constructor(
+        private readonly constructionObjectsService: ConstructionObjectsService,
+    ) {}
 
-  @Post()
-  create(@Body() createConstructionObjectDto: CreateConstructionObjectDto) {
-    return this.constructionObjectsService.create(createConstructionObjectDto);
-  }
+    @Post()
+    async create(
+        @Body() createConstructionObjectDto: CreateConstructionObjectDto,
+    ) {
+        return await this.constructionObjectsService.create(
+            createConstructionObjectDto,
+        );
+    }
 
-  @Get()
-  findAll() {
-    return this.constructionObjectsService.findAll();
-  }
+    @Get()
+    async findAll(
+        @Query("limit") limit: string,
+        @Query("offset") offset: string,
+    ) {
+        return await this.constructionObjectsService.findAll(+limit, +offset);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.constructionObjectsService.findOne(+id);
-  }
+    @Get(":id")
+    async findOne(@Param("id") id: string) {
+        return await this.constructionObjectsService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConstructionObjectDto: UpdateConstructionObjectDto) {
-    return this.constructionObjectsService.update(+id, updateConstructionObjectDto);
-  }
+    @Patch(":id")
+    async update(
+        @Param("id") id: string,
+        @Body() updateConstructionObjectDto: UpdateConstructionObjectDto,
+    ) {
+        return await this.constructionObjectsService.update(
+            +id,
+            updateConstructionObjectDto,
+        );
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.constructionObjectsService.remove(+id);
-  }
+    @Delete(":id")
+    async remove(@Param("id") id: string) {
+        return await this.constructionObjectsService.remove(+id);
+    }
 }

@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
-import { CreateOrganizationDto } from './dto/create-organization.dto';
-import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/sequelize";
+import { Transaction } from "sequelize";
+import { CreateOrganizationDto } from "./dto/create-organization.dto";
+import { UpdateOrganizationDto } from "./dto/update-organization.dto";
+import { Organization } from "./entities/organization.entity";
 
 @Injectable()
 export class OrganizationsService {
-  create(createOrganizationDto: CreateOrganizationDto) {
-    return 'This action adds a new organization';
-  }
+    constructor(
+        @InjectModel(Organization)
+        private organizationRepository: typeof Organization,
+    ) {}
 
-  findAll() {
-    return `This action returns all organizations`;
-  }
+    async create(
+        createOrganizationDto: CreateOrganizationDto,
+        transaction?: Transaction,
+    ) {
+        return await this.organizationRepository.create(createOrganizationDto, {
+            transaction,
+        });
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} organization`;
-  }
+    async findAll(limit: number, offset: number, transaction?: Transaction) {
+        return await this.organizationRepository.findAll({
+            limit,
+            offset,
+            transaction,
+        });
+    }
 
-  update(id: number, updateOrganizationDto: UpdateOrganizationDto) {
-    return `This action updates a #${id} organization`;
-  }
+    async findOne(id: number, transaction?: Transaction) {
+        return await this.organizationRepository.findOne({
+            where: { id },
+            transaction,
+        });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} organization`;
-  }
+    async update(
+        id: number,
+        updateOrganizationDto: UpdateOrganizationDto,
+        transaction?: Transaction,
+    ) {
+        return await this.organizationRepository.update(updateOrganizationDto, {
+            where: { id },
+            transaction,
+        });
+    }
+
+    async remove(id: number, transaction?: Transaction) {
+        return await this.organizationRepository.destroy({
+            where: { id },
+            transaction,
+        });
+    }
 }

@@ -1,34 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AccessRightsService } from './access-rights.service';
-import { CreateAccessRightDto } from './dto/create-access-right.dto';
-import { UpdateAccessRightDto } from './dto/update-access-right.dto';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+} from "@nestjs/common";
+import { AccessRightsService } from "./access-rights.service";
+import { CreateAccessRightDto } from "./dto/create-access-right.dto";
+import { UpdateAccessRightDto } from "./dto/update-access-right.dto";
 
-@Controller('access-rights')
+@Controller("access-rights")
 export class AccessRightsController {
-  constructor(private readonly accessRightsService: AccessRightsService) {}
+    constructor(private readonly accessRightsService: AccessRightsService) {}
 
-  @Post()
-  create(@Body() createAccessRightDto: CreateAccessRightDto) {
-    return this.accessRightsService.create(createAccessRightDto);
-  }
+    @Post()
+    async create(@Body() createAccessRightDto: CreateAccessRightDto) {
+        return await this.accessRightsService.create(createAccessRightDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.accessRightsService.findAll();
-  }
+    @Get()
+    async findAll(
+        @Query("limit") limit: string,
+        @Query("offset") offset: string,
+    ) {
+        return await this.accessRightsService.findAll(+limit, +offset);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.accessRightsService.findOne(+id);
-  }
+    @Get(":id")
+    async findOne(@Param("id") id: string) {
+        return await this.accessRightsService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAccessRightDto: UpdateAccessRightDto) {
-    return this.accessRightsService.update(+id, updateAccessRightDto);
-  }
+    @Patch(":id")
+    async update(
+        @Param("id") id: string,
+        @Body() updateAccessRightDto: UpdateAccessRightDto,
+    ) {
+        return await this.accessRightsService.update(+id, updateAccessRightDto);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.accessRightsService.remove(+id);
-  }
+    @Delete(":id")
+    async remove(@Param("id") id: string) {
+        return await this.accessRightsService.remove(+id);
+    }
 }

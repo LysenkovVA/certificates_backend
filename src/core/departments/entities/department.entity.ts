@@ -24,8 +24,8 @@ export class Department extends Model<Department, IDepartmentCreationAttrs> {
         description: "Название подразделения (отдела)",
     })
     @Column({
-        type: DataType.INTEGER,
+        type: DataType.STRING,
         allowNull: false,
     })
-    name: number;
+    name: string;
 }

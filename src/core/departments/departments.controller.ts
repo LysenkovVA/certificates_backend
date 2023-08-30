@@ -1,34 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { DepartmentsService } from './departments.service';
-import { CreateDepartmentDto } from './dto/create-department.dto';
-import { UpdateDepartmentDto } from './dto/update-department.dto';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+} from "@nestjs/common";
+import { DepartmentsService } from "./departments.service";
+import { CreateDepartmentDto } from "./dto/create-department.dto";
+import { UpdateDepartmentDto } from "./dto/update-department.dto";
 
-@Controller('departments')
+@Controller("departments")
 export class DepartmentsController {
-  constructor(private readonly departmentsService: DepartmentsService) {}
+    constructor(private readonly departmentsService: DepartmentsService) {}
 
-  @Post()
-  create(@Body() createDepartmentDto: CreateDepartmentDto) {
-    return this.departmentsService.create(createDepartmentDto);
-  }
+    @Post()
+    async create(@Body() createDepartmentDto: CreateDepartmentDto) {
+        return await this.departmentsService.create(createDepartmentDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.departmentsService.findAll();
-  }
+    @Get()
+    async findAll(
+        @Query("limit") limit: string,
+        @Query("offset") offset: string,
+    ) {
+        return await this.departmentsService.findAll(+limit, +offset);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.departmentsService.findOne(+id);
-  }
+    @Get(":id")
+    async findOne(@Param("id") id: string) {
+        return await this.departmentsService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
-    return this.departmentsService.update(+id, updateDepartmentDto);
-  }
+    @Patch(":id")
+    async update(
+        @Param("id") id: string,
+        @Body() updateDepartmentDto: UpdateDepartmentDto,
+    ) {
+        return await this.departmentsService.update(+id, updateDepartmentDto);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.departmentsService.remove(+id);
-  }
+    @Delete(":id")
+    async remove(@Param("id") id: string) {
+        return await this.departmentsService.remove(+id);
+    }
 }

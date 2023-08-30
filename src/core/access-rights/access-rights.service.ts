@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAccessRightDto } from './dto/create-access-right.dto';
-import { UpdateAccessRightDto } from './dto/update-access-right.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/sequelize";
+import { Transaction } from "sequelize";
+import { CreateAccessRightDto } from "./dto/create-access-right.dto";
+import { UpdateAccessRightDto } from "./dto/update-access-right.dto";
+import { AccessRight } from "./entities/access-right.entity";
 
 @Injectable()
 export class AccessRightsService {
-  create(createAccessRightDto: CreateAccessRightDto) {
-    return 'This action adds a new accessRight';
-  }
+    constructor(
+        @InjectModel(AccessRight)
+        private accessRightsRepository: typeof AccessRight,
+    ) {}
+    async create(
+        createAccessRightDto: CreateAccessRightDto,
+        transaction?: Transaction,
+    ) {
+        return await this.accessRightsRepository.create(createAccessRightDto, {
+            transaction,
+        });
+    }
 
-  findAll() {
-    return `This action returns all accessRights`;
-  }
+    async findAll(limit: number, offset: number, transaction?: Transaction) {
+        return await this.accessRightsRepository.findAll({
+            limit,
+            offset,
+            transaction,
+        });
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} accessRight`;
-  }
+    async findOne(id: number, transaction?: Transaction) {
+        return await this.accessRightsRepository.findOne({
+            where: { id },
+            transaction,
+        });
+    }
 
-  update(id: number, updateAccessRightDto: UpdateAccessRightDto) {
-    return `This action updates a #${id} accessRight`;
-  }
+    async update(
+        id: number,
+        updateAccessRightDto: UpdateAccessRightDto,
+        transaction?: Transaction,
+    ) {
+        return await this.accessRightsRepository.update(updateAccessRightDto, {
+            where: { id },
+            transaction,
+        });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} accessRight`;
-  }
+    async remove(id: number, transaction?: Transaction) {
+        return await this.accessRightsRepository.destroy({
+            where: { id },
+            transaction,
+        });
+    }
 }

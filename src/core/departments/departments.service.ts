@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
-import { CreateDepartmentDto } from './dto/create-department.dto';
-import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/sequelize";
+import { Transaction } from "sequelize";
+import { CreateDepartmentDto } from "./dto/create-department.dto";
+import { UpdateDepartmentDto } from "./dto/update-department.dto";
+import { Department } from "./entities/department.entity";
 
 @Injectable()
 export class DepartmentsService {
-  create(createDepartmentDto: CreateDepartmentDto) {
-    return 'This action adds a new department';
-  }
+    constructor(
+        @InjectModel(Department)
+        private departmentsRepository: typeof Department,
+    ) {}
 
-  findAll() {
-    return `This action returns all departments`;
-  }
+    async create(
+        createDepartmentDto: CreateDepartmentDto,
+        transaction?: Transaction,
+    ) {
+        return await this.departmentsRepository.create(createDepartmentDto, {
+            transaction,
+        });
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} department`;
-  }
+    async findAll(limit: number, offset: number, transaction?: Transaction) {
+        return await this.departmentsRepository.findAll({
+            limit,
+            offset,
+            transaction,
+        });
+    }
 
-  update(id: number, updateDepartmentDto: UpdateDepartmentDto) {
-    return `This action updates a #${id} department`;
-  }
+    async findOne(id: number, transaction?: Transaction) {
+        return await this.departmentsRepository.findOne({
+            where: { id },
+            transaction,
+        });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} department`;
-  }
+    async update(
+        id: number,
+        updateDepartmentDto: UpdateDepartmentDto,
+        transaction?: Transaction,
+    ) {
+        return await this.departmentsRepository.update(updateDepartmentDto, {
+            where: { id },
+            transaction,
+        });
+    }
+
+    async remove(id: number, transaction?: Transaction) {
+        return await this.departmentsRepository.destroy({
+            where: { id },
+            transaction,
+        });
+    }
 }

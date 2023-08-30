@@ -1,26 +1,57 @@
-import { Injectable } from '@nestjs/common';
-import { CreateConstructionObjectDto } from './dto/create-construction-object.dto';
-import { UpdateConstructionObjectDto } from './dto/update-construction-object.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/sequelize";
+import { Transaction } from "sequelize";
+import { CreateConstructionObjectDto } from "./dto/create-construction-object.dto";
+import { UpdateConstructionObjectDto } from "./dto/update-construction-object.dto";
+import { ConstructionObject } from "./entities/construction-object.entity";
 
 @Injectable()
 export class ConstructionObjectsService {
-  create(createConstructionObjectDto: CreateConstructionObjectDto) {
-    return 'This action adds a new constructionObject';
-  }
+    constructor(
+        @InjectModel(ConstructionObject)
+        private constructionObjectsRepository: typeof ConstructionObject,
+    ) {}
 
-  findAll() {
-    return `This action returns all constructionObjects`;
-  }
+    async create(
+        createConstructionObjectDto: CreateConstructionObjectDto,
+        transaction?: Transaction,
+    ) {
+        return await this.constructionObjectsRepository.create(
+            createConstructionObjectDto,
+            { transaction },
+        );
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} constructionObject`;
-  }
+    async findAll(limit: number, offset: number, transaction?: Transaction) {
+        return await this.constructionObjectsRepository.findAll({
+            limit,
+            offset,
+            transaction,
+        });
+    }
 
-  update(id: number, updateConstructionObjectDto: UpdateConstructionObjectDto) {
-    return `This action updates a #${id} constructionObject`;
-  }
+    async findOne(id: number, transaction?: Transaction) {
+        return await this.constructionObjectsRepository.findOne({
+            where: { id },
+            transaction,
+        });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} constructionObject`;
-  }
+    async update(
+        id: number,
+        updateConstructionObjectDto: UpdateConstructionObjectDto,
+        transaction?: Transaction,
+    ) {
+        return await this.constructionObjectsRepository.update(
+            updateConstructionObjectDto,
+            { where: { id }, transaction },
+        );
+    }
+
+    async remove(id: number, transaction?: Transaction) {
+        return await this.constructionObjectsRepository.destroy({
+            where: { id },
+            transaction,
+        });
+    }
 }

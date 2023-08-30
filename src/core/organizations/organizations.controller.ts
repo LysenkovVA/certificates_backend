@@ -1,34 +1,52 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { OrganizationsService } from './organizations.service';
-import { CreateOrganizationDto } from './dto/create-organization.dto';
-import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+} from "@nestjs/common";
+import { CreateOrganizationDto } from "./dto/create-organization.dto";
+import { UpdateOrganizationDto } from "./dto/update-organization.dto";
+import { OrganizationsService } from "./organizations.service";
 
-@Controller('organizations')
+@Controller("organizations")
 export class OrganizationsController {
-  constructor(private readonly organizationsService: OrganizationsService) {}
+    constructor(private readonly organizationsService: OrganizationsService) {}
 
-  @Post()
-  create(@Body() createOrganizationDto: CreateOrganizationDto) {
-    return this.organizationsService.create(createOrganizationDto);
-  }
+    @Post()
+    async create(@Body() createOrganizationDto: CreateOrganizationDto) {
+        return await this.organizationsService.create(createOrganizationDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.organizationsService.findAll();
-  }
+    @Get()
+    async findAll(
+        @Query("limit") limit: string,
+        @Query("offset") offset: string,
+    ) {
+        return await this.organizationsService.findAll(+limit, +offset);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.organizationsService.findOne(+id);
-  }
+    @Get(":id")
+    async findOne(@Param("id") id: string) {
+        return await this.organizationsService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrganizationDto: UpdateOrganizationDto) {
-    return this.organizationsService.update(+id, updateOrganizationDto);
-  }
+    @Patch(":id")
+    async update(
+        @Param("id") id: string,
+        @Body() updateOrganizationDto: UpdateOrganizationDto,
+    ) {
+        return await this.organizationsService.update(
+            +id,
+            updateOrganizationDto,
+        );
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.organizationsService.remove(+id);
-  }
+    @Delete(":id")
+    async remove(@Param("id") id: string) {
+        return await this.organizationsService.remove(+id);
+    }
 }
