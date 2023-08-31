@@ -10,6 +10,8 @@ import { ConstructionObjectsModule } from "./core/construction-objects/construct
 import { ConstructionObject } from "./core/construction-objects/entities/construction-object.entity";
 import { DepartmentsModule } from "./core/departments/departments.module";
 import { Department } from "./core/departments/entities/department.entity";
+import { EmployeesModule } from "./core/employees/employees.module";
+import { Employee } from "./core/employees/entities/employee.entity";
 import { Organization } from "./core/organizations/entities/organization.entity";
 import { OrganizationsModule } from "./core/organizations/organizations.module";
 import { Role } from "./core/roles/entities/roles.entity";
@@ -60,6 +62,7 @@ import { UsersModule } from "./core/users/users.module";
                 Organization,
                 ConstructionObject,
                 Department,
+                Employee,
             ],
             define: {
                 createdAt: false,
@@ -88,6 +91,7 @@ import { UsersModule } from "./core/users/users.module";
         OrganizationsModule,
         ConstructionObjectsModule,
         DepartmentsModule,
+        EmployeesModule,
     ],
 })
 export class AppModule {}
