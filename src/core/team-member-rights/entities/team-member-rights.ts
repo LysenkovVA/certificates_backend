@@ -51,4 +51,44 @@ export class TeamMemberRight extends Model<
     })
     @ForeignKey(() => AccessRight)
     accessRightId: number;
+
+    @ApiProperty({
+        example: "true",
+        description: "Создание записи",
+    })
+    @Column({
+        type: DataType.BOOLEAN,
+        allowNull: false,
+    })
+    canCreate: boolean;
+
+    @ApiProperty({
+        example: "true",
+        description: "Чтение записи",
+    })
+    @Column({
+        type: DataType.BOOLEAN,
+        allowNull: false,
+    })
+    canRead: boolean;
+
+    @ApiProperty({
+        example: "true",
+        description: "Изменение записи",
+    })
+    @Column({
+        type: DataType.BOOLEAN,
+        allowNull: false,
+    })
+    canUpdate: boolean;
+
+    @ApiProperty({
+        example: "true",
+        description: "Удаление записи",
+    })
+    @Column({
+        type: DataType.BOOLEAN,
+        allowNull: false,
+    })
+    canDelete: boolean;
 }

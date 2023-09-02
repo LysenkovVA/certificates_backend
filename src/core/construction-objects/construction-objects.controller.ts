@@ -8,10 +8,12 @@ import {
     Post,
     Query,
 } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
 import { ConstructionObjectsService } from "./construction-objects.service";
 import { CreateConstructionObjectDto } from "./dto/create-construction-object.dto";
 import { UpdateConstructionObjectDto } from "./dto/update-construction-object.dto";
 
+@ApiTags("Строительные объекты")
 @Controller("construction-objects")
 export class ConstructionObjectsController {
     constructor(

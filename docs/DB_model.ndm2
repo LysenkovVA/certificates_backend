@@ -10248,6 +10248,154 @@
                     "geographySRID": -1,
                     "geometryType": "",
                     "geometrySRID": -1
+                  },
+                  {
+                    "objectType": "TableField_PGSQL",
+                    "name": "canCreate",
+                    "type": "bool",
+                    "length": -2147483648,
+                    "decimals": -2147483648,
+                    "dimensions": 0,
+                    "collation": "",
+                    "isNullable": true,
+                    "defaultType": "None",
+                    "defaultValue": "",
+                    "comment": "",
+                    "oldName": "canCreate",
+                    "typeOID": 1,
+                    "fieldObjectType": "",
+                    "objectTypeSchema": "",
+                    "isDomainType": false,
+                    "collationSchema": "",
+                    "ordinalPosition": -1,
+                    "foreignOptions": [],
+                    "isIdentity": false,
+                    "identityGeneration": "None",
+                    "oldIdentityGeneration": "None",
+                    "identityStart": 0,
+                    "identityIncrement": 0,
+                    "identityMinimum": 0,
+                    "hasNoIdentityMinValue": false,
+                    "identityMaximum": 0,
+                    "hasNoIdentityMaxValue": false,
+                    "identityCache_inServer": 0,
+                    "isIdentityCycle": false,
+                    "generationExpression": "",
+                    "geographyType": "",
+                    "geographySRID": -1,
+                    "geometryType": "",
+                    "geometrySRID": -1
+                  },
+                  {
+                    "objectType": "TableField_PGSQL",
+                    "name": "canRead",
+                    "type": "bool",
+                    "length": -2147483648,
+                    "decimals": -2147483648,
+                    "dimensions": 0,
+                    "collation": "",
+                    "isNullable": true,
+                    "defaultType": "None",
+                    "defaultValue": "",
+                    "comment": "",
+                    "oldName": "canRead",
+                    "typeOID": 1,
+                    "fieldObjectType": "",
+                    "objectTypeSchema": "",
+                    "isDomainType": false,
+                    "collationSchema": "",
+                    "ordinalPosition": -1,
+                    "foreignOptions": [],
+                    "isIdentity": false,
+                    "identityGeneration": "None",
+                    "oldIdentityGeneration": "None",
+                    "identityStart": 0,
+                    "identityIncrement": 0,
+                    "identityMinimum": 0,
+                    "hasNoIdentityMinValue": false,
+                    "identityMaximum": 0,
+                    "hasNoIdentityMaxValue": false,
+                    "identityCache_inServer": 0,
+                    "isIdentityCycle": false,
+                    "generationExpression": "",
+                    "geographyType": "",
+                    "geographySRID": -1,
+                    "geometryType": "",
+                    "geometrySRID": -1
+                  },
+                  {
+                    "objectType": "TableField_PGSQL",
+                    "name": "canUpdate",
+                    "type": "bool",
+                    "length": -2147483648,
+                    "decimals": -2147483648,
+                    "dimensions": 0,
+                    "collation": "",
+                    "isNullable": true,
+                    "defaultType": "None",
+                    "defaultValue": "",
+                    "comment": "",
+                    "oldName": "canUpdate",
+                    "typeOID": 1,
+                    "fieldObjectType": "",
+                    "objectTypeSchema": "",
+                    "isDomainType": false,
+                    "collationSchema": "",
+                    "ordinalPosition": -1,
+                    "foreignOptions": [],
+                    "isIdentity": false,
+                    "identityGeneration": "None",
+                    "oldIdentityGeneration": "None",
+                    "identityStart": 0,
+                    "identityIncrement": 0,
+                    "identityMinimum": 0,
+                    "hasNoIdentityMinValue": false,
+                    "identityMaximum": 0,
+                    "hasNoIdentityMaxValue": false,
+                    "identityCache_inServer": 0,
+                    "isIdentityCycle": false,
+                    "generationExpression": "",
+                    "geographyType": "",
+                    "geographySRID": -1,
+                    "geometryType": "",
+                    "geometrySRID": -1
+                  },
+                  {
+                    "objectType": "TableField_PGSQL",
+                    "name": "canDelete",
+                    "type": "bool",
+                    "length": -2147483648,
+                    "decimals": -2147483648,
+                    "dimensions": 0,
+                    "collation": "",
+                    "isNullable": true,
+                    "defaultType": "None",
+                    "defaultValue": "",
+                    "comment": "",
+                    "oldName": "canDelete",
+                    "typeOID": 1,
+                    "fieldObjectType": "",
+                    "objectTypeSchema": "",
+                    "isDomainType": false,
+                    "collationSchema": "",
+                    "ordinalPosition": -1,
+                    "foreignOptions": [],
+                    "isIdentity": false,
+                    "identityGeneration": "None",
+                    "oldIdentityGeneration": "None",
+                    "identityStart": 0,
+                    "identityIncrement": 0,
+                    "identityMinimum": 0,
+                    "hasNoIdentityMinValue": false,
+                    "identityMaximum": 0,
+                    "hasNoIdentityMaxValue": false,
+                    "identityCache_inServer": 0,
+                    "isIdentityCycle": false,
+                    "generationExpression": "",
+                    "geographyType": "",
+                    "geographySRID": -1,
+                    "geometryType": "",
+                    "geometrySRID": -1
                   }
                 ],
                 "indexes": [],
@@ -10304,9 +10452,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 221,
-            "g": 193,
-            "b": 0,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10320,9 +10468,9 @@
           "height": 114,
           "isBold": false,
           "titleColor": {
-            "r": 221,
-            "g": 193,
-            "b": 0,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10336,9 +10484,9 @@
           "height": 282,
           "isBold": false,
           "titleColor": {
-            "r": 221,
-            "g": 193,
-            "b": 0,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10352,9 +10500,9 @@
           "height": 198,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10368,9 +10516,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10384,9 +10532,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10400,9 +10548,9 @@
           "height": 282,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10416,9 +10564,9 @@
           "height": 198,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10432,9 +10580,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10448,9 +10596,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10464,9 +10612,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10480,9 +10628,9 @@
           "height": 177,
           "isBold": false,
           "titleColor": {
-            "r": 204,
-            "g": 23,
-            "b": 41,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10496,9 +10644,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10512,9 +10660,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10528,9 +10676,9 @@
           "height": 324,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10576,9 +10724,9 @@
           "height": 114,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10640,9 +10788,9 @@
           "height": 114,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10656,9 +10804,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10672,9 +10820,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10688,9 +10836,9 @@
           "height": 114,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10784,9 +10932,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10800,9 +10948,9 @@
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10816,9 +10964,9 @@
           "height": 198,
           "isBold": false,
           "titleColor": {
-            "r": 221,
-            "g": 193,
-            "b": 0,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10832,9 +10980,9 @@
           "height": 177,
           "isBold": false,
           "titleColor": {
-            "r": 221,
-            "g": 193,
-            "b": 0,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10843,14 +10991,14 @@
           "schemaName": "public",
           "tableName": "accessRights",
           "x": 1360,
-          "y": 710,
+          "y": 800,
           "width": 150,
           "height": 135,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         },
@@ -10861,12 +11009,12 @@
           "x": 1310,
           "y": 530,
           "width": 232,
-          "height": 135,
+          "height": 219,
           "isBold": false,
           "titleColor": {
-            "r": 55,
-            "g": 131,
-            "b": 192,
+            "r": 151,
+            "g": 0,
+            "b": 195,
             "a": 1
           }
         }
@@ -11683,16 +11831,16 @@
           "vertices": [
             {
               "x": 2745,
-              "y": 1630
+              "y": 1640
             },
             {
               "x": 2475,
-              "y": 1630
+              "y": 1640
             }
           ],
           "label": {
             "x": 2755,
-            "y": 1591,
+            "y": 1601,
             "width": 210,
             "height": 31,
             "fontName": "Arial Unicode MS",
@@ -12583,16 +12731,16 @@
           "vertices": [
             {
               "x": 1430,
-              "y": 695
+              "y": 785
             },
             {
               "x": 1430,
-              "y": 680
+              "y": 764
             }
           ],
           "label": {
             "x": 1166,
-            "y": 664,
+            "y": 754,
             "width": 266,
             "height": 31,
             "fontName": "Arial Unicode MS",

@@ -8,10 +8,12 @@ import {
     Post,
     Query,
 } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { TeamsService } from "./teams.service";
 
+@ApiTags("Команды")
 @Controller("teams")
 export class TeamsController {
     constructor(private readonly teamsService: TeamsService) {}

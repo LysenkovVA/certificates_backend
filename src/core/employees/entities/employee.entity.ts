@@ -1,5 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import {
+    BelongsToMany,
+    Column,
+    DataType,
+    HasMany,
+    Model,
+    Table,
+} from "sequelize-typescript";
+import { Certificate } from "../../certificates/entities/certificate.entity";
+import { Inspection } from "../../inspections/entities/inspection.entity";
+import { Inspector } from "../../inspectors/entities/inspectors.entity";
+import { RepresentativeEmployee } from "../../representative-employees/entities/representative-employees.entity";
 
 export interface IEmployeeCreationAttrs {}
 
@@ -78,4 +89,13 @@ export class Employee extends Model<Employee, IEmployeeCreationAttrs> {
         allowNull: true,
     })
     rank: string;
+
+    @BelongsToMany(() => Inspection, () => RepresentativeEmployee)
+    inspectionsWhereRepresentative: Inspection[];
+
+    @BelongsToMany(() => Inspection, () => Inspector)
+    inspectionsWhereInspector: Inspection[];
+
+    @HasMany(() => Certificate, "employeeId")
+    certificates: Certificate[];
 }

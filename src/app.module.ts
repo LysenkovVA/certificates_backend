@@ -6,16 +6,38 @@ import * as process from "process";
 import { AccessRightsModule } from "./core/access-rights/access-rights.module";
 import { AccessRight } from "./core/access-rights/entities/access-right.entity";
 import { AuthModule } from "./core/auth/auth.module";
+import { BerthTypesModule } from "./core/berth-types/berth-types.module";
+import { BerthType } from "./core/berth-types/entities/berth-type.entity";
+import { BerthesModule } from "./core/berthes/berthes.module";
+import { Berth } from "./core/berthes/entities/berth.entity";
+import { CertificateTypesModule } from "./core/certificate-types/certificate-types.module";
+import { CertificateType } from "./core/certificate-types/entities/certificate-type.entity";
+import { CertificatesModule } from "./core/certificates/certificates.module";
+import { Certificate } from "./core/certificates/entities/certificate.entity";
+import { CheckGroupsModule } from "./core/check-groups/check-groups.module";
+import { CheckGroup } from "./core/check-groups/entities/check-group.entity";
 import { ConstructionObjectsModule } from "./core/construction-objects/construction-objects.module";
 import { ConstructionObject } from "./core/construction-objects/entities/construction-object.entity";
 import { DepartmentsModule } from "./core/departments/departments.module";
 import { Department } from "./core/departments/entities/department.entity";
 import { EmployeesModule } from "./core/employees/employees.module";
 import { Employee } from "./core/employees/entities/employee.entity";
+import { File } from "./core/files/entities/file.entity";
+import { FilesModule } from "./core/files/files.module";
+import { InspectionType } from "./core/inspection-types/entities/inspection-type.entity";
+import { InspectionTypesModule } from "./core/inspection-types/inspection-types.module";
+import { Inspection } from "./core/inspections/entities/inspection.entity";
+import { InspectionsModule } from "./core/inspections/inspections.module";
+import { Inspector } from "./core/inspectors/entities/inspectors.entity";
 import { Organization } from "./core/organizations/entities/organization.entity";
 import { OrganizationsModule } from "./core/organizations/organizations.module";
+import { Protocol } from "./core/protocols/entities/protocols.entity";
+import { RepresentativeEmployee } from "./core/representative-employees/entities/representative-employees.entity";
+import { ResultDocumentType } from "./core/result_document_types/entities/result_document_type.entity";
+import { ResultDocumentTypesModule } from "./core/result_document_types/result_document_types.module";
 import { Role } from "./core/roles/entities/roles.entity";
 import { RolesModule } from "./core/roles/roles.module";
+import { Scan } from "./core/scans/entities/scans.entity";
 import { Subscription } from "./core/subscriptions/entities/subscription.entity";
 import { SubscriptionsModule } from "./core/subscriptions/subscriptions.module";
 import { TeamMemberRight } from "./core/team-member-rights/entities/team-member-rights";
@@ -63,6 +85,19 @@ import { UsersModule } from "./core/users/users.module";
                 ConstructionObject,
                 Department,
                 Employee,
+                Berth,
+                BerthType,
+                Inspection,
+                InspectionType,
+                ResultDocumentType,
+                RepresentativeEmployee,
+                Inspector,
+                Certificate,
+                CertificateType,
+                File,
+                Protocol,
+                Scan,
+                CheckGroup,
             ],
             define: {
                 createdAt: false,
@@ -92,6 +127,15 @@ import { UsersModule } from "./core/users/users.module";
         ConstructionObjectsModule,
         DepartmentsModule,
         EmployeesModule,
+        BerthesModule,
+        BerthTypesModule,
+        InspectionsModule,
+        InspectionTypesModule,
+        ResultDocumentTypesModule,
+        CertificatesModule,
+        CertificateTypesModule,
+        FilesModule,
+        CheckGroupsModule,
     ],
 })
 export class AppModule {}

@@ -8,10 +8,12 @@ import {
     Post,
     Query,
 } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
 import { CreateSubscriptionDto } from "./dto/create-subscription.dto";
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto";
 import { SubscriptionsService } from "./subscriptions.service";
 
+@ApiTags("Подписки")
 @Controller("subscriptions")
 export class SubscriptionsController {
     constructor(private readonly subscriptionsService: SubscriptionsService) {}

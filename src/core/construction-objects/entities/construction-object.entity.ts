@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import { Inspection } from "../../inspections/entities/inspection.entity";
 
 export interface IConstructionObjectCreationAttrs {}
 
@@ -61,4 +62,7 @@ export class ConstructionObject extends Model<
         allowNull: true,
     })
     endDate: Date;
+
+    @HasMany(() => Inspection, "constructionObjectId")
+    inspections: Inspection[];
 }

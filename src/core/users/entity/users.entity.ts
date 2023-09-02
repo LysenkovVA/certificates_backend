@@ -8,6 +8,7 @@ import {
     Table,
 } from "sequelize-typescript";
 import { Employee } from "../../employees/entities/employee.entity";
+import { Inspection } from "../../inspections/entities/inspection.entity";
 import { Role } from "../../roles/entities/roles.entity";
 import { Subscription } from "../../subscriptions/entities/subscription.entity";
 import { Team } from "../../teams/entities/team.entity";
@@ -118,4 +119,7 @@ export class User extends Model<User, IUserCreationAttrs> {
 
     @HasMany(() => Employee, "userId")
     employees: Employee[];
+
+    @HasMany(() => Inspection, "userId")
+    inspections: Inspection[];
 }
