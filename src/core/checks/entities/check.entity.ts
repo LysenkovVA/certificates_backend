@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import { CheckListCheck } from "../../check-list-checks/entities/check-list-check.entity";
 import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 
 export interface ICheckCreationAttrs {}
@@ -53,4 +54,7 @@ export class Check extends Model<Check, ICheckCreationAttrs> {
 
     @HasMany(() => InspectionViolation, "checkId")
     inspectionViolations: InspectionViolation[];
+
+    @HasMany(() => CheckListCheck, "checkId")
+    checkListChecks: CheckListCheck[];
 }

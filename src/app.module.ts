@@ -16,6 +16,12 @@ import { CertificatesModule } from "./core/certificates/certificates.module";
 import { Certificate } from "./core/certificates/entities/certificate.entity";
 import { CheckGroupsModule } from "./core/check-groups/check-groups.module";
 import { CheckGroup } from "./core/check-groups/entities/check-group.entity";
+import { CheckListChecksModule } from "./core/check-list-checks/check-list-checks.module";
+import { CheckListCheck } from "./core/check-list-checks/entities/check-list-check.entity";
+import { CheckListGroupsModule } from "./core/check-list-groups/check-list-groups.module";
+import { CheckListGroup } from "./core/check-list-groups/entities/check-list-group.entity";
+import { CheckListsModule } from "./core/check-lists/check-lists.module";
+import { CheckList } from "./core/check-lists/entities/check-list.entity";
 import { CheckStatusesModule } from "./core/check-statuses/check-statuses.module";
 import { CheckStatus } from "./core/check-statuses/entities/check-status.entity";
 import { ChecksModule } from "./core/checks/checks.module";
@@ -117,6 +123,9 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
                 ViolationPhoto,
                 ViolationViewedBy,
                 ViolationEmployeeComment,
+                CheckList,
+                CheckListGroup,
+                CheckListCheck,
             ],
             define: {
                 createdAt: false,
@@ -160,6 +169,9 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
         CheckStatusesModule,
         ViolationCommentsModule,
         ViolationEmployeeCommentsModule,
+        CheckListsModule,
+        CheckListGroupsModule,
+        CheckListChecksModule,
     ],
 })
 export class AppModule {}
