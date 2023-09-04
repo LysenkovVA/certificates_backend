@@ -7,8 +7,10 @@ import {
     Table,
 } from "sequelize-typescript";
 import { Certificate } from "../../certificates/entities/certificate.entity";
+import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 import { Protocol } from "../../protocols/entities/protocols.entity";
 import { Scan } from "../../scans/entities/scans.entity";
+import { ViolationPhoto } from "../../violation-photos/entities/violation-photos.entity";
 
 export interface IFileCreationAttrs {}
 
@@ -75,4 +77,7 @@ export class File extends Model<File, IFileCreationAttrs> {
 
     @BelongsToMany(() => Certificate, () => Scan)
     certificatesWhereScan: Certificate[];
+
+    @BelongsToMany(() => InspectionViolation, () => ViolationPhoto)
+    inspectionViolations: InspectionViolation[];
 }

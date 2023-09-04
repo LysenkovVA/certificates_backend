@@ -1,13 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
-import { Check } from "../../checks/entities/check.entity";
+import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 
-export interface ICheckGroupCreationAttrs {}
+export interface ICheckStatusCreationAttrs {}
 
-@Table({
-    tableName: "check_groups",
-})
-export class CheckGroup extends Model<CheckGroup, ICheckGroupCreationAttrs> {
+@Table({ tableName: "check_statuses" })
+export class CheckStatus extends Model<CheckStatus, ICheckStatusCreationAttrs> {
     @ApiProperty({
         example: "1",
         description: "Идентификатор",
@@ -21,8 +19,8 @@ export class CheckGroup extends Model<CheckGroup, ICheckGroupCreationAttrs> {
     id: number;
 
     @ApiProperty({
-        example: "Электробезопасность",
-        description: "Название группы",
+        example: "Соответствует",
+        description: "Название статуса",
     })
     @Column({
         type: DataType.STRING,
@@ -30,6 +28,6 @@ export class CheckGroup extends Model<CheckGroup, ICheckGroupCreationAttrs> {
     })
     value: string;
 
-    @HasMany(() => Check, "checkGroupId")
-    checks: Check[];
+    @HasMany(() => InspectionViolation, "checkStatusId")
+    inspectionViolations: InspectionViolation[];
 }

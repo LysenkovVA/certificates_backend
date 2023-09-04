@@ -16,6 +16,10 @@ import { CertificatesModule } from "./core/certificates/certificates.module";
 import { Certificate } from "./core/certificates/entities/certificate.entity";
 import { CheckGroupsModule } from "./core/check-groups/check-groups.module";
 import { CheckGroup } from "./core/check-groups/entities/check-group.entity";
+import { CheckStatusesModule } from "./core/check-statuses/check-statuses.module";
+import { CheckStatus } from "./core/check-statuses/entities/check-status.entity";
+import { ChecksModule } from "./core/checks/checks.module";
+import { Check } from "./core/checks/entities/check.entity";
 import { ConstructionObjectsModule } from "./core/construction-objects/construction-objects.module";
 import { ConstructionObject } from "./core/construction-objects/entities/construction-object.entity";
 import { DepartmentsModule } from "./core/departments/departments.module";
@@ -26,6 +30,8 @@ import { File } from "./core/files/entities/file.entity";
 import { FilesModule } from "./core/files/files.module";
 import { InspectionType } from "./core/inspection-types/entities/inspection-type.entity";
 import { InspectionTypesModule } from "./core/inspection-types/inspection-types.module";
+import { InspectionViolation } from "./core/inspection-violations/entities/inspection-violation.entity";
+import { InspectionViolationsModule } from "./core/inspection-violations/inspection-violations.module";
 import { Inspection } from "./core/inspections/entities/inspection.entity";
 import { InspectionsModule } from "./core/inspections/inspections.module";
 import { Inspector } from "./core/inspectors/entities/inspectors.entity";
@@ -49,6 +55,12 @@ import { UserSubscription } from "./core/user-subscriptions/entities/user-subscr
 import { UserTeam } from "./core/user-teams/entities/user-teams.entity";
 import { User } from "./core/users/entity/users.entity";
 import { UsersModule } from "./core/users/users.module";
+import { ViolationComment } from "./core/violation-comments/entities/violation-comment.entity";
+import { ViolationCommentsModule } from "./core/violation-comments/violation-comments.module";
+import { ViolationEmployeeComment } from "./core/violation-employee-comments/entities/violation-employee-comment.entity";
+import { ViolationEmployeeCommentsModule } from "./core/violation-employee-comments/violation-employee-comments.module";
+import { ViolationPhoto } from "./core/violation-photos/entities/violation-photos.entity";
+import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation_viewed_by.entity";
 
 @Module({
     controllers: [],
@@ -98,6 +110,13 @@ import { UsersModule } from "./core/users/users.module";
                 Protocol,
                 Scan,
                 CheckGroup,
+                Check,
+                InspectionViolation,
+                CheckStatus,
+                ViolationComment,
+                ViolationPhoto,
+                ViolationViewedBy,
+                ViolationEmployeeComment,
             ],
             define: {
                 createdAt: false,
@@ -136,6 +155,11 @@ import { UsersModule } from "./core/users/users.module";
         CertificateTypesModule,
         FilesModule,
         CheckGroupsModule,
+        ChecksModule,
+        InspectionViolationsModule,
+        CheckStatusesModule,
+        ViolationCommentsModule,
+        ViolationEmployeeCommentsModule,
     ],
 })
 export class AppModule {}

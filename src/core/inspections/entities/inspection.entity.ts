@@ -3,10 +3,12 @@ import {
     BelongsToMany,
     Column,
     DataType,
+    HasMany,
     Model,
     Table,
 } from "sequelize-typescript";
 import { Employee } from "../../employees/entities/employee.entity";
+import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 import { Inspector } from "../../inspectors/entities/inspectors.entity";
 import { RepresentativeEmployee } from "../../representative-employees/entities/representative-employees.entity";
 
@@ -108,4 +110,7 @@ export class Inspection extends Model<Inspection, IInspectionCreationAttrs> {
 
     @BelongsToMany(() => Employee, () => Inspector)
     inspectors: Employee[];
+
+    @HasMany(() => InspectionViolation, "inspectionId")
+    inspectionViolations: InspectionViolation[];
 }
