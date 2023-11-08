@@ -5,7 +5,11 @@ import { AppModule } from "./app.module";
 
 async function start() {
     const PORT = process.env.PORT || 5001;
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+        // Опция для Frontend, иначе вылетает ошибка при авторизации и
+        // возможно других запросах
+        cors: true,
+    });
     app.setGlobalPrefix("/api");
 
     // Настройка документации

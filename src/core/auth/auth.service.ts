@@ -28,13 +28,33 @@ export class AuthService {
     ) {}
     async login(loginDto: LoginDto) {
         const user = await this.validateUser(loginDto);
-        return this.generateToken(user);
+
+        if (!user) {
+            console.log("login error!!!");
+            throw new HttpException(
+                `Указан неверный логин или пароль`,
+                HttpStatus.BAD_REQUEST,
+                { description: "Ошибка при авторизации пользователя!" },
+            );
+        }
+
+        const token = await this.generateToken(user);
+
+        return {
+            id: user.id,
+            email: user.email,
+            surname: user.surname,
+            name: user.name,
+            birthDate: user.birthDate,
+            avatar: user.avatar,
+            token,
+        };
     }
 
     private async generateToken(user: User) {
         const payload = { id: user.id, email: user.email, roles: user.roles };
 
-        return { token: this.jwtService.sign(payload) };
+        return this.jwtService.sign(payload);
     }
 
     async register(createUserDto: CreateUserDto, userType: string) {
@@ -93,6 +113,7 @@ export class AuthService {
             } else {
                 // Добавляем роль пользователя
                 await user.$add("roles", [userRole.id], { transaction });
+                console.log(">>>USER CREATED");
 
                 // Добавляем подписку
                 await user.$add("subscriptions", [basicSubscription.id], {
@@ -102,38 +123,40 @@ export class AuthService {
                         endDate: Dates.getDateFrom(new Date(), 1),
                     },
                 });
+                console.log(">>>SUBSCRIPTION ADDED");
 
-                // Добавляем команду
-                const team = await this.teamsService.create(
-                    {
-                        value: "Моя команда",
-                        description: "Описание команды",
-                    },
-                    transaction,
-                );
-
-                if (!team) {
-                    throw new HttpException(
-                        `Команда не создана!`,
-                        HttpStatus.BAD_REQUEST,
-                    );
-                }
-
-                console.log(team);
-
-                await user.$add("teams", [team.id], {
-                    transaction,
-                    through: {
-                        roleId: userRole.id,
-                    },
-                });
+                // // Добавляем команду
+                // const team = await this.teamsService.create(
+                //     {
+                //         value: "Моя команда",
+                //         description: "Описание команды",
+                //     },
+                //     transaction,
+                // );
+                // console.log(">>>TEAM CREATED");
+                //
+                // if (!team) {
+                //     throw new HttpException(
+                //         `Команда не создана!`,
+                //         HttpStatus.BAD_REQUEST,
+                //     );
+                // }
+                //
+                // console.log(">>>ADDING TEAM");
+                // TODO ОШИБКА!!!
+                // await user.$add("teams", [team.id], {
+                //     transaction,
+                //     through: {
+                //         roleId: userRole.id,
+                //     },
+                // });
+                // console.log(">>>TEAM ADDED");
             }
 
             // Коммит
             await transaction.commit();
 
-            // Возвращаем токен
-            return await this.generateToken(user);
+            return { id: user.id };
         } catch (error) {
             await transaction.rollback();
             throw error;

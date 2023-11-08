@@ -5,6 +5,7 @@ import { Transaction } from "sequelize";
 import { RolesService } from "../roles/roles.service";
 import { AddRoleDto } from "./dto/add-role.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user-dto";
 import { User } from "./entity/users.entity";
 
 @Injectable()
@@ -84,5 +85,22 @@ export class UsersService {
             "Пользователь или роль не найдены",
             HttpStatus.NOT_FOUND,
         );
+    }
+
+    async update(
+        id: number,
+        updateUserDto: UpdateUserDto,
+        transaction?: Transaction,
+    ) {
+        const result = await this.userRepository.update(updateUserDto, {
+            where: { id },
+            transaction,
+        });
+
+        if (Number(result[0]) > 0) {
+            return true;
+        }
+
+        return false;
     }
 }
