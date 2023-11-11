@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { CreateEmployeeDto } from "./dto/create-employee.dto";
 import { UpdateEmployeeDto } from "./dto/update-employee.dto";
 import { Employee } from "./entities/employee.entity";
@@ -20,11 +20,38 @@ export class EmployeesService {
         });
     }
 
-    async findAll(limit: number, offset: number, transaction?: Transaction) {
+    async findAll(
+        limit: number,
+        offset: number,
+        searchQuery?: string,
+        transaction?: Transaction,
+    ) {
+        if (!searchQuery) {
+            return await this.employeeRepository.findAll({
+                limit,
+                offset,
+                transaction,
+            });
+        }
+
         return await this.employeeRepository.findAll({
             limit,
             offset,
             transaction,
+            where: {
+                [Op.or]: [
+                    {
+                        surname: {
+                            [Op.iLike]: `%${searchQuery}%`,
+                        },
+                    },
+                    {
+                        name: {
+                            [Op.iLike]: `%${searchQuery}%`,
+                        },
+                    },
+                ],
+            },
         });
     }
 

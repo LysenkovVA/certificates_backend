@@ -27,8 +27,13 @@ export class EmployeesController {
     async findAll(
         @Query("limit") limit: string,
         @Query("offset") offset: string,
+        @Query("searchQuery") searchQuery?: string,
     ) {
-        return await this.employeesService.findAll(+limit, +offset);
+        return await this.employeesService.findAll(
+            +limit,
+            +offset,
+            searchQuery,
+        );
     }
 
     @Get(":id")
