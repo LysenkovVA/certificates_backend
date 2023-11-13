@@ -27,14 +27,14 @@ export class EmployeesService {
         transaction?: Transaction,
     ) {
         if (!searchQuery) {
-            return await this.employeeRepository.findAll({
+            return await this.employeeRepository.findAndCountAll({
                 limit,
                 offset,
                 transaction,
             });
         }
 
-        return await this.employeeRepository.findAll({
+        return await this.employeeRepository.findAndCountAll({
             limit,
             offset,
             transaction,
