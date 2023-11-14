@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
+    BelongsTo,
     BelongsToMany,
     Column,
     DataType,
@@ -7,11 +8,14 @@ import {
     Model,
     Table,
 } from "sequelize-typescript";
+import { Berth } from "../../berthes/entities/berth.entity";
 import { Certificate } from "../../certificates/entities/certificate.entity";
+import { Department } from "../../departments/entities/department.entity";
 import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 import { Inspection } from "../../inspections/entities/inspection.entity";
 import { Inspector } from "../../inspectors/entities/inspectors.entity";
 import { RepresentativeEmployee } from "../../representative-employees/entities/representative-employees.entity";
+import { User } from "../../users/entity/users.entity";
 import { ViolationComment } from "../../violation-comments/entities/violation-comment.entity";
 import { ViolationEmployeeComment } from "../../violation-employee-comments/entities/violation-employee-comment.entity";
 import { ViolationViewedBy } from "../../violation_viewed_by/entities/violation_viewed_by.entity";
@@ -114,4 +118,13 @@ export class Employee extends Model<Employee, IEmployeeCreationAttrs> {
 
     @HasMany(() => ViolationEmployeeComment, "employeeId")
     employeeComments: ViolationEmployeeComment[];
+
+    @BelongsTo(() => Berth, "berthId")
+    berth: Berth;
+
+    @BelongsTo(() => Department, "departmentId")
+    department: Department;
+
+    @BelongsTo(() => User, "userId")
+    user: User;
 }

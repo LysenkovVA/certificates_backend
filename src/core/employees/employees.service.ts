@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Op, Transaction } from "sequelize";
+import { Op, Transaction, WhereOptions } from "sequelize";
+import { Berth } from "../berthes/entities/berth.entity";
+import { Department } from "../departments/entities/department.entity";
+import { User } from "../users/entity/users.entity";
 import { CreateEmployeeDto } from "./dto/create-employee.dto";
 import { UpdateEmployeeDto } from "./dto/update-employee.dto";
 import { Employee } from "./entities/employee.entity";
@@ -26,19 +29,10 @@ export class EmployeesService {
         searchQuery?: string,
         transaction?: Transaction,
     ) {
-        if (!searchQuery) {
-            return await this.employeeRepository.findAndCountAll({
-                limit,
-                offset,
-                transaction,
-            });
-        }
+        let where: WhereOptions<Employee> = null;
 
-        return await this.employeeRepository.findAndCountAll({
-            limit,
-            offset,
-            transaction,
-            where: {
+        if (searchQuery) {
+            where = {
                 [Op.or]: [
                     {
                         surname: {
@@ -50,8 +44,27 @@ export class EmployeesService {
                             [Op.iLike]: `%${searchQuery}%`,
                         },
                     },
+                    {
+                        ["$berth.value$"]: {
+                            [Op.iLike]: `%${searchQuery}%`,
+                        },
+                    },
+                    {
+                        ["$department.name$"]: {
+                            [Op.iLike]: `%${searchQuery}%`,
+                        },
+                    },
                 ],
-            },
+            };
+        }
+
+        return await this.employeeRepository.findAndCountAll({
+            limit,
+            offset,
+            transaction,
+            attributes: ["id", "surname", "name", "hireDate", "dismissDate"],
+            include: [{ model: Berth }, Department, User],
+            where,
         });
     }
 
