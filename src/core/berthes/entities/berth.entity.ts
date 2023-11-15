@@ -1,5 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import {
+    BelongsTo,
+    Column,
+    DataType,
+    HasMany,
+    Model,
+    Table,
+} from "sequelize-typescript";
+import { BerthType } from "../../berth-types/entities/berth-type.entity";
 import { Employee } from "../../employees/entities/employee.entity";
 
 export interface IBerthCreationAttrs {}
@@ -30,4 +38,7 @@ export class Berth extends Model<Berth, IBerthCreationAttrs> {
 
     @HasMany(() => Employee, "berthId")
     employees: Employee[];
+
+    @BelongsTo(() => BerthType, "berthTypeId")
+    berthType: BerthType;
 }

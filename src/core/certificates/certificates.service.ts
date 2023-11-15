@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Transaction } from "sequelize";
+import { Employee } from "../employees/entities/employee.entity";
 import { CreateCertificateDto } from "./dto/create-certificate.dto";
 import { UpdateCertificateDto } from "./dto/update-certificate.dto";
 import { Certificate } from "./entities/certificate.entity";
@@ -32,6 +33,16 @@ export class CertificatesService {
     async findOne(id: number, transaction?: Transaction) {
         return await this.certificateRepository.findOne({
             where: { id },
+            transaction,
+        });
+    }
+
+    async fetchByEmployeeId(employeeId: number, transaction?: Transaction) {
+        return await this.certificateRepository.findAndCountAll({
+            where: {
+                "$employee.id$": employeeId,
+            },
+            include: [Employee],
             transaction,
         });
     }

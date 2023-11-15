@@ -1,9 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Op, Transaction, WhereOptions } from "sequelize";
+import { BerthType } from "../berth-types/entities/berth-type.entity";
 import { Berth } from "../berthes/entities/berth.entity";
+import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
+import { Certificate } from "../certificates/entities/certificate.entity";
 import { Department } from "../departments/entities/department.entity";
-import { User } from "../users/entity/users.entity";
+import { Organization } from "../organizations/entities/organization.entity";
 import { CreateEmployeeDto } from "./dto/create-employee.dto";
 import { UpdateEmployeeDto } from "./dto/update-employee.dto";
 import { Employee } from "./entities/employee.entity";
@@ -62,8 +65,9 @@ export class EmployeesService {
             limit,
             offset,
             transaction,
+            subQuery: false, // без этого аттрибута косячил поиск на фронтенде
             attributes: ["id", "surname", "name", "hireDate", "dismissDate"],
-            include: [{ model: Berth }, Department, User],
+            include: [Berth, Department, Certificate],
             where,
         });
     }
@@ -71,6 +75,33 @@ export class EmployeesService {
     async findOne(id: number, transaction?: Transaction) {
         return await this.employeeRepository.findOne({
             where: { id },
+            attributes: [
+                "id",
+                "surname",
+                "name",
+                "hireDate",
+                "dismissDate",
+                "rank",
+            ],
+            include: [
+                {
+                    model: Berth,
+                    include: [BerthType],
+                    attributes: ["id", "value"],
+                },
+                {
+                    model: Department,
+                    include: [
+                        { model: Organization, attributes: ["id", "name"] },
+                    ],
+                    attributes: ["id", "name"],
+                },
+                {
+                    model: Certificate,
+                    include: [CertificateType],
+                    attributes: ["id", "number", "startDate", "group"],
+                },
+            ],
             transaction,
         });
     }

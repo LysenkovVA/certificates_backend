@@ -36,6 +36,11 @@ export class CertificatesController {
         return await this.certificatesService.findOne(+id);
     }
 
+    @Get("/employee/:employeeId")
+    async fetchByEmployeeId(@Param("employeeId") employeeId: string) {
+        return await this.certificatesService.fetchByEmployeeId(+employeeId);
+    }
+
     @Patch(":id")
     async update(
         @Param("id") id: string,

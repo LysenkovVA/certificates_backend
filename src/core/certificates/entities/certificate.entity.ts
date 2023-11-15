@@ -1,11 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
+    BelongsTo,
     BelongsToMany,
     Column,
     DataType,
     Model,
     Table,
 } from "sequelize-typescript";
+import { CertificateType } from "../../certificate-types/entities/certificate-type.entity";
+import { Employee } from "../../employees/entities/employee.entity";
 import { File } from "../../files/entities/file.entity";
 import { Protocol } from "../../protocols/entities/protocols.entity";
 import { Scan } from "../../scans/entities/scans.entity";
@@ -63,4 +66,10 @@ export class Certificate extends Model<Certificate, ICertificateCreationAttrs> {
 
     @BelongsToMany(() => File, () => Scan)
     scans: File[];
+
+    @BelongsTo(() => Employee, "employeeId")
+    employee: Employee;
+
+    @BelongsTo(() => CertificateType, "certificateTypeId")
+    certificateType: CertificateType;
 }
