@@ -6,6 +6,7 @@ import {
     Model,
     Table,
 } from "sequelize-typescript";
+import { File } from "../../files/entities/file.entity";
 import { User } from "../../users/entity/users.entity";
 
 interface IProfileCreationAttrs {}
@@ -66,16 +67,19 @@ export class Profile extends Model<Profile, IProfileCreationAttrs> {
     })
     birthDate: Date;
 
-    @ApiProperty({
-        example: "/3/profile/avatar.jpeg",
-        description: "Путь к аватару",
-    })
-    @Column({
-        type: DataType.STRING,
-        allowNull: true,
-    })
-    avatar: string;
+    // @ApiProperty({
+    //     example: "/3/profile/avatar.jpeg",
+    //     description: "Путь к аватару",
+    // })
+    // @Column({
+    //     type: DataType.STRING,
+    //     allowNull: true,
+    // })
+    // avatar: string;
 
     @BelongsTo(() => User, "userId")
     user: User;
+
+    @BelongsTo(() => File, "fileId")
+    avatar: File;
 }

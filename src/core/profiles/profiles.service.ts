@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Op, Transaction } from "sequelize";
+import { File } from "../files/entities/file.entity";
 import { User } from "../users/entity/users.entity";
 import { CreateProfileDto } from "./dto/create-profile.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
@@ -20,20 +21,31 @@ export class ProfilesService {
         return `This action returns all profiles`;
     }
 
+    async findById(id: number, transaction?: Transaction) {
+        return await this.profileRepository.findOne({
+            attributes: ["id", "surname", "name", "birthDate"],
+            include: [{ model: User, attributes: ["id", "email"] }, File],
+            where: { id },
+            transaction,
+        });
+    }
+
     async fetchByUserId(userId: number, transaction?: Transaction) {
         const result = await this.profileRepository.findOne({
             attributes: ["id", "surname", "name", "birthDate"],
-            include: [{ model: User, attributes: ["id", "email"] }],
+            include: [{ model: User, attributes: ["id", "email"] }, File],
             where: { "$user.id$": { [Op.eq]: userId } },
             transaction,
         });
 
-        const res = JSON.parse(JSON.stringify(result));
+        return result;
 
-        return {
-            ...res,
-            avatar: `files/download/${result.id}/avatar`,
-        };
+        // const res = JSON.parse(JSON.stringify(result));
+        //
+        // return {
+        //     ...res,
+        //     avatar: `files/download/${result.id}/avatar`,
+        // };
     }
 
     async update(
