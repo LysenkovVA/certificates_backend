@@ -67,7 +67,15 @@ export class EmployeesService {
             transaction,
             subQuery: false, // без этого аттрибута косячил поиск на фронтенде
             attributes: ["id", "surname", "name", "hireDate", "dismissDate"],
-            include: [Berth, Department, Certificate],
+            include: [
+                Berth,
+                {
+                    model: Department,
+                    include: [Organization],
+                    attributes: ["id", "name"],
+                },
+                Certificate,
+            ],
             where,
         });
     }

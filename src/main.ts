@@ -2,6 +2,7 @@ import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as process from "process";
 import { AppModule } from "./app.module";
+import { ExceptionsLoggerFilter } from "./infrastructure/exceptions/exceptionsLogger.filter";
 
 async function start() {
     const PORT = process.env.PORT || 5001;
@@ -11,6 +12,7 @@ async function start() {
         cors: true,
     });
     app.setGlobalPrefix("/api");
+    app.useGlobalFilters(new ExceptionsLoggerFilter());
 
     // Настройка документации
     const config = new DocumentBuilder()

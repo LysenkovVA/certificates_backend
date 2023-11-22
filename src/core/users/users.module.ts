@@ -4,6 +4,7 @@ import { UsersController } from "./users.controller";
 import { UsersService } from "./users.service";
 
 import { AuthModule } from "../auth/auth.module";
+import { Profile } from "../profiles/entities/profile.entity";
 import { Role } from "../roles/entities/roles.entity";
 import { RolesModule } from "../roles/roles.module";
 import { Subscription } from "../subscriptions/entities/subscription.entity";
@@ -23,6 +24,7 @@ import { User } from "./entity/users.entity";
             Subscription,
             UserSubscription,
             UserTeam,
+            Profile,
         ]),
         //SeederModule.forFeature([SeedUser]),
         RolesModule,

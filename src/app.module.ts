@@ -43,6 +43,8 @@ import { InspectionsModule } from "./core/inspections/inspections.module";
 import { Inspector } from "./core/inspectors/entities/inspectors.entity";
 import { Organization } from "./core/organizations/entities/organization.entity";
 import { OrganizationsModule } from "./core/organizations/organizations.module";
+import { Profile } from "./core/profiles/entities/profile.entity";
+import { ProfilesModule } from "./core/profiles/profiles.module";
 import { Protocol } from "./core/protocols/entities/protocols.entity";
 import { RepresentativeEmployee } from "./core/representative-employees/entities/representative-employees.entity";
 import { ResultDocumentType } from "./core/result_document_types/entities/result_document_type.entity";
@@ -126,6 +128,7 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
                 CheckList,
                 CheckListGroup,
                 CheckListCheck,
+                Profile,
             ],
             define: {
                 createdAt: false,
@@ -172,6 +175,7 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
         CheckListsModule,
         CheckListGroupsModule,
         CheckListChecksModule,
+        ProfilesModule,
     ],
 })
 export class AppModule {}

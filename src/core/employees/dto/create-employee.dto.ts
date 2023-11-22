@@ -15,12 +15,12 @@ export class CreateEmployeeDto {
     })
     readonly name: string;
 
-    @ApiProperty({
-        example: "Иванович",
-        description: "Отчество",
-        required: false,
-    })
-    readonly patronymic: string;
+    // @ApiProperty({
+    //     example: "Иванович",
+    //     description: "Отчество",
+    //     required: false,
+    // })
+    // readonly patronymic: string;
 
     @ApiProperty({
         example: "01.05.2022",
@@ -42,4 +42,18 @@ export class CreateEmployeeDto {
         required: false,
     })
     readonly rank: string;
+
+    @ApiProperty({
+        example: "+79261234567",
+        description: "Телефон",
+        required: false,
+    })
+    readonly phone: string;
+
+    @ApiProperty({
+        example: "email@email.ru",
+        description: "E-mail",
+        required: false,
+    })
+    readonly email: string;
 }

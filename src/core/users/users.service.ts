@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import * as bcrypt from "bcryptjs";
 import { Transaction } from "sequelize";
+import { Profile } from "../profiles/entities/profile.entity";
 import { RolesService } from "../roles/roles.service";
 import { AddRoleDto } from "./dto/add-role.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -55,7 +56,7 @@ export class UsersService {
             where: {
                 email,
             },
-            include: { all: true },
+            include: [Profile],
             transaction,
         });
     }
@@ -97,10 +98,6 @@ export class UsersService {
             transaction,
         });
 
-        if (Number(result[0]) > 0) {
-            return true;
-        }
-
-        return false;
+        return Number(result[0]) > 0;
     }
 }

@@ -8,6 +8,13 @@ import { File } from "./entities/file.entity";
 export class FilesService {
     constructor(@InjectModel(File) private fileRepository: typeof File) {}
 
+    async upload(file: Express.Multer.File) {
+        return {
+            message: "File uploaded successfully!",
+            filename: file.filename,
+        };
+    }
+
     async create(createFileDto: CreateFileDto, transaction?: Transaction) {
         return await this.fileRepository.create(createFileDto, { transaction });
     }

@@ -58,15 +58,15 @@ export class Employee extends Model<Employee, IEmployeeCreationAttrs> {
     })
     name: string;
 
-    @ApiProperty({
-        example: "Иванович",
-        description: "Отчество",
-    })
-    @Column({
-        type: DataType.STRING,
-        allowNull: true,
-    })
-    patronymic: string;
+    // @ApiProperty({
+    //     example: "Иванович",
+    //     description: "Отчество",
+    // })
+    // @Column({
+    //     type: DataType.STRING,
+    //     allowNull: true,
+    // })
+    // patronymic: string;
 
     @ApiProperty({
         example: "01.05.2023",
@@ -97,6 +97,26 @@ export class Employee extends Model<Employee, IEmployeeCreationAttrs> {
         allowNull: true,
     })
     rank: string;
+
+    @ApiProperty({
+        example: "+79261234567",
+        description: "Телефон",
+    })
+    @Column({
+        type: DataType.STRING,
+        allowNull: true,
+    })
+    phone: string;
+
+    @ApiProperty({
+        example: "email@email.ru",
+        description: "E-mail",
+    })
+    @Column({
+        type: DataType.STRING,
+        allowNull: true,
+    })
+    email: string;
 
     @BelongsToMany(() => Inspection, () => RepresentativeEmployee)
     inspectionsWhereRepresentative: Inspection[];

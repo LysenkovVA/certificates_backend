@@ -4,11 +4,13 @@ import {
     Column,
     DataType,
     HasMany,
+    HasOne,
     Model,
     Table,
 } from "sequelize-typescript";
 import { Employee } from "../../employees/entities/employee.entity";
 import { Inspection } from "../../inspections/entities/inspection.entity";
+import { Profile } from "../../profiles/entities/profile.entity";
 import { Role } from "../../roles/entities/roles.entity";
 import { Subscription } from "../../subscriptions/entities/subscription.entity";
 import { Team } from "../../teams/entities/team.entity";
@@ -58,55 +60,55 @@ export class User extends Model<User, IUserCreationAttrs> {
     })
     password: string;
 
-    @ApiProperty({
-        example: "Иванов",
-        description: "Фамилия",
-    })
-    @Column({
-        type: DataType.STRING,
-        allowNull: true,
-    })
-    surname: string;
-
-    @ApiProperty({
-        example: "Иван",
-        description: "Имя",
-    })
-    @Column({
-        type: DataType.STRING,
-        allowNull: true,
-    })
-    name: string;
-
-    @ApiProperty({
-        example: "Иванович",
-        description: "Отчество",
-    })
-    @Column({
-        type: DataType.STRING,
-        allowNull: true,
-    })
-    patronymic: string;
-
-    @ApiProperty({
-        example: "30.06.1993",
-        description: "Дата рождения",
-    })
-    @Column({
-        type: DataType.DATEONLY,
-        allowNull: true,
-    })
-    birthDate: Date;
-
-    @ApiProperty({
-        example: "unique_name",
-        description: "Ссылка на статику аватара",
-    })
-    @Column({
-        type: DataType.STRING,
-        allowNull: true,
-    })
-    avatar: string;
+    // @ApiProperty({
+    //     example: "Иванов",
+    //     description: "Фамилия",
+    // })
+    // @Column({
+    //     type: DataType.STRING,
+    //     allowNull: true,
+    // })
+    // surname: string;
+    //
+    // @ApiProperty({
+    //     example: "Иван",
+    //     description: "Имя",
+    // })
+    // @Column({
+    //     type: DataType.STRING,
+    //     allowNull: true,
+    // })
+    // name: string;
+    //
+    // @ApiProperty({
+    //     example: "Иванович",
+    //     description: "Отчество",
+    // })
+    // @Column({
+    //     type: DataType.STRING,
+    //     allowNull: true,
+    // })
+    // patronymic: string;
+    //
+    // @ApiProperty({
+    //     example: "30.06.1993",
+    //     description: "Дата рождения",
+    // })
+    // @Column({
+    //     type: DataType.DATEONLY,
+    //     allowNull: true,
+    // })
+    // birthDate: Date;
+    //
+    // @ApiProperty({
+    //     example: "unique_name",
+    //     description: "Ссылка на статику аватара",
+    // })
+    // @Column({
+    //     type: DataType.STRING,
+    //     allowNull: true,
+    // })
+    // avatar: string;
 
     @BelongsToMany(() => Role, () => UserRoles)
     roles: Role[];
@@ -122,4 +124,7 @@ export class User extends Model<User, IUserCreationAttrs> {
 
     @HasMany(() => Inspection, "userId")
     inspections: Inspection[];
+
+    @HasOne(() => Profile, "userId")
+    profile: Profile;
 }

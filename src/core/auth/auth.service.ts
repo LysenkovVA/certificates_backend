@@ -43,11 +43,11 @@ export class AuthService {
         return {
             id: user.id,
             email: user.email,
-            surname: user.surname,
-            name: user.name,
-            birthDate: user.birthDate,
-            avatar: user.avatar,
             token,
+            profile: {
+                id: user.profile.id,
+                avatar: `files/download/${user.profile.id}/avatar`,
+            },
         };
     }
 
