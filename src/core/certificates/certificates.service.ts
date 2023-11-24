@@ -23,7 +23,7 @@ export class CertificatesService {
     }
 
     async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.certificateRepository.findAll({
+        return await this.certificateRepository.findAndCountAll({
             limit,
             offset,
             transaction,

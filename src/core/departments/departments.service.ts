@@ -22,7 +22,7 @@ export class DepartmentsService {
     }
 
     async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.departmentsRepository.findAll({
+        return await this.departmentsRepository.findAndCountAll({
             limit,
             offset,
             transaction,

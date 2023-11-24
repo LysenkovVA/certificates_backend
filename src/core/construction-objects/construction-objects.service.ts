@@ -23,7 +23,7 @@ export class ConstructionObjectsService {
     }
 
     async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.constructionObjectsRepository.findAll({
+        return await this.constructionObjectsRepository.findAndCountAll({
             limit,
             offset,
             transaction,

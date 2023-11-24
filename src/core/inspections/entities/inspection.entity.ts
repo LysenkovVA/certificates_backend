@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
+    BelongsTo,
     BelongsToMany,
     Column,
     DataType,
@@ -7,10 +8,13 @@ import {
     Model,
     Table,
 } from "sequelize-typescript";
+import { ConstructionObject } from "../../construction-objects/entities/construction-object.entity";
 import { Employee } from "../../employees/entities/employee.entity";
+import { InspectionType } from "../../inspection-types/entities/inspection-type.entity";
 import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 import { Inspector } from "../../inspectors/entities/inspectors.entity";
 import { RepresentativeEmployee } from "../../representative-employees/entities/representative-employees.entity";
+import { ResultDocumentType } from "../../result_document_types/entities/result_document_type.entity";
 
 export interface IInspectionCreationAttrs {}
 
@@ -113,4 +117,13 @@ export class Inspection extends Model<Inspection, IInspectionCreationAttrs> {
 
     @HasMany(() => InspectionViolation, "inspectionId")
     inspectionViolations: InspectionViolation[];
+
+    @BelongsTo(() => ConstructionObject, "constructionObjectId")
+    constructionObject: ConstructionObject;
+
+    @BelongsTo(() => ResultDocumentType, "resultDocumentTypeId")
+    resultDocumentType: ResultDocumentType;
+
+    @BelongsTo(() => InspectionType, "inspectionTypeId")
+    inspectionType: InspectionType;
 }

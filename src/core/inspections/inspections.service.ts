@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Transaction } from "sequelize";
+import { ConstructionObject } from "../construction-objects/entities/construction-object.entity";
+import { InspectionType } from "../inspection-types/entities/inspection-type.entity";
+import { ResultDocumentType } from "../result_document_types/entities/result_document_type.entity";
 import { CreateInspectionDto } from "./dto/create-inspection.dto";
 import { UpdateInspectionDto } from "./dto/update-inspection.dto";
 import { Inspection } from "./entities/inspection.entity";
@@ -22,9 +25,24 @@ export class InspectionsService {
     }
 
     async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.inspectionsRepository.findAll({
+        return await this.inspectionsRepository.findAndCountAll({
             limit,
             offset,
+            attributes: [
+                "id",
+                "date",
+                "isPenalty",
+                "isCommitional",
+                "dateOfElimination",
+                "documentNumber",
+                "documentDate",
+                "notes",
+            ],
+            include: [
+                { model: InspectionType },
+                { model: ConstructionObject },
+                { model: ResultDocumentType },
+            ],
             transaction,
         });
     }
@@ -32,6 +50,21 @@ export class InspectionsService {
     async findOne(id: number, transaction?: Transaction) {
         return await this.inspectionsRepository.findOne({
             where: { id },
+            attributes: [
+                "id",
+                "date",
+                "isPenalty",
+                "isCommitional",
+                "dateOfElimination",
+                "documentNumber",
+                "documentDate",
+                "notes",
+            ],
+            include: [
+                { model: InspectionType },
+                { model: ConstructionObject },
+                { model: ResultDocumentType },
+            ],
             transaction,
         });
     }
