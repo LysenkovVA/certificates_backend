@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { BerthesService } from "./berthes.service";
 import { CreateBerthDto } from "./dto/create-berth.dto";
 import { UpdateBerthDto } from "./dto/update-berth.dto";
 
 @ApiTags("Должности")
 @Controller("berthes")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class BerthesController {
     constructor(private readonly berthesService: BerthesService) {}
 

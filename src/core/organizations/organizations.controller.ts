@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateOrganizationDto } from "./dto/create-organization.dto";
 import { UpdateOrganizationDto } from "./dto/update-organization.dto";
 import { OrganizationsService } from "./organizations.service";
 
 @ApiTags("Организации")
 @Controller("organizations")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class OrganizationsController {
     constructor(private readonly organizationsService: OrganizationsService) {}
 

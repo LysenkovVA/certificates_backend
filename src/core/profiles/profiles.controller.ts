@@ -6,12 +6,16 @@ import {
     Param,
     Patch,
     Post,
+    UseGuards,
 } from "@nestjs/common";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateProfileDto } from "./dto/create-profile.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { ProfilesService } from "./profiles.service";
 
 @Controller("profiles")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class ProfilesController {
     constructor(private readonly profilesService: ProfilesService) {}
 

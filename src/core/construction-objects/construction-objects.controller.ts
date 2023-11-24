@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { ConstructionObjectsService } from "./construction-objects.service";
 import { CreateConstructionObjectDto } from "./dto/create-construction-object.dto";
 import { UpdateConstructionObjectDto } from "./dto/update-construction-object.dto";
 
 @ApiTags("Строительные объекты")
 @Controller("construction-objects")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class ConstructionObjectsController {
     constructor(
         private readonly constructionObjectsService: ConstructionObjectsService,

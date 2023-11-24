@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateSubscriptionDto } from "./dto/create-subscription.dto";
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto";
 import { SubscriptionsService } from "./subscriptions.service";
 
 @ApiTags("Подписки")
 @Controller("subscriptions")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class SubscriptionsController {
     constructor(private readonly subscriptionsService: SubscriptionsService) {}
 

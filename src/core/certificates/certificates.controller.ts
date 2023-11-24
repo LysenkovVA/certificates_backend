@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { CertificatesService } from "./certificates.service";
 import { CreateCertificateDto } from "./dto/create-certificate.dto";
 import { UpdateCertificateDto } from "./dto/update-certificate.dto";
 
 @ApiTags("Удостоверения")
 @Controller("certificates")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class CertificatesController {
     constructor(private readonly certificatesService: CertificatesService) {}
 

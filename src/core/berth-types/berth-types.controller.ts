@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { BerthTypesService } from "./berth-types.service";
 import { CreateBerthTypeDto } from "./dto/create-berth-type.dto";
 import { UpdateBerthTypeDto } from "./dto/update-berth-type.dto";
 
 @ApiTags("Типы должностей")
 @Controller("berth-types")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class BerthTypesController {
     constructor(private readonly berthTypesService: BerthTypesService) {}
 

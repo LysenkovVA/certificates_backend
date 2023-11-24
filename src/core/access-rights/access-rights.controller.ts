@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { AccessRightsService } from "./access-rights.service";
 import { CreateAccessRightDto } from "./dto/create-access-right.dto";
 import { UpdateAccessRightDto } from "./dto/update-access-right.dto";
 
 @ApiTags("Права доступа")
 @Controller("access-rights")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class AccessRightsController {
     constructor(private readonly accessRightsService: AccessRightsService) {}
 

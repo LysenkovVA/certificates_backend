@@ -6,17 +6,21 @@ import {
     Post,
     StreamableFile,
     UploadedFile,
+    UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { createReadStream } from "fs";
 import path from "path";
+import { AuthGuard } from "../auth/auth.guard";
 import { FilesService } from "./files.service";
 import { FILES_PATH, storage } from "./storage/storage";
 
 @ApiTags("Файлы")
 @Controller("files")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class FilesController {
     constructor(private readonly filesService: FilesService) {}
 

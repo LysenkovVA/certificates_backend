@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateInspectionViolationDto } from "./dto/create-inspection-violation.dto";
 import { UpdateInspectionViolationDto } from "./dto/update-inspection-violation.dto";
 import { InspectionViolationsService } from "./inspection-violations.service";
 
 @ApiTags("Нарушения проверки")
 @Controller("inspection-violations")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class InspectionViolationsController {
     constructor(
         private readonly inspectionViolationsService: InspectionViolationsService,

@@ -39,15 +39,16 @@ export class AuthService {
         }
 
         const token = await this.generateToken(user);
+        // return token;
 
         return {
             id: user.id,
             email: user.email,
             token,
-            profile: {
-                id: user.profile.id,
-                avatar: `files/download/${user.profile.id}/avatar`,
-            },
+            // profile: {
+            //     id: user.profile.id,
+            //     avatar: `files/download/${user.profile.id}/avatar`,
+            // },
         };
     }
 

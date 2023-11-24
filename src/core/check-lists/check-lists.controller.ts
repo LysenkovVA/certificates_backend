@@ -7,12 +7,16 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
+import { AuthGuard } from "../auth/auth.guard";
 import { CheckListsService } from "./check-lists.service";
 import { CreateCheckListDto } from "./dto/create-check-list.dto";
 import { UpdateCheckListDto } from "./dto/update-check-list.dto";
 
 @Controller("check-lists")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class CheckListsController {
     constructor(private readonly checkListsService: CheckListsService) {}
 

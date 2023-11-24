@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateViolationCommentDto } from "./dto/create-violation-comment.dto";
 import { UpdateViolationCommentDto } from "./dto/update-violation-comment.dto";
 import { ViolationCommentsService } from "./violation-comments.service";
 
 @ApiTags("Комментарии к нарушению (что нарушено)")
 @Controller("violation-comments")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class ViolationCommentsController {
     constructor(
         private readonly violationCommentsService: ViolationCommentsService,

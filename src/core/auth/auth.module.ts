@@ -1,6 +1,5 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
-import * as process from "process";
 import { RolesModule } from "../roles/roles.module";
 import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
 import { TeamsModule } from "../teams/teams.module";
@@ -17,10 +16,11 @@ import { AuthService } from "./auth.service";
         SubscriptionsModule,
         TeamsModule,
         JwtModule.register({
-            secret: process.env.PRIVATE_KEY || "PRIVATE_KEY",
             signOptions: {
                 expiresIn: "24h",
             },
+            global: true,
+            secret: "hard!to-guess_secret",
         }),
     ],
     exports: [AuthService, JwtModule],

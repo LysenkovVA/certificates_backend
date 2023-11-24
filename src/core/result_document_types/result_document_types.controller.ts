@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateResultDocumentTypeDto } from "./dto/create-result_document_type.dto";
 import { UpdateResultDocumentTypeDto } from "./dto/update-result_document_type.dto";
 import { ResultDocumentTypesService } from "./result_document_types.service";
 
 @ApiTags("Тип результирующего документа проверки")
 @Controller("result-document-types")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class ResultDocumentTypesController {
     constructor(
         private readonly resultDocumentTypesService: ResultDocumentTypesService,

@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { CheckStatusesService } from "./check-statuses.service";
 import { CreateCheckStatusDto } from "./dto/create-check-status.dto";
 import { UpdateCheckStatusDto } from "./dto/update-check-status.dto";
 
 @ApiTags("Статус проверки нарушения")
 @Controller("check-statuses")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class CheckStatusesController {
     constructor(private readonly checkStatusesService: CheckStatusesService) {}
 

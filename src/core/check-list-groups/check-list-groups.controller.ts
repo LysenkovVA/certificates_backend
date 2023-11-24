@@ -7,14 +7,18 @@ import {
     Patch,
     Post,
     Query,
+    UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { CheckListGroupsService } from "./check-list-groups.service";
 import { CreateCheckListGroupDto } from "./dto/create-check-list-group.dto";
 import { UpdateCheckListGroupDto } from "./dto/update-check-list-group.dto";
 
 @ApiTags("Группы пользовательского списка")
 @Controller("check-list-groups")
+// ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
+@UseGuards(AuthGuard)
 export class CheckListGroupsController {
     constructor(
         private readonly checkListGroupsService: CheckListGroupsService,
