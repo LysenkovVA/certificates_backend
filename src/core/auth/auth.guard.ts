@@ -4,6 +4,7 @@ import {
     Injectable,
     UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Observable } from "rxjs";
 
@@ -12,7 +13,10 @@ import { Observable } from "rxjs";
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private jwtService: JwtService) {}
+    constructor(
+        private configService: ConfigService,
+        private jwtService: JwtService,
+    ) {}
     canActivate(
         context: ExecutionContext,
     ): boolean | Promise<boolean> | Observable<boolean> {
@@ -32,7 +36,11 @@ export class AuthGuard implements CanActivate {
                 }
 
                 //req.user = this.jwtService.verify(token);
-                this.jwtService.verify(token);
+                this.jwtService.verify(token, {
+                    secret: this.configService.get<string>(
+                        "JWT_ACCESS_TOKEN_KEY",
+                    ),
+                });
                 return true;
             }
 

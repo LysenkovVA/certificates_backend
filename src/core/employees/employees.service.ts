@@ -6,6 +6,7 @@ import { Berth } from "../berthes/entities/berth.entity";
 import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
 import { Certificate } from "../certificates/entities/certificate.entity";
 import { Department } from "../departments/entities/department.entity";
+import { File } from "../files/entities/file.entity";
 import { Organization } from "../organizations/entities/organization.entity";
 import { CreateEmployeeDto } from "./dto/create-employee.dto";
 import { UpdateEmployeeDto } from "./dto/update-employee.dto";
@@ -68,13 +69,13 @@ export class EmployeesService {
             subQuery: false, // без этого аттрибута косячил поиск на фронтенде
             attributes: ["id", "surname", "name", "hireDate", "dismissDate"],
             include: [
-                Berth,
+                { model: Berth },
                 {
                     model: Department,
                     include: [Organization],
                     attributes: ["id", "name"],
                 },
-                Certificate,
+                { model: Certificate },
             ],
             where,
         });
@@ -106,7 +107,11 @@ export class EmployeesService {
                 },
                 {
                     model: Certificate,
-                    include: [CertificateType],
+                    include: [
+                        { model: CertificateType },
+                        { model: File, as: "scans" },
+                        { model: File, as: "protocols" },
+                    ],
                     attributes: ["id", "number", "startDate", "group"],
                 },
             ],

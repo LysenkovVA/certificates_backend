@@ -14,6 +14,7 @@ import { Profile } from "../../profiles/entities/profile.entity";
 import { Role } from "../../roles/entities/roles.entity";
 import { Subscription } from "../../subscriptions/entities/subscription.entity";
 import { Team } from "../../teams/entities/team.entity";
+import { Token } from "../../tokens/entities/token.entity";
 import { UserRoles } from "../../user-roles/entities/user-roles.entity";
 import { UserSubscription } from "../../user-subscriptions/entities/user-subscription.entity";
 import { UserTeam } from "../../user-teams/entities/user-teams.entity";
@@ -109,6 +110,9 @@ export class User extends Model<User, IUserCreationAttrs> {
     //     allowNull: true,
     // })
     // avatar: string;
+
+    @HasMany(() => Token, "userId")
+    tokens: Token[];
 
     @BelongsToMany(() => Role, () => UserRoles)
     roles: Role[];

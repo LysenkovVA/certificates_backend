@@ -58,16 +58,6 @@ export class Employee extends Model<Employee, IEmployeeCreationAttrs> {
     })
     name: string;
 
-    // @ApiProperty({
-    //     example: "Иванович",
-    //     description: "Отчество",
-    // })
-    // @Column({
-    //     type: DataType.STRING,
-    //     allowNull: true,
-    // })
-    // patronymic: string;
-
     @ApiProperty({
         example: "01.05.2023",
         description: "Дата приема на работу",

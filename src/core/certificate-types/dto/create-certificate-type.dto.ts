@@ -12,6 +12,15 @@ export class CreateCertificateTypeDto {
         example: "true",
         description: "Есть/нет групп(ы)",
         required: true,
+        default: false,
     })
     readonly hasGroups: boolean;
+
+    @ApiProperty({
+        example: "true",
+        description: "Бессрочное",
+        required: true,
+        default: false,
+    })
+    readonly isUnlimited: boolean;
 }

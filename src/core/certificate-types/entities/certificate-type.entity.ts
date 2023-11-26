@@ -40,8 +40,16 @@ export class CertificateType extends Model<
     @Column({
         type: DataType.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
     })
     hasGroups: boolean;
+
+    @Column({
+        type: DataType.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    })
+    isUnlimited: boolean;
 
     @HasMany(() => Certificate, "certificateTypeId")
     certificates: Certificate[];

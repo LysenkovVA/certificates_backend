@@ -57,6 +57,8 @@ import { SubscriptionsModule } from "./core/subscriptions/subscriptions.module";
 import { TeamMemberRight } from "./core/team-member-rights/entities/team-member-rights";
 import { Team } from "./core/teams/entities/team.entity";
 import { TeamsModule } from "./core/teams/teams.module";
+import { Token } from "./core/tokens/entities/token.entity";
+import { TokensModule } from "./core/tokens/tokens.module";
 import { UserRoles } from "./core/user-roles/entities/user-roles.entity";
 import { UserRolesModule } from "./core/user-roles/user-roles.module";
 import { UserSubscription } from "./core/user-subscriptions/entities/user-subscription.entity";
@@ -76,6 +78,8 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
     imports: [
         ConfigModule.forRoot({
             envFilePath: `.${process.env.NODE_ENV}.env`,
+            cache: true,
+            isGlobal: true,
         }),
         SequelizeModule.forRoot({
             dialect: "postgres",
@@ -129,6 +133,7 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
                 CheckListGroup,
                 CheckListCheck,
                 Profile,
+                Token,
             ],
             define: {
                 createdAt: false,
@@ -176,6 +181,7 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
         CheckListGroupsModule,
         CheckListChecksModule,
         ProfilesModule,
+        TokensModule,
     ],
 })
 export class AppModule {}
