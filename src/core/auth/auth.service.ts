@@ -228,19 +228,8 @@ export class AuthService {
                 );
             }
 
-            // Генерируем токены
+            // Генерируем access токен
             const accessToken = await this.generateAccessToken(user);
-            const refreshToken = await this.generateRefreshToken(user);
-
-            // Обновляем refresh токен
-            if (user.tokens.length > 0) {
-                await this.tokenService.update(user.tokens[0].id, {
-                    refreshToken,
-                });
-            } else {
-                const token = await this.tokenService.create({ refreshToken });
-                await user.$add("tokens", [token]);
-            }
 
             return {
                 user: {

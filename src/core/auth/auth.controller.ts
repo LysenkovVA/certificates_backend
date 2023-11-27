@@ -31,6 +31,8 @@ export class AuthController {
         const result = await this.authService.login(loginUserDto);
 
         if (result) {
+            response.status(200);
+
             // Добавляем Cookie в ответ
             response.cookie("refreshToken", result.refreshToken, {
                 httpOnly: true,
@@ -62,10 +64,11 @@ export class AuthController {
             response.status(200);
 
             return result;
-        } else {
-            response.status(500);
-            response.errored.message = "Не был найден Refresh-токен";
         }
+        // else {
+        //     response.status(500);
+        //     //response.errored.message = "Не был найден Refresh-токен";
+        // }
     }
 
     @Get("/refresh")
@@ -89,6 +92,8 @@ export class AuthController {
                     "COOKIE_REFRESH_TOKEN_MAX_AGE",
                 ),
             });
+
+            return result;
         } else {
             response.status(500);
             response.errored.message = "Не был найден Refresh-токен";
