@@ -48,16 +48,16 @@ export class EmployeesService {
                             [Op.iLike]: `%${searchQuery}%`,
                         },
                     },
-                    {
-                        ["$berth.value$"]: {
-                            [Op.iLike]: `%${searchQuery}%`,
-                        },
-                    },
-                    {
-                        ["$department.name$"]: {
-                            [Op.iLike]: `%${searchQuery}%`,
-                        },
-                    },
+                    // {
+                    //     "$berth.value$": {
+                    //         [Op.iLike]: `%${searchQuery}%`,
+                    //     },
+                    // },
+                    // {
+                    //     "$department.name$": {
+                    //         [Op.iLike]: `%${searchQuery}%`,
+                    //     },
+                    // },
                 ],
             };
         }
@@ -66,18 +66,41 @@ export class EmployeesService {
             limit,
             offset,
             transaction,
-            subQuery: false, // без этого аттрибута косячил поиск на фронтенде
-            attributes: ["id", "surname", "name", "hireDate", "dismissDate"],
+            //subQuery: true, // без этого аттрибута косячил поиск на фронтенде
+            attributes: [
+                "id",
+                "surname",
+                "name",
+                "hireDate",
+                "dismissDate",
+                "rank",
+            ],
             include: [
-                { model: Berth },
+                {
+                    model: Berth,
+                    include: [BerthType],
+                    attributes: ["id", "value"],
+                },
                 {
                     model: Department,
-                    include: [Organization],
+                    include: [
+                        { model: Organization, attributes: ["id", "name"] },
+                    ],
                     attributes: ["id", "name"],
                 },
-                { model: Certificate },
+                {
+                    model: Certificate,
+                    include: [
+                        { model: CertificateType },
+                        { model: File, as: "scans" },
+                        { model: File, as: "protocols" },
+                    ],
+                    attributes: ["id", "number", "startDate", "group"],
+                },
             ],
             where,
+            distinct: true, // Обязательно потому что выдает неверное количество записей при пописке
+            order: [["surname", "ASC"]],
         });
     }
 

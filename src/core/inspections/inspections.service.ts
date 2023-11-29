@@ -43,6 +43,7 @@ export class InspectionsService {
                 { model: ConstructionObject },
                 { model: ResultDocumentType },
             ],
+            order: [["date", "DESC"]],
             transaction,
         });
     }
