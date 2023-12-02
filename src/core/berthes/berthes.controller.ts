@@ -6,7 +6,6 @@ import {
     Param,
     Patch,
     Post,
-    Query,
     UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
@@ -28,11 +27,12 @@ export class BerthesController {
     }
 
     @Get()
-    async findAll(
-        @Query("limit") limit: string,
-        @Query("offset") offset: string,
-    ) {
-        return await this.berthesService.findAll(+limit, +offset);
+    async findAll() // @Query("limit") limit: string,
+    // @Query("offset") offset: string,
+    // @Query("searchQuery") searchQuery: string,
+    {
+        //return await this.berthesService.findAll(+limit, +offset, searchQuery);
+        return await this.berthesService.findAll();
     }
 
     @Get(":id")

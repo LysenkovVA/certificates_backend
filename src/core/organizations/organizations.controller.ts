@@ -29,10 +29,14 @@ export class OrganizationsController {
 
     @Get()
     async findAll(
-        @Query("limit") limit: string,
-        @Query("offset") offset: string,
+        @Query("limit") limit?: string,
+        @Query("offset") offset?: string,
     ) {
-        return await this.organizationsService.findAll(+limit, +offset);
+        if (!limit || !offset) {
+            return await this.organizationsService.findAll();
+        } else {
+            return await this.organizationsService.findAll(+limit, +offset);
+        }
     }
 
     @Get(":id")

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Transaction } from "sequelize";
+import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
 import { Employee } from "../employees/entities/employee.entity";
 import { CreateCertificateDto } from "./dto/create-certificate.dto";
 import { UpdateCertificateDto } from "./dto/update-certificate.dto";
@@ -27,6 +28,7 @@ export class CertificatesService {
             limit,
             offset,
             transaction,
+            include: [{ model: CertificateType }],
         });
     }
 

@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -7,9 +8,12 @@ import {
     Patch,
     Post,
     Query,
+    Req,
+    Res,
     UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
 import { CreateEmployeeDto } from "./dto/create-employee.dto";
 import { UpdateEmployeeDto } from "./dto/update-employee.dto";
@@ -41,8 +45,18 @@ export class EmployeesController {
     }
 
     @Get(":id")
-    async findOne(@Param("id") id: string) {
-        return await this.employeesService.findOne(+id);
+    async findOne(
+        @Param("id") id: string,
+        @Req() request: Request,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        const employee = await this.employeesService.findOne(+id);
+
+        if (!employee) {
+            throw new BadRequestException("Нет такого сотрудника на сервере!");
+        } else {
+            return employee;
+        }
     }
 
     @Patch(":id")
