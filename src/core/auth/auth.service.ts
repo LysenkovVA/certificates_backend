@@ -180,6 +180,7 @@ export class AuthService {
             user: {
                 id: user.id,
                 email: user.email,
+                profile: user.profile,
             },
             accessToken,
             refreshToken,

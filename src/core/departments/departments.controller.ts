@@ -29,10 +29,14 @@ export class DepartmentsController {
 
     @Get()
     async findAll(
-        @Query("limit") limit: string,
-        @Query("offset") offset: string,
+        @Query("limit") limit?: string,
+        @Query("offset") offset?: string,
     ) {
-        return await this.departmentsService.findAll(+limit, +offset);
+        if (!limit || !offset) {
+            return await this.departmentsService.findAll();
+        } else {
+            return await this.departmentsService.findAll(+limit, +offset);
+        }
     }
 
     @Get(":id")

@@ -29,9 +29,9 @@ export class ProfilesController {
         return this.profilesService.findAll();
     }
 
-    @Get(":userId")
-    async fetchByUserId(@Param("userId") userId: string) {
-        return await this.profilesService.fetchByUserId(+userId);
+    @Get(":profileId")
+    async fetchByUserId(@Param("profileId") profileId: string) {
+        return await this.profilesService.findById(+profileId);
     }
 
     @Patch(":id")

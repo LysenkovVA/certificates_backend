@@ -7,6 +7,7 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import * as bcrypt from "bcryptjs";
 import { Transaction } from "sequelize";
+import { File } from "../files/entities/file.entity";
 import { Profile } from "../profiles/entities/profile.entity";
 import { RolesService } from "../roles/roles.service";
 import { Token } from "../tokens/entities/token.entity";
@@ -53,14 +54,14 @@ export class UsersService {
             where: {
                 email,
             },
-            include: [Profile, Token],
+            include: [{ model: Profile, include: [File] }, Token],
             transaction,
         });
     }
 
-    async getUserById(id: string, transaction?: Transaction) {
+    async getUserById(id: number, transaction?: Transaction) {
         return await this.userRepository.findByPk(id, {
-            include: [Token],
+            include: [{ model: Profile, include: [File] }, Token],
             transaction,
         });
     }

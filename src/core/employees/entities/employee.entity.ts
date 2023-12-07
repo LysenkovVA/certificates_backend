@@ -11,6 +11,7 @@ import {
 import { Berth } from "../../berthes/entities/berth.entity";
 import { Certificate } from "../../certificates/entities/certificate.entity";
 import { Department } from "../../departments/entities/department.entity";
+import { File } from "../../files/entities/file.entity";
 import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 import { Inspection } from "../../inspections/entities/inspection.entity";
 import { Inspector } from "../../inspectors/entities/inspectors.entity";
@@ -137,4 +138,7 @@ export class Employee extends Model<Employee, IEmployeeCreationAttrs> {
 
     @BelongsTo(() => User, "userId")
     user: User;
+
+    @BelongsTo(() => File, "fileId")
+    avatar: File;
 }

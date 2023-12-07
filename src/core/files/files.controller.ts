@@ -1,9 +1,9 @@
 import {
     Controller,
     Get,
-    Header,
     Param,
     Post,
+    Res,
     StreamableFile,
     UploadedFile,
     UseGuards,
@@ -11,6 +11,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { createReadStream } from "fs";
 import path from "path";
 import { AuthGuard } from "../auth/auth.guard";
@@ -27,7 +28,7 @@ export class FilesController {
     // TODO - ДОКУМЕНТАЦИЯ ДЛЯ Swagger
     // https://notiz.dev/blog/type-safe-file-uploads
 
-    @Post("upload/:profileId/avatar")
+    @Post("upload/avatar/:profileId")
     @UseInterceptors(FileInterceptor("file", { storage })) // 👈 field name must match
     @ApiConsumes("multipart/form-data")
     @ApiBody({
@@ -49,25 +50,28 @@ export class FilesController {
         // Файл загрузился
         console.log("Uploaded file: " + JSON.stringify(file));
         // Сохраняем информацию в БД дальше
-        return await this.filesService.uploadAvatar(file, profileId);
+        return await this.filesService.uploadProfileAvatar(file, +profileId);
     }
 
-    @Get("download/:profileId/avatar")
-    @Header("Content-Disposition", 'attachment; filename="profile.jpeg"')
-    async downloadAvatar(
-        @Param("profileId") profileId: string,
+    @Get("download/:id")
+    async downloadFile(
+        @Param("id") id: string,
+        @Res({ passthrough: true }) response: Response,
     ): Promise<StreamableFile> {
-        const avatar = await this.filesService.downloadAvatar(profileId);
+        const file = await this.filesService.findOne(+id);
 
-        if (avatar) {
-            const downloadPath = path.resolve(FILES_PATH, avatar.path);
-
-            console.log("Downloading file: ", downloadPath);
-
-            const file = createReadStream(downloadPath);
-            return new StreamableFile(file);
+        if (!file) {
+            return null;
         }
 
-        return null;
+        const downloadPath = path.resolve(FILES_PATH, file.path);
+        const fileStream = createReadStream(downloadPath);
+        response.set("Content-Type", file.format);
+        response.set(
+            "Content-Disposition",
+            `attachment; filename="${file.name}"`,
+        );
+        console.log("Downloading file: " + file.name);
+        return new StreamableFile(fileStream);
     }
 }

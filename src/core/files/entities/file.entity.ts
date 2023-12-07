@@ -3,10 +3,12 @@ import {
     BelongsToMany,
     Column,
     DataType,
+    HasMany,
     Model,
     Table,
 } from "sequelize-typescript";
 import { Certificate } from "../../certificates/entities/certificate.entity";
+import { Employee } from "../../employees/entities/employee.entity";
 import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 import { Protocol } from "../../protocols/entities/protocols.entity";
 import { Scan } from "../../scans/entities/scans.entity";
@@ -80,4 +82,7 @@ export class File extends Model<File, IFileCreationAttrs> {
 
     @BelongsToMany(() => InspectionViolation, () => ViolationPhoto)
     inspectionViolations: InspectionViolation[];
+
+    @HasMany(() => Employee, "fileId")
+    employees: Employee[];
 }

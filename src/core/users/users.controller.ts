@@ -8,6 +8,7 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { AuthGuard } from "../auth/auth.guard";
 import { Roles } from "../roles/roles-auth.decorator";
 import { RolesGuard } from "../roles/roles.guard";
 import { AddRoleDto } from "./dto/add-role.dto";
@@ -55,5 +56,11 @@ export class UsersController {
         @Body() updateUserDto: UpdateUserDto,
     ) {
         return await this.usersService.update(+id, updateUserDto);
+    }
+
+    @Get(":id")
+    @UseGuards(AuthGuard)
+    async getById(@Param("id") id: string) {
+        return await this.usersService.getUserById(+id);
     }
 }

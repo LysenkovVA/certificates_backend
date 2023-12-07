@@ -1,10 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Op, Transaction, WhereOptions } from "sequelize";
+import { Sequelize } from "sequelize-typescript";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
+import { BerthesService } from "../berthes/berthes.service";
 import { Berth } from "../berthes/entities/berth.entity";
 import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
 import { Certificate } from "../certificates/entities/certificate.entity";
+import { DepartmentsService } from "../departments/departments.service";
 import { Department } from "../departments/entities/department.entity";
 import { File } from "../files/entities/file.entity";
 import { Organization } from "../organizations/entities/organization.entity";
@@ -16,6 +19,9 @@ import { Employee } from "./entities/employee.entity";
 export class EmployeesService {
     constructor(
         @InjectModel(Employee) private employeeRepository: typeof Employee,
+        private sequelize: Sequelize,
+        private berthService: BerthesService,
+        private departmentService: DepartmentsService,
     ) {}
 
     async create(
@@ -97,6 +103,9 @@ export class EmployeesService {
                     ],
                     attributes: ["id", "number", "startDate", "group"],
                 },
+                {
+                    model: File,
+                },
             ],
             where,
             distinct: true, // Обязательно потому что выдает неверное количество записей при пописке
@@ -113,6 +122,8 @@ export class EmployeesService {
                 "name",
                 "hireDate",
                 "dismissDate",
+                "email",
+                "phone",
                 "rank",
             ],
             include: [
@@ -137,20 +148,69 @@ export class EmployeesService {
                     ],
                     attributes: ["id", "number", "startDate", "group"],
                 },
+                {
+                    model: File,
+                },
             ],
             transaction,
         });
     }
 
-    async update(
-        id: number,
-        updateEmployeeDto: UpdateEmployeeDto,
-        transaction?: Transaction,
-    ) {
-        return await this.employeeRepository.update(updateEmployeeDto, {
-            where: { id },
-            transaction,
-        });
+    async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const employeeData = {
+                surname: updateEmployeeDto.surname,
+                name: updateEmployeeDto.name,
+                hireDate: updateEmployeeDto.hireDate,
+                dismissDate: updateEmployeeDto.dismissDate,
+                email: updateEmployeeDto.email,
+                phone: updateEmployeeDto.phone,
+                rank: updateEmployeeDto.rank,
+            };
+
+            // Обновление информации пользователя
+            const result = await this.employeeRepository.update(employeeData, {
+                where: { id },
+                transaction,
+            });
+
+            const employee = await this.findOne(id, transaction);
+
+            // Должность
+            if (updateEmployeeDto.berth) {
+                const berth = await this.berthService.findOne(
+                    updateEmployeeDto.berth.id,
+                    transaction,
+                );
+
+                await employee.$set("berth", [berth.id], {
+                    transaction,
+                });
+            }
+
+            // Участок
+            if (updateEmployeeDto.department) {
+                const department = await this.departmentService.findOne(
+                    updateEmployeeDto.department.id,
+                    transaction,
+                );
+
+                await employee.$set("department", [department.id], {
+                    transaction,
+                });
+            }
+
+            await transaction.commit();
+
+            await employee.reload();
+
+            return employee;
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
     }
 
     async remove(id: number, transaction?: Transaction) {

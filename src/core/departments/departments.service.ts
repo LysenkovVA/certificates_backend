@@ -21,12 +21,18 @@ export class DepartmentsService {
         });
     }
 
-    async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.departmentsRepository.findAndCountAll({
-            limit,
-            offset,
-            transaction,
-        });
+    async findAll(limit?: number, offset?: number, transaction?: Transaction) {
+        if (!limit || !offset) {
+            return await this.departmentsRepository.findAndCountAll({
+                transaction,
+            });
+        } else {
+            return await this.departmentsRepository.findAndCountAll({
+                limit,
+                offset,
+                transaction,
+            });
+        }
     }
 
     async findOne(id: number, transaction?: Transaction) {

@@ -23,12 +23,10 @@ export class OrganizationsService {
 
     async findAll(limit?: number, offset?: number, transaction?: Transaction) {
         if (!limit || !offset) {
-            console.log("WITHOUT PARAMS");
             return await this.organizationRepository.findAndCountAll({
                 transaction,
             });
         } else {
-            console.log("WITH PARAMS");
             return await this.organizationRepository.findAndCountAll({
                 limit,
                 offset,

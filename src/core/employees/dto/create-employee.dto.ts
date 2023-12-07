@@ -1,4 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Type } from "class-transformer";
+import { ValidateNested } from "class-validator";
+import { Berth } from "../../berthes/entities/berth.entity";
+import { Department } from "../../departments/entities/department.entity";
 
 export class CreateEmployeeDto {
     @ApiProperty({
@@ -14,13 +18,6 @@ export class CreateEmployeeDto {
         required: false,
     })
     readonly name: string;
-
-    // @ApiProperty({
-    //     example: "Иванович",
-    //     description: "Отчество",
-    //     required: false,
-    // })
-    // readonly patronymic: string;
 
     @ApiProperty({
         example: "01.05.2022",
@@ -56,4 +53,14 @@ export class CreateEmployeeDto {
         required: false,
     })
     readonly email: string;
+
+    @Type(() => Berth)
+    @ValidateNested()
+    @ApiProperty({ required: false })
+    readonly berth: Berth;
+
+    @Type(() => Department)
+    @ValidateNested()
+    @ApiProperty({ required: false })
+    readonly department: Department;
 }
