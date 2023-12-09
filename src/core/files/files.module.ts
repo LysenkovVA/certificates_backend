@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
+import { EmployeesModule } from "../employees/employees.module";
 import { ProfilesModule } from "../profiles/profiles.module";
 import { Protocol } from "../protocols/entities/protocols.entity";
 import { Scan } from "../scans/entities/scans.entity";
@@ -14,6 +15,7 @@ import { FilesService } from "./files.service";
     imports: [
         SequelizeModule.forFeature([File, Protocol, Scan, ViolationPhoto]),
         ProfilesModule,
+        EmployeesModule,
     ],
     exports: [FilesService],
 })

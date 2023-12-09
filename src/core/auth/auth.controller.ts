@@ -62,13 +62,11 @@ export class AuthController {
             // Чистим Cookies из ответа
             response.clearCookie("refreshToken");
             response.status(200);
-
             return result;
         }
-        // else {
-        //     response.status(500);
-        //     //response.errored.message = "Не был найден Refresh-токен";
-        // }
+
+        response.status(200);
+        // return response;
     }
 
     @Get("/refresh")

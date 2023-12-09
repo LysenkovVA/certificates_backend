@@ -53,6 +53,31 @@ export class FilesController {
         return await this.filesService.uploadProfileAvatar(file, +profileId);
     }
 
+    @Post("upload/employee/:employeeId")
+    @UseInterceptors(FileInterceptor("file", { storage })) // 👈 field name must match
+    @ApiConsumes("multipart/form-data")
+    @ApiBody({
+        schema: {
+            type: "object",
+            properties: {
+                file: {
+                    // 👈 this property
+                    type: "string",
+                    format: "binary",
+                },
+            },
+        },
+    })
+    async uploadEmployeePhoto(
+        @Param("employeeId") employeeId: string,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        // Файл загрузился
+        console.log("Uploaded file: " + JSON.stringify(file));
+        // Сохраняем информацию в БД дальше
+        return await this.filesService.uploadEmployeeAvatar(file, +employeeId);
+    }
+
     @Get("download/:id")
     async downloadFile(
         @Param("id") id: string,
