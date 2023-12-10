@@ -124,21 +124,25 @@ export class AuthController {
         @Body() loginUserDto: CreateUserDto,
         @Query("type") type: string,
     ) {
-        const result = await this.authService.register(loginUserDto, type);
+        try {
+            const result = await this.authService.register(loginUserDto, type);
 
-        if (result) {
-            // Добавляем Cookie в ответ
-            response.cookie("refreshToken", result.refreshToken, {
-                httpOnly: true,
-                // Для HTTPS
-                // secure: this.configService.get<boolean>("COOKIE_SECURE"),
-                // Столько же, сколько и рефреш токен
-                maxAge: this.configService.get<number>(
-                    "COOKIE_REFRESH_TOKEN_MAX_AGE",
-                ),
-            });
+            if (result) {
+                // Добавляем Cookie в ответ
+                response.cookie("refreshToken", result.refreshToken, {
+                    httpOnly: true,
+                    // Для HTTPS
+                    // secure: this.configService.get<boolean>("COOKIE_SECURE"),
+                    // Столько же, сколько и рефреш токен
+                    maxAge: this.configService.get<number>(
+                        "COOKIE_REFRESH_TOKEN_MAX_AGE",
+                    ),
+                });
+            }
+
+            return result;
+        } catch (e) {
+            throw e;
         }
-
-        return result;
     }
 }

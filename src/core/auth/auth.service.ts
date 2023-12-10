@@ -8,7 +8,7 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { Sequelize } from "sequelize-typescript";
-import { Dates } from "../../infrastructure/helpers/Dates";
+import { ProfilesService } from "../profiles/profiles.service";
 import { RolesService } from "../roles/roles.service";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import { TeamsService } from "../teams/teams.service";
@@ -29,6 +29,7 @@ export class AuthService {
         private sequelize: Sequelize,
         private jwtService: JwtService,
         private tokenService: TokensService,
+        private profileService: ProfilesService,
     ) {}
 
     /**
@@ -90,22 +91,36 @@ export class AuthService {
                 transaction,
             );
 
-            // Добавляем роль при регистрации
-            if (role.value === "ADMIN") {
-                await user.$add("roles", [role.id], { transaction });
-            } else {
-                // Добавляем роль пользователя
-                await user.$add("roles", [userRole.id], { transaction });
+            const profile = await this.profileService.create(
+                { surname: null, name: null, birthDate: null },
+                transaction,
+            );
 
-                // Добавляем подписку
-                await user.$add("subscriptions", [basicSubscription.id], {
-                    transaction,
-                    through: {
-                        startDate: new Date(),
-                        endDate: Dates.getDateFrom(new Date(), 1),
-                    },
-                });
+            console.log("PROFILE: " + JSON.stringify(profile));
+
+            if (profile) {
+                // ОБЯЗАТЕЛЬНО ПЕРЕДАВАТЬ id, а не объект
+                await user.$set("profile", [profile.id], { transaction });
             }
+
+            console.log(">>> profile set");
+
+            // // Добавляем роль при регистрации
+            // if (role.value === "ADMIN") {
+            //     await user.$add("roles", [role.id], { transaction });
+            // } else {
+            //     // Добавляем роль пользователя
+            //     await user.$add("roles", [userRole.id], { transaction });
+            //
+            //     // Добавляем подписку
+            //     await user.$add("subscriptions", [basicSubscription.id], {
+            //         transaction,
+            //         through: {
+            //             startDate: new Date(),
+            //             endDate: Dates.getDateFrom(new Date(), 1),
+            //         },
+            //     });
+            // }
 
             // Генерируем токены
             const accessToken = await this.generateAccessToken(user);
@@ -127,6 +142,7 @@ export class AuthService {
                 user: {
                     id: user.id,
                     email: user.email,
+                    profile: user.profile,
                 },
                 accessToken,
                 refreshToken,

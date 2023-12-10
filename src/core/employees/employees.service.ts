@@ -1,5 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
+import * as console from "console";
 import { Op, Transaction, WhereOptions } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
@@ -11,8 +12,7 @@ import { DepartmentsService } from "../departments/departments.service";
 import { Department } from "../departments/entities/department.entity";
 import { File } from "../files/entities/file.entity";
 import { Organization } from "../organizations/entities/organization.entity";
-import { CreateEmployeeDto } from "./dto/create-employee.dto";
-import { UpdateEmployeeDto } from "./dto/update-employee.dto";
+import { EmployeeDto } from "./dto/employee.dto";
 import { Employee } from "./entities/employee.entity";
 
 @Injectable()
@@ -24,10 +24,11 @@ export class EmployeesService {
         private departmentService: DepartmentsService,
     ) {}
 
-    async create(
-        createEmployeeDto: CreateEmployeeDto,
+    private async create(
+        createEmployeeDto: EmployeeDto,
         transaction?: Transaction,
     ) {
+        console.log(">>> Create employee");
         return await this.employeeRepository.create(createEmployeeDto, {
             transaction,
         });
@@ -114,6 +115,7 @@ export class EmployeesService {
     }
 
     async findOne(id: number, transaction?: Transaction) {
+        console.log(">>> FindOne employee by id=" + id);
         return await this.employeeRepository.findOne({
             where: { id },
             attributes: [
@@ -156,27 +158,56 @@ export class EmployeesService {
         });
     }
 
-    async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
+    async save(id: string, updateEmployeeDto: EmployeeDto) {
+        console.log(">>> Start save employee");
         const transaction = await this.sequelize.transaction();
+        console.log("DTO: " + JSON.stringify(updateEmployeeDto));
 
         try {
-            const employeeData = {
-                surname: updateEmployeeDto.surname,
-                name: updateEmployeeDto.name,
-                hireDate: updateEmployeeDto.hireDate,
-                dismissDate: updateEmployeeDto.dismissDate,
-                email: updateEmployeeDto.email,
-                phone: updateEmployeeDto.phone,
-                rank: updateEmployeeDto.rank,
-            };
+            // const employeeData: EmployeeDto = {
+            //     surname: updateEmployeeDto.surname,
+            //     name: updateEmployeeDto.name,
+            //     hireDate: updateEmployeeDto.hireDate,
+            //     dismissDate: updateEmployeeDto.dismissDate,
+            //     email: updateEmployeeDto.email,
+            //     phone: updateEmployeeDto.phone,
+            //     rank: updateEmployeeDto.rank,
+            //     berth: null,
+            //     department: null
+            // };
 
-            // Обновление информации пользователя
-            const result = await this.employeeRepository.update(employeeData, {
-                where: { id },
-                transaction,
-            });
+            let employee = null;
 
-            const employee = await this.findOne(id, transaction);
+            if (id) {
+                employee = await this.findOne(+id, transaction);
+
+                if (!employee) {
+                    console.log(">>> Error finding employee");
+                    throw new BadRequestException(
+                        "Ошибка при обновлении/создании пользователя",
+                    );
+                }
+
+                // Обновление информации пользователя
+                await this.employeeRepository.update(updateEmployeeDto, {
+                    where: { id },
+                    transaction,
+                });
+            } else {
+                employee = await this.employeeRepository.create(
+                    updateEmployeeDto,
+                    {
+                        transaction,
+                    },
+                );
+
+                if (!employee) {
+                    console.log(">>> Error creating employee");
+                    throw new BadRequestException(
+                        "Ошибка при обновлении/создании пользователя",
+                    );
+                }
+            }
 
             // Должность
             if (updateEmployeeDto.berth) {
@@ -209,6 +240,7 @@ export class EmployeesService {
             return employee;
         } catch (error) {
             await transaction.rollback();
+            console.log("Rollback error: " + JSON.stringify(error));
             throw error;
         }
     }

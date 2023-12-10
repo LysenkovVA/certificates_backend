@@ -1,5 +1,6 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
+import { ProfilesModule } from "../profiles/profiles.module";
 import { RolesModule } from "../roles/roles.module";
 import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
 import { TeamsModule } from "../teams/teams.module";
@@ -17,6 +18,7 @@ import { AuthService } from "./auth.service";
         SubscriptionsModule,
         TeamsModule,
         TokensModule,
+        ProfilesModule,
         JwtModule.register({
             signOptions: {
                 expiresIn: "24h",

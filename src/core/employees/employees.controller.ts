@@ -15,8 +15,7 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
-import { CreateEmployeeDto } from "./dto/create-employee.dto";
-import { UpdateEmployeeDto } from "./dto/update-employee.dto";
+import { EmployeeDto } from "./dto/employee.dto";
 import { EmployeesService } from "./employees.service";
 
 @ApiTags("Сотрудники")
@@ -26,9 +25,25 @@ import { EmployeesService } from "./employees.service";
 export class EmployeesController {
     constructor(private readonly employeesService: EmployeesService) {}
 
-    @Post()
-    async create(@Body() createEmployeeDto: CreateEmployeeDto) {
-        return await this.employeesService.create(createEmployeeDto);
+    @Post("create")
+    async create(
+        @Body() createEmployeeDto: EmployeeDto,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            return await this.employeesService.save("", createEmployeeDto);
+        } catch (e) {
+            response.status(500);
+            response.statusMessage = e;
+        }
+    }
+
+    @Patch(":id")
+    async update(
+        @Param("id") id: string,
+        @Body() updateEmployeeDto: EmployeeDto,
+    ) {
+        return await this.employeesService.save(id, updateEmployeeDto);
     }
 
     @Get()
@@ -57,14 +72,6 @@ export class EmployeesController {
         } else {
             return employee;
         }
-    }
-
-    @Patch(":id")
-    async update(
-        @Param("id") id: string,
-        @Body() updateEmployeeDto: UpdateEmployeeDto,
-    ) {
-        return await this.employeesService.update(+id, updateEmployeeDto);
     }
 
     @Delete(":id")

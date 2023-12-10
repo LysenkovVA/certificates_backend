@@ -1,5 +1,6 @@
 import {
     Controller,
+    Delete,
     Get,
     Param,
     Post,
@@ -12,7 +13,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
-import { createReadStream } from "fs";
+import fs, { createReadStream } from "fs";
 import path from "path";
 import { AuthGuard } from "../auth/auth.guard";
 import { FilesService } from "./files.service";
@@ -98,5 +99,33 @@ export class FilesController {
         );
         console.log("Downloading file: " + file.name);
         return new StreamableFile(fileStream);
+    }
+
+    @Delete(":id")
+    async deleteFile(
+        @Param("id") id: string,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        console.log(">>>>>> DELETE");
+        // Удаляем из храннилища
+        const file = await this.filesService.findOne(+id);
+
+        if (file) {
+            const filePath = path.resolve(FILES_PATH, file.name);
+
+            if (fs.existsSync(filePath)) {
+                fs.rmSync(filePath);
+
+                // Удаляем из БД
+                await this.filesService.remove(+id);
+                response.status(200);
+            } else {
+                console.log(">>> FILE NOT FOUND at path: " + filePath);
+                response.status(500);
+            }
+        } else {
+            console.log(">>> FILE NOT FOUND AT DB");
+            response.status(500);
+        }
     }
 }

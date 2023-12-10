@@ -13,8 +13,13 @@ export class ProfilesService {
         @InjectModel(Profile) private profileRepository: typeof Profile,
     ) {}
 
-    create(createProfileDto: CreateProfileDto) {
-        return "This action adds a new profile";
+    async create(
+        createProfileDto: CreateProfileDto,
+        transaction?: Transaction,
+    ) {
+        return await this.profileRepository.create(createProfileDto, {
+            transaction,
+        });
     }
 
     findAll() {

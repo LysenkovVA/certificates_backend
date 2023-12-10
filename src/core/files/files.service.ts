@@ -116,4 +116,11 @@ export class FilesService {
             throw e;
         }
     }
+
+    async remove(id: number, transaction?: Transaction) {
+        return await this.fileRepository.destroy({
+            where: { id },
+            transaction,
+        });
+    }
 }

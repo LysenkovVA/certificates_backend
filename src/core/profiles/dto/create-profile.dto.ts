@@ -19,13 +19,7 @@ export class CreateProfileDto {
         example: "30.12.2009",
         description: "Дата рождения",
         nullable: true,
+        required: false,
     })
     readonly birthDate: Date;
-
-    // @ApiPropertyOptional({
-    //     example: "/3/profile/avatar.jpeg",
-    //     description: "Путь к аватару",
-    //     nullable: true,
-    // })
-    // readonly avatar: string;
 }

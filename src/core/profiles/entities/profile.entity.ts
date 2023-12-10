@@ -48,16 +48,6 @@ export class Profile extends Model<Profile, IProfileCreationAttrs> {
     name: string;
 
     @ApiProperty({
-        example: "Иванович",
-        description: "Отчество",
-    })
-    @Column({
-        type: DataType.STRING,
-        allowNull: true,
-    })
-    patronymic: string;
-
-    @ApiProperty({
         example: "30.06.1993",
         description: "Дата рождения",
     })
@@ -66,16 +56,6 @@ export class Profile extends Model<Profile, IProfileCreationAttrs> {
         allowNull: true,
     })
     birthDate: Date;
-
-    // @ApiProperty({
-    //     example: "/3/profile/avatar.jpeg",
-    //     description: "Путь к аватару",
-    // })
-    // @Column({
-    //     type: DataType.STRING,
-    //     allowNull: true,
-    // })
-    // avatar: string;
 
     @BelongsTo(() => User, "userId")
     user: User;

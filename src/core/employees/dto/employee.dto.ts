@@ -1,10 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { ValidateNested } from "class-validator";
 import { Berth } from "../../berthes/entities/berth.entity";
 import { Department } from "../../departments/entities/department.entity";
 
-export class CreateEmployeeDto {
+export class EmployeeDto {
     @ApiProperty({
         example: "Иванов",
         description: "Фамилия",
@@ -55,12 +54,12 @@ export class CreateEmployeeDto {
     readonly email: string;
 
     @Type(() => Berth)
-    @ValidateNested()
+    // @ValidateNested()
     @ApiProperty({ required: false })
     readonly berth: Berth;
 
     @Type(() => Department)
-    @ValidateNested()
+    // @ValidateNested()
     @ApiProperty({ required: false })
     readonly department: Department;
 }
