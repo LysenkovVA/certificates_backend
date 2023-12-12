@@ -28,24 +28,28 @@ export class AuthController {
         @Body() loginUserDto: LoginDto,
         @Res({ passthrough: true }) response: Response,
     ) {
-        const result = await this.authService.login(loginUserDto);
+        try {
+            const result = await this.authService.login(loginUserDto);
 
-        if (result) {
-            response.status(200);
+            if (result) {
+                response.status(200);
 
-            // Добавляем Cookie в ответ
-            response.cookie("refreshToken", result.refreshToken, {
-                httpOnly: true,
-                // Для HTTPS
-                // secure: this.configService.get("COOKIE_SECURE"),
-                // Столько же, сколько и рефреш токен
-                maxAge: this.configService.get<number>(
-                    "COOKIE_REFRESH_TOKEN_MAX_AGE",
-                ),
-            });
+                // Добавляем Cookie в ответ
+                response.cookie("refreshToken", result.refreshToken, {
+                    httpOnly: true,
+                    // Для HTTPS
+                    // secure: this.configService.get("COOKIE_SECURE"),
+                    // Столько же, сколько и рефреш токен
+                    maxAge: this.configService.get<number>(
+                        "COOKIE_REFRESH_TOKEN_MAX_AGE",
+                    ),
+                });
+            }
+
+            return result;
+        } catch (e) {
+            throw e;
         }
-
-        return result;
     }
 
     @Post("/logout")
@@ -98,7 +102,6 @@ export class AuthController {
         }
     }
 
-    // TODO перенести название УЦ в dto
     @Post("/register?")
     @ApiQuery({
         name: "type",

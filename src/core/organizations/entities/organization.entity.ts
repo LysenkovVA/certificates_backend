@@ -27,6 +27,7 @@ export class Organization extends Model<
     @ApiProperty({
         example: "Рога и копыта",
         description: "Название организации",
+        type: String,
     })
     @Column({
         type: DataType.STRING,
@@ -34,9 +35,19 @@ export class Organization extends Model<
     })
     name: string;
 
-    @HasMany(() => ConstructionObject, "organizationId")
-    organizations: ConstructionObject[];
-
+    @ApiProperty({
+        example: [],
+        description: "Участки",
+        type: [Department],
+    })
     @HasMany(() => Department, "organizationId")
     departments: Department[];
+
+    @ApiProperty({
+        example: [],
+        description: "Объекты",
+        type: [ConstructionObject],
+    })
+    @HasMany(() => ConstructionObject, "organizationId")
+    constructionObjects: ConstructionObject[];
 }

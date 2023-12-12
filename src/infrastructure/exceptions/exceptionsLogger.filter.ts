@@ -17,6 +17,7 @@ export class ExceptionsLoggerFilter implements ExceptionFilter {
         response.status(status).json({
             statusCode: status,
             timestamp: new Date().toISOString(),
+            method: request.method,
             path: request.url,
             error: exception.message,
         });

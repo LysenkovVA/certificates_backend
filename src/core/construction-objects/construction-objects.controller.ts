@@ -12,8 +12,8 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 import { AuthGuard } from "../auth/auth.guard";
 import { ConstructionObjectsService } from "./construction-objects.service";
-import { CreateConstructionObjectDto } from "./dto/create-construction-object.dto";
-import { UpdateConstructionObjectDto } from "./dto/update-construction-object.dto";
+import { CreateConstructionObjectDto } from "./dto/createConstructionObject.dto";
+import { UpdateConstructionObjectDto } from "./dto/updateConstructionObject.dto";
 
 @ApiTags("Строительные объекты")
 @Controller("construction-objects")

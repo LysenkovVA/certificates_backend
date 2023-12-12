@@ -96,14 +96,10 @@ export class AuthService {
                 transaction,
             );
 
-            console.log("PROFILE: " + JSON.stringify(profile));
-
             if (profile) {
                 // ОБЯЗАТЕЛЬНО ПЕРЕДАВАТЬ id, а не объект
                 await user.$set("profile", [profile.id], { transaction });
             }
-
-            console.log(">>> profile set");
 
             // // Добавляем роль при регистрации
             // if (role.value === "ADMIN") {
@@ -163,7 +159,7 @@ export class AuthService {
 
         if (!user) {
             throw new BadRequestException({
-                message: `Пользователь с e-mail ${loginDto.email} не существует!`,
+                message: `Пользователь с e-mail '${loginDto.email}' не существует!`,
             });
         }
 
