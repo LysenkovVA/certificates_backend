@@ -6,11 +6,12 @@ import {
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import * as bcrypt from "bcryptjs";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
 import { File } from "../files/entities/file.entity";
 import { Profile } from "../profiles/entities/profile.entity";
+import { Role } from "../roles/entities/roles.entity";
 import { RolesService } from "../roles/roles.service";
-import { Token } from "../tokens/entities/token.entity";
+import { Subscription } from "../subscriptions/entities/subscription.entity";
 import { AddRoleDto } from "./dto/add-role.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user-dto";
@@ -18,10 +19,40 @@ import { User } from "./entity/users.entity";
 
 @Injectable()
 export class UsersService {
+    attributes: Array<string>;
+    profileAttributes: Array<string>;
+    roleAttributes: Array<string>;
+    subscriptionAttributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(User) private userRepository: typeof User,
         private roleService: RolesService,
-    ) {}
+    ) {
+        this.attributes = ["id", "email", "password"];
+        this.profileAttributes = ["id", "surname", "name", "birthDate"];
+        this.roleAttributes = ["id", "value"];
+        this.subscriptionAttributes = ["id", "value"];
+
+        this.include = [
+            {
+                model: Profile,
+                attributes: this.profileAttributes,
+                include: [File],
+            },
+            // { model: Token },
+            {
+                model: Role,
+                attributes: this.roleAttributes,
+                through: { attributes: [] }, // Чтобы не показывалась промежуточная таблица
+            },
+            {
+                model: Subscription,
+                attributes: this.subscriptionAttributes,
+                through: { attributes: [] }, // Чтобы не показывалась промежуточная таблица
+            },
+        ];
+    }
 
     async createUser(dto: CreateUserDto, transaction?: Transaction) {
         if (!dto.email) {
@@ -54,21 +85,24 @@ export class UsersService {
             where: {
                 email,
             },
-            include: [{ model: Profile, include: [File] }, Token],
+            attributes: this.attributes,
+            include: this.include,
             transaction,
         });
     }
 
     async getUserById(id: number, transaction?: Transaction) {
         return await this.userRepository.findByPk(id, {
-            include: [{ model: Profile, include: [File] }, Token],
+            attributes: this.attributes,
+            include: this.include,
             transaction,
         });
     }
 
     async getAllUsers(transaction?: Transaction) {
         return await this.userRepository.findAll({
-            include: { all: true },
+            attributes: this.attributes,
+            include: this.include,
             transaction,
         });
     }

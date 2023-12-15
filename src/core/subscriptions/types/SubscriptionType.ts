@@ -1,6 +1,3 @@
-export type SubscriptionType =
-    | "Free"
-    | "Business"
-    | "Business PRO"
-    | "Premium"
-    | "Ultimate";
+export enum SubscriptionType {
+    FREE = "Free",
+}

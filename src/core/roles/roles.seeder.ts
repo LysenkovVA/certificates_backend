@@ -1,4 +1,6 @@
 import { OnSeederInit, Seeder } from "nestjs-sequelize-seeder";
+import { CreateRoleDto } from "./dto/create-role.dto";
+import { RoleTypes } from "./types/RoleTypes";
 
 @Seeder({
     model: "Role",
@@ -6,24 +8,16 @@ import { OnSeederInit, Seeder } from "nestjs-sequelize-seeder";
 })
 export class SeedRole implements OnSeederInit {
     run() {
-        const data = [
+        const data: Array<CreateRoleDto> = [
             {
                 // Администратор
-                value: "ADMIN",
-                description: "Роль администратора системы",
+                value: RoleTypes.ADMIN,
+                description: "Администратор",
             },
             {
                 // Пользователь
-                value: "USER",
-                description: "Роль пользователя",
-            },
-            {
-                value: "ORGANIZATION_ADMIN",
-                description: "Роль администратора бизнес-аккаунта",
-            },
-            {
-                value: "ORGANIZATION_MEMBER",
-                description: "Роль пользователя бизнес-аккаунта",
+                value: RoleTypes.USER,
+                description: "Пользователь",
             },
         ];
         return data;

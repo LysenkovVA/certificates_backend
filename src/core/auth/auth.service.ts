@@ -8,10 +8,12 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { Sequelize } from "sequelize-typescript";
+import { Dates } from "../../infrastructure/helpers/Dates";
 import { ProfilesService } from "../profiles/profiles.service";
 import { RolesService } from "../roles/roles.service";
+import { RoleTypes } from "../roles/types/RoleTypes";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
-import { TeamsService } from "../teams/teams.service";
+import { SubscriptionType } from "../subscriptions/types/SubscriptionType";
 import { TokensService } from "../tokens/tokens.service";
 import { CreateUserDto } from "../users/dto/create-user.dto";
 import { User } from "../users/entity/users.entity";
@@ -25,7 +27,6 @@ export class AuthService {
         private userService: UsersService,
         private roleService: RolesService,
         private subscriptionService: SubscriptionsService,
-        private teamsService: TeamsService,
         private sequelize: Sequelize,
         private jwtService: JwtService,
         private tokenService: TokensService,
@@ -35,16 +36,8 @@ export class AuthService {
     /**
      * Регистрация пользователя
      * @param createUserDto
-     * @param userType
      */
-    async register(createUserDto: CreateUserDto, userType: string) {
-        // Проверка существования роли в запросе
-        if (!userType) {
-            throw new BadRequestException(
-                `Тип пользователя не задан (параметр 'type')`,
-            );
-        }
-
+    async register(createUserDto: CreateUserDto) {
         const candidate = await this.userService.getUserByEmail(
             createUserDto.email,
         );
@@ -55,33 +48,7 @@ export class AuthService {
             });
         }
 
-        // // Ищем роль в БД
-        const role = await this.roleService.getRoleByValue(
-            userType.toUpperCase(),
-        );
-
-        if (!role) {
-            throw new InternalServerErrorException(
-                `Роль '${userType} отсутствует в системе!'`,
-            );
-        }
-
-        const userRole = await this.roleService.getRoleByValue("USER");
-
-        if (!userRole) {
-            throw new InternalServerErrorException(
-                `Роль USER отсутствует в системе!`,
-            );
-        }
-
-        const basicSubscription =
-            await this.subscriptionService.findSubscriptionByValue("Free");
-        if (!basicSubscription) {
-            throw new InternalServerErrorException(
-                `Подписка Free отсутствует в системе!`,
-            );
-        }
-
+        // Запускаем транзакцию
         const transaction = await this.sequelize.transaction();
 
         try {
@@ -91,6 +58,7 @@ export class AuthService {
                 transaction,
             );
 
+            // Создаем профиль пользователя
             const profile = await this.profileService.create(
                 { surname: null, name: null, birthDate: null },
                 transaction,
@@ -101,22 +69,39 @@ export class AuthService {
                 await user.$set("profile", [profile.id], { transaction });
             }
 
-            // // Добавляем роль при регистрации
-            // if (role.value === "ADMIN") {
-            //     await user.$add("roles", [role.id], { transaction });
-            // } else {
-            //     // Добавляем роль пользователя
-            //     await user.$add("roles", [userRole.id], { transaction });
-            //
-            //     // Добавляем подписку
-            //     await user.$add("subscriptions", [basicSubscription.id], {
-            //         transaction,
-            //         through: {
-            //             startDate: new Date(),
-            //             endDate: Dates.getDateFrom(new Date(), 1),
-            //         },
-            //     });
-            // }
+            // Добавляем роль пользователя
+            const userRole = await this.roleService.getRoleByValue(
+                RoleTypes.USER,
+                transaction,
+            );
+
+            if (!userRole) {
+                throw new InternalServerErrorException(
+                    `Роль ${RoleTypes.USER} отсутствует в системе!`,
+                );
+            }
+
+            await user.$add("roles", [userRole.id], { transaction });
+
+            // Добавляем подписку
+            const freeSubscription =
+                await this.subscriptionService.findSubscriptionByValue(
+                    SubscriptionType.FREE,
+                );
+
+            if (!freeSubscription) {
+                throw new InternalServerErrorException(
+                    `Подписка ${SubscriptionType.FREE} отсутствует в системе!`,
+                );
+            }
+
+            await user.$add("subscriptions", [freeSubscription.id], {
+                transaction,
+                through: {
+                    startDate: new Date(),
+                    endDate: Dates.getDateFrom(new Date(), 1),
+                },
+            });
 
             // Генерируем токены
             const accessToken = await this.generateAccessToken(user);
@@ -134,11 +119,15 @@ export class AuthService {
             // Коммит
             await transaction.commit();
 
+            const createdUser = await this.userService.getUserById(user.id);
+
             return {
                 user: {
-                    id: user.id,
-                    email: user.email,
-                    profile: user.profile,
+                    id: createdUser.id,
+                    email: createdUser.email,
+                    profile: createdUser.profile,
+                    roles: createdUser.roles,
+                    subscriptions: createdUser.subscriptions,
                 },
                 accessToken,
                 refreshToken,
@@ -154,49 +143,74 @@ export class AuthService {
      * @param loginDto
      */
     async login(loginDto: LoginDto) {
-        // Ищем пользователя и проверяем правильность пароля
-        const user = await this.userService.getUserByEmail(loginDto.email);
+        // Запускаем транзакцию
+        const transaction = await this.sequelize.transaction();
 
-        if (!user) {
-            throw new BadRequestException({
-                message: `Пользователь с e-mail '${loginDto.email}' не существует!`,
-            });
+        try {
+            // Ищем пользователя и проверяем правильность пароля
+            const user = await this.userService.getUserByEmail(
+                loginDto.email,
+                transaction,
+            );
+
+            if (!user) {
+                throw new BadRequestException({
+                    message: `Пользователь с e-mail '${loginDto.email}' не существует!`,
+                });
+            }
+
+            // Здесь await нужен, иначе не срабатывает!
+            // .then нужен чтобы среда не подсвечивала синтаксис
+            const passwordEquals = await bcrypt
+                .compare(loginDto.password, user.password)
+                .then((resolve) => resolve);
+
+            if (!passwordEquals) {
+                throw new BadRequestException({
+                    message: `Неверный пароль!`,
+                });
+            }
+
+            // Генерируем токены
+            const accessToken = await this.generateAccessToken(user);
+            const refreshToken = await this.generateRefreshToken(user);
+
+            // Обновляем refresh токен
+            if (user.tokens?.length > 0) {
+                await this.tokenService.update(
+                    user.tokens[0].id,
+                    { refreshToken },
+                    transaction,
+                );
+            } else {
+                // Пользователь логинится в первый раз или токена нет
+                const token = await this.tokenService.create(
+                    { refreshToken },
+                    transaction,
+                );
+                await user.$add("tokens", [token.id], { transaction });
+            }
+
+            // Коммит
+            await transaction.commit();
+
+            const loggedInUser = await this.userService.getUserById(user.id);
+
+            return {
+                user: {
+                    id: loggedInUser.id,
+                    email: loggedInUser.email,
+                    profile: loggedInUser.profile,
+                    roles: loggedInUser.roles,
+                    subscriptions: loggedInUser.subscriptions,
+                },
+                accessToken,
+                refreshToken,
+            };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
         }
-
-        // Здесь await нужен, иначе не срабатывает!
-        // .then нужен чтобы среда не подсвечивала синтаксис
-        const passwordEquals = await bcrypt
-            .compare(loginDto.password, user.password)
-            .then((resolve) => resolve);
-
-        if (!passwordEquals) {
-            throw new BadRequestException({
-                message: `Неверный пароль!`,
-            });
-        }
-
-        // Генерируем токены
-        const accessToken = await this.generateAccessToken(user);
-        const refreshToken = await this.generateRefreshToken(user);
-
-        // Обновляем refresh токен
-        if (user.tokens.length > 0) {
-            await this.tokenService.update(user.tokens[0].id, { refreshToken });
-        } else {
-            // Пользователь логинится в первый раз или токена нет
-            const token = await this.tokenService.create({ refreshToken });
-            await user.$add("tokens", [token]);
-        }
-
-        return {
-            user: {
-                id: user.id,
-                email: user.email,
-                profile: user.profile,
-            },
-            accessToken,
-            refreshToken,
-        };
     }
 
     /**

@@ -3,8 +3,6 @@ import { ConfigModule } from "@nestjs/config";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { SeederModule } from "nestjs-sequelize-seeder";
 import * as process from "process";
-import { AccessRightsModule } from "./core/access-rights/access-rights.module";
-import { AccessRight } from "./core/access-rights/entities/access-right.entity";
 import { AuthModule } from "./core/auth/auth.module";
 import { BerthTypesModule } from "./core/berth-types/berth-types.module";
 import { BerthType } from "./core/berth-types/entities/berth-type.entity";
@@ -54,15 +52,11 @@ import { RolesModule } from "./core/roles/roles.module";
 import { Scan } from "./core/scans/entities/scans.entity";
 import { Subscription } from "./core/subscriptions/entities/subscription.entity";
 import { SubscriptionsModule } from "./core/subscriptions/subscriptions.module";
-import { TeamMemberRight } from "./core/team-member-rights/entities/team-member-rights";
-import { Team } from "./core/teams/entities/team.entity";
-import { TeamsModule } from "./core/teams/teams.module";
 import { Token } from "./core/tokens/entities/token.entity";
 import { TokensModule } from "./core/tokens/tokens.module";
 import { UserRoles } from "./core/user-roles/entities/user-roles.entity";
 import { UserRolesModule } from "./core/user-roles/user-roles.module";
 import { UserSubscription } from "./core/user-subscriptions/entities/user-subscription.entity";
-import { UserTeam } from "./core/user-teams/entities/user-teams.entity";
 import { User } from "./core/users/entity/users.entity";
 import { UsersModule } from "./core/users/users.module";
 import { ViolationComment } from "./core/violation-comments/entities/violation-comment.entity";
@@ -101,10 +95,6 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
                 UserRoles,
                 Subscription,
                 UserSubscription,
-                UserTeam,
-                Team,
-                TeamMemberRight,
-                AccessRight,
                 Organization,
                 ConstructionObject,
                 Department,
@@ -157,8 +147,6 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
         UserRolesModule,
         AuthModule,
         SubscriptionsModule,
-        TeamsModule,
-        AccessRightsModule,
         OrganizationsModule,
         ConstructionObjectsModule,
         DepartmentsModule,

@@ -12,6 +12,8 @@ import { ConstructionObject } from "../construction-objects/entities/constructio
 import { DepartmentsService } from "../departments/departments.service";
 import { CreateDepartmentDto } from "../departments/dto/createDepartment.dto";
 import { Department } from "../departments/entities/department.entity";
+import { User } from "../users/entity/users.entity";
+import { UsersService } from "../users/users.service";
 import { CreateOrganizationDto } from "./dto/createOrganization.dto";
 import { CreateOrganizationExtendedDto } from "./dto/createOrganizationExtended.dto";
 import { UpdateOrganizationDto } from "./dto/updateOrganization.dto";
@@ -29,12 +31,14 @@ export class OrganizationsService {
         private sequelize: Sequelize,
         private departmentsService: DepartmentsService,
         private constructionObjectsService: ConstructionObjectsService,
+        private userService: UsersService,
     ) {
         // Параметры запросов к БД
         this.attributes = ["id", "name"];
         this.include = [
             { model: Department, required: false },
             { model: ConstructionObject, required: false },
+            { model: User },
         ];
     }
 
@@ -78,60 +82,76 @@ export class OrganizationsService {
 
     async createExtended(
         createOrganizationExtendedDto: CreateOrganizationExtendedDto,
+        userId: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
         try {
+            const user = await this.userService.getUserById(userId);
+
+            if (!user) {
+                throw new InternalServerErrorException(
+                    "Пользователь не найден!",
+                );
+            }
+
             const organization = await this.create(
                 createOrganizationExtendedDto as CreateOrganizationDto,
                 transaction,
             );
 
-            // Добавляем или обновляем участки
-            for (const department of createOrganizationExtendedDto.departments) {
-                if (department.id) {
-                    await this.departmentsService.update(
-                        department.id,
-                        department,
-                        transaction,
-                    );
-                } else {
-                    const newDepartment = await this.departmentsService.create(
-                        department as CreateDepartmentDto,
-                        transaction,
-                    );
+            await organization.$set("user", [user.id], { transaction });
 
-                    if (newDepartment) {
-                        await organization.$add(
-                            "departments",
-                            [newDepartment.id],
-                            { transaction },
+            // Добавляем или обновляем участки
+            if (createOrganizationExtendedDto.departments) {
+                for (const department of createOrganizationExtendedDto.departments) {
+                    if (department.id) {
+                        await this.departmentsService.update(
+                            department.id,
+                            department,
+                            transaction,
                         );
+                    } else {
+                        const newDepartment =
+                            await this.departmentsService.create(
+                                department as CreateDepartmentDto,
+                                transaction,
+                            );
+
+                        if (newDepartment) {
+                            await organization.$add(
+                                "departments",
+                                [newDepartment.id],
+                                { transaction },
+                            );
+                        }
                     }
                 }
             }
 
             // Добавляем или обновляем объекты
-            for (const constructionObject of createOrganizationExtendedDto.constructionObjects) {
-                if (constructionObject.id) {
-                    await this.constructionObjectsService.update(
-                        constructionObject.id,
-                        constructionObject,
-                        transaction,
-                    );
-                } else {
-                    const newConstructionObject =
-                        await this.constructionObjectsService.create(
-                            constructionObject as CreateConstructionObjectDto,
+            if (createOrganizationExtendedDto.constructionObjects) {
+                for (const constructionObject of createOrganizationExtendedDto.constructionObjects) {
+                    if (constructionObject.id) {
+                        await this.constructionObjectsService.update(
+                            constructionObject.id,
+                            constructionObject,
                             transaction,
                         );
+                    } else {
+                        const newConstructionObject =
+                            await this.constructionObjectsService.create(
+                                constructionObject as CreateConstructionObjectDto,
+                                transaction,
+                            );
 
-                    if (newConstructionObject) {
-                        await organization.$add(
-                            "constructionObjects",
-                            [newConstructionObject.id],
-                            { transaction },
-                        );
+                        if (newConstructionObject) {
+                            await organization.$add(
+                                "constructionObjects",
+                                [newConstructionObject.id],
+                                { transaction },
+                            );
+                        }
                     }
                 }
             }
@@ -155,11 +175,26 @@ export class OrganizationsService {
     async updateExtended(
         id: number,
         updateOrganizationExtendedDto: UpdateOrganizationExtendedDto,
+        userId: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
         try {
+            const user = await this.userService.getUserById(userId);
+
+            if (!user) {
+                throw new InternalServerErrorException(
+                    "Пользователь не найден!",
+                );
+            }
+
             const organization = await this.findOne(id, transaction);
+
+            if (organization.user.id !== user.id) {
+                throw new InternalServerErrorException(
+                    "Пользователь не может изменить чужую организацию",
+                );
+            }
 
             if (!organization) {
                 throw new BadRequestException("Организация не найдена");
@@ -251,10 +286,18 @@ export class OrganizationsService {
         }
     }
 
-    async findAll(limit?: number, offset?: number, transaction?: Transaction) {
+    async findAll(
+        userId: number,
+        limit?: number,
+        offset?: number,
+        transaction?: Transaction,
+    ) {
         try {
             if (!limit || !offset) {
                 return await this.organizationRepository.findAndCountAll({
+                    where: {
+                        "$user.id$": userId,
+                    },
                     attributes: this.attributes,
                     include: this.include,
                     order: [["name", "ASC"]],
@@ -265,6 +308,9 @@ export class OrganizationsService {
                 return await this.organizationRepository.findAndCountAll({
                     limit,
                     offset,
+                    where: {
+                        "$user.id$": userId,
+                    },
                     attributes: this.attributes,
                     include: this.include,
                     order: [["name", "ASC"]],

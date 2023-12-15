@@ -3,7 +3,6 @@ import { JwtModule } from "@nestjs/jwt";
 import { ProfilesModule } from "../profiles/profiles.module";
 import { RolesModule } from "../roles/roles.module";
 import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
-import { TeamsModule } from "../teams/teams.module";
 import { TokensModule } from "../tokens/tokens.module";
 import { UsersModule } from "../users/users.module";
 import { AuthController } from "./auth.controller";
@@ -16,7 +15,6 @@ import { AuthService } from "./auth.service";
         forwardRef(() => UsersModule),
         forwardRef(() => RolesModule),
         SubscriptionsModule,
-        TeamsModule,
         TokensModule,
         ProfilesModule,
         JwtModule.register({

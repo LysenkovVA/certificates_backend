@@ -1,7 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import {
+    BelongsTo,
+    Column,
+    DataType,
+    HasMany,
+    Model,
+    Table,
+} from "sequelize-typescript";
 import { ConstructionObject } from "../../construction-objects/entities/construction-object.entity";
 import { Department } from "../../departments/entities/department.entity";
+import { User } from "../../users/entity/users.entity";
 
 export interface IOrganizationCreationAttrs {}
 
@@ -50,4 +58,7 @@ export class Organization extends Model<
     })
     @HasMany(() => ConstructionObject, "organizationId")
     constructionObjects: ConstructionObject[];
+
+    @BelongsTo(() => User, "userId")
+    user: User;
 }

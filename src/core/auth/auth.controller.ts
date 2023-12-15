@@ -4,12 +4,11 @@ import {
     Get,
     HttpStatus,
     Post,
-    Query,
     Req,
     Res,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { CreateUserDto } from "../users/dto/create-user.dto";
 import { AuthService } from "./auth.service";
@@ -102,11 +101,11 @@ export class AuthController {
         }
     }
 
-    @Post("/register?")
-    @ApiQuery({
-        name: "type",
-        enum: ["ADMIN", "USER"],
-    })
+    @Post("/register")
+    // @ApiQuery({
+    //     name: "type",
+    //     enum: ["ADMIN", "USER"],
+    // })
     // TODO Разобраться с документацией ответов (как показывать что вернется)
     @ApiResponse({
         status: HttpStatus.OK,
@@ -125,10 +124,10 @@ export class AuthController {
     async register(
         @Res({ passthrough: true }) response: Response,
         @Body() loginUserDto: CreateUserDto,
-        @Query("type") type: string,
+        // @Query("type") type: string,
     ) {
         try {
-            const result = await this.authService.register(loginUserDto, type);
+            const result = await this.authService.register(loginUserDto);
 
             if (result) {
                 // Добавляем Cookie в ответ

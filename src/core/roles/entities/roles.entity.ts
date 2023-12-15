@@ -7,7 +7,6 @@ import {
     Table,
 } from "sequelize-typescript";
 import { UserRoles } from "../../user-roles/entities/user-roles.entity";
-import { UserTeam } from "../../user-teams/entities/user-teams.entity";
 import { User } from "../../users/entity/users.entity";
 
 interface IRoleCreationAttrs {
@@ -56,7 +55,4 @@ export class Role extends Model<Role, IRoleCreationAttrs> {
 
     @BelongsToMany(() => User, () => UserRoles)
     users: User[];
-
-    @BelongsToMany(() => Role, () => UserTeam)
-    roles: Role[];
 }
