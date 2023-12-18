@@ -9,7 +9,7 @@ import {
 } from "sequelize-typescript";
 import { ConstructionObject } from "../../construction-objects/entities/construction-object.entity";
 import { Department } from "../../departments/entities/department.entity";
-import { User } from "../../users/entity/users.entity";
+import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface IOrganizationCreationAttrs {}
 
@@ -59,6 +59,6 @@ export class Organization extends Model<
     @HasMany(() => ConstructionObject, "organizationId")
     constructionObjects: ConstructionObject[];
 
-    @BelongsTo(() => User, "userId")
-    user: User;
+    @BelongsTo(() => Workspace, "workspaceId")
+    workspace: Workspace;
 }

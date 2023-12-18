@@ -15,6 +15,7 @@ import { InspectionViolation } from "../../inspection-violations/entities/inspec
 import { Inspector } from "../../inspectors/entities/inspectors.entity";
 import { RepresentativeEmployee } from "../../representative-employees/entities/representative-employees.entity";
 import { ResultDocumentType } from "../../result_document_types/entities/result_document_type.entity";
+import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface IInspectionCreationAttrs {}
 
@@ -126,4 +127,7 @@ export class Inspection extends Model<Inspection, IInspectionCreationAttrs> {
 
     @BelongsTo(() => InspectionType, "inspectionTypeId")
     inspectionType: InspectionType;
+
+    @BelongsTo(() => Workspace, "workspaceId")
+    workspace: Workspace;
 }

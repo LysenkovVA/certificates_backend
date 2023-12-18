@@ -12,8 +12,8 @@ import { ConstructionObject } from "../construction-objects/entities/constructio
 import { DepartmentsService } from "../departments/departments.service";
 import { CreateDepartmentDto } from "../departments/dto/createDepartment.dto";
 import { Department } from "../departments/entities/department.entity";
-import { User } from "../users/entity/users.entity";
-import { UsersService } from "../users/users.service";
+import { Workspace } from "../workspaces/entities/workspace.entity";
+import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateOrganizationDto } from "./dto/createOrganization.dto";
 import { CreateOrganizationExtendedDto } from "./dto/createOrganizationExtended.dto";
 import { UpdateOrganizationDto } from "./dto/updateOrganization.dto";
@@ -31,14 +31,14 @@ export class OrganizationsService {
         private sequelize: Sequelize,
         private departmentsService: DepartmentsService,
         private constructionObjectsService: ConstructionObjectsService,
-        private userService: UsersService,
+        private workspaceService: WorkspacesService,
     ) {
         // Параметры запросов к БД
         this.attributes = ["id", "name"];
         this.include = [
             { model: Department, required: false },
             { model: ConstructionObject, required: false },
-            { model: User },
+            { model: Workspace },
         ];
     }
 
@@ -82,16 +82,19 @@ export class OrganizationsService {
 
     async createExtended(
         createOrganizationExtendedDto: CreateOrganizationExtendedDto,
-        userId: number,
+        workspaceId: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const user = await this.userService.getUserById(userId);
+            const workspace = await this.workspaceService.findOne(
+                workspaceId,
+                transaction,
+            );
 
-            if (!user) {
+            if (!workspace) {
                 throw new InternalServerErrorException(
-                    "Пользователь не найден!",
+                    "Рабочее пространство не найдено!",
                 );
             }
 
@@ -100,7 +103,9 @@ export class OrganizationsService {
                 transaction,
             );
 
-            await organization.$set("user", [user.id], { transaction });
+            await organization.$set("workspace", [workspace.id], {
+                transaction,
+            });
 
             // Добавляем или обновляем участки
             if (createOrganizationExtendedDto.departments) {
@@ -119,6 +124,12 @@ export class OrganizationsService {
                             );
 
                         if (newDepartment) {
+                            await newDepartment.$set(
+                                "workspace",
+                                [workspace.id],
+                                { transaction },
+                            );
+
                             await organization.$add(
                                 "departments",
                                 [newDepartment.id],
@@ -146,6 +157,12 @@ export class OrganizationsService {
                             );
 
                         if (newConstructionObject) {
+                            await newConstructionObject.$set(
+                                "workspace",
+                                [workspace.id],
+                                { transaction },
+                            );
+
                             await organization.$add(
                                 "constructionObjects",
                                 [newConstructionObject.id],
@@ -175,30 +192,30 @@ export class OrganizationsService {
     async updateExtended(
         id: number,
         updateOrganizationExtendedDto: UpdateOrganizationExtendedDto,
-        userId: number,
+        workspaceId: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const user = await this.userService.getUserById(userId);
-
-            if (!user) {
-                throw new InternalServerErrorException(
-                    "Пользователь не найден!",
-                );
-            }
-
+            // const user = await this.userService.getUserById(userId);
+            //
+            // if (!user) {
+            //     throw new InternalServerErrorException(
+            //         "Пользователь не найден!",
+            //     );
+            // }
+            //
             const organization = await this.findOne(id, transaction);
-
-            if (organization.user.id !== user.id) {
-                throw new InternalServerErrorException(
-                    "Пользователь не может изменить чужую организацию",
-                );
-            }
 
             if (!organization) {
                 throw new BadRequestException("Организация не найдена");
             }
+            //
+            // if (organization.user.id !== user.id) {
+            //     throw new InternalServerErrorException(
+            //         "Пользователь не может изменить чужую организацию",
+            //     );
+            // }
 
             await this.update(
                 id,
@@ -237,6 +254,12 @@ export class OrganizationsService {
                             [newDepartment.id],
                             { transaction },
                         );
+
+                        await newDepartment.$set(
+                            "workspace",
+                            [organization.workspace.id],
+                            { transaction },
+                        );
                     }
                 }
             }
@@ -273,6 +296,12 @@ export class OrganizationsService {
                             [newConstructionObject.id],
                             { transaction },
                         );
+
+                        await newConstructionObject.$set(
+                            "workspace",
+                            [organization.workspace.id],
+                            { transaction },
+                        );
                     }
                 }
             }
@@ -287,7 +316,7 @@ export class OrganizationsService {
     }
 
     async findAll(
-        userId: number,
+        workspaceId: number,
         limit?: number,
         offset?: number,
         transaction?: Transaction,
@@ -296,7 +325,7 @@ export class OrganizationsService {
             if (!limit || !offset) {
                 return await this.organizationRepository.findAndCountAll({
                     where: {
-                        "$user.id$": userId,
+                        "$workspace.id$": workspaceId,
                     },
                     attributes: this.attributes,
                     include: this.include,
@@ -309,7 +338,7 @@ export class OrganizationsService {
                     limit,
                     offset,
                     where: {
-                        "$user.id$": userId,
+                        "$workspace.id$": workspaceId,
                     },
                     attributes: this.attributes,
                     include: this.include,

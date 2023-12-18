@@ -1,21 +1,22 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
+    ForbiddenException,
     Get,
-    InternalServerErrorException,
     Param,
     Patch,
     Post,
     Query,
-    Req,
     Res,
     UseGuards,
 } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
+import { User } from "../users/entity/users.entity";
+import { AuthUser } from "../users/user.decorator";
 import { CreateOrganizationExtendedDto } from "./dto/createOrganizationExtended.dto";
 import { UpdateOrganizationExtendedDto } from "./dto/updateOrganizationExtended.dto";
 import { Organization } from "./entities/organization.entity";
@@ -26,33 +27,13 @@ import { OrganizationsService } from "./organizations.service";
 // ⛔️ТОЛЬКО АВТОРИЗОВАННЫЕ ПОЛЬЗОВАТЕЛИ
 @UseGuards(AuthGuard)
 export class OrganizationsController {
-    constructor(
-        private readonly organizationsService: OrganizationsService,
-        private readonly jwtService: JwtService,
-    ) {}
-
-    getUserIdFromRequest(request: Request): number {
-        if (!request) {
-            return null;
-        }
-
-        const payload = this.jwtService.decode(
-            request.headers?.authorization?.split(" ")?.[1],
-        );
-
-        const { id } = JSON.parse(JSON.stringify(payload));
-
-        if (!id) {
-            throw new InternalServerErrorException(
-                "Не удалось получить идентификатор пользователя из запроса!",
-            );
-        }
-
-        return Number(id);
-    }
+    constructor(private readonly organizationsService: OrganizationsService) {}
 
     @ApiOperation({
         summary: "Создание новой организации",
+        description:
+            "При создании новой организации проверяется что пользователь" +
+            "является владельцем рабочего пространства, в которое добавляется организация",
     })
     @ApiResponse({
         status: 200,
@@ -65,21 +46,34 @@ export class OrganizationsController {
     })
     @Post("create")
     async create(
-        @Req() request: Request,
+        @AuthUser() user: User,
+        @Query("workspaceId") workspaceId: string,
         @Body() extendedOrganizationDto: CreateOrganizationExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const userId = this.getUserIdFromRequest(request);
+            if (!workspaceId) {
+                throw new BadRequestException(
+                    "Неправильные параметры запроса!",
+                );
+            }
 
-            const result = await this.organizationsService.createExtended(
-                extendedOrganizationDto,
-                userId,
-            );
+            if (
+                user.workspaces?.some((ws) => {
+                    return ws.id === Number(workspaceId);
+                })
+            ) {
+                const result = await this.organizationsService.createExtended(
+                    extendedOrganizationDto,
+                    +workspaceId,
+                );
 
-            if (result) {
-                response.status(200);
-                return result;
+                if (result) {
+                    response.status(200);
+                    return result;
+                }
+            } else {
+                throw new ForbiddenException("Операция запрещена!");
             }
         } catch (e) {
             throw e;
@@ -88,31 +82,46 @@ export class OrganizationsController {
 
     @Get()
     async findAll(
-        @Req() request: Request,
         @Res({ passthrough: true }) response: Response,
+        @AuthUser() user: User,
+        @Query("workspaceId") workspaceId: string,
         @Query("limit") limit?: string,
         @Query("offset") offset?: string,
     ) {
         try {
-            const id = this.getUserIdFromRequest(request);
+            if (!workspaceId) {
+                throw new BadRequestException(
+                    "Неправильные параметры запроса!",
+                );
+            }
 
-            if (!limit || !offset) {
-                const result = await this.organizationsService.findAll(id);
+            if (
+                user.workspaces?.some((ws) => {
+                    return ws.id === Number(workspaceId);
+                })
+            ) {
+                if (!limit || !offset) {
+                    const result = await this.organizationsService.findAll(
+                        +workspaceId,
+                    );
 
-                if (result) {
-                    response.status(200);
-                    return result;
+                    if (result) {
+                        response.status(200);
+                        return result;
+                    }
+                } else {
+                    const result = await this.organizationsService.findAll(
+                        +workspaceId,
+                        +limit,
+                        +offset,
+                    );
+                    if (result) {
+                        response.status(200);
+                        return result;
+                    }
                 }
             } else {
-                const result = await this.organizationsService.findAll(
-                    id,
-                    +limit,
-                    +offset,
-                );
-                if (result) {
-                    response.status(200);
-                    return result;
-                }
+                throw new ForbiddenException("Операция запрещена!");
             }
         } catch (e) {
             throw e;
@@ -121,15 +130,26 @@ export class OrganizationsController {
 
     @Get(":id")
     async findOne(
+        @AuthUser() user: User,
         @Param("id") id: string,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const result = await this.organizationsService.findOne(+id);
+            // Получаем организацию
+            const organization = await this.organizationsService.findOne(+id);
 
-            if (result) {
-                response.status(200);
-                return result;
+            if (organization) {
+                // Проверяем, что пользователю разрешено ее получить
+                if (
+                    user.workspaces?.some((ws) => {
+                        return ws.id === Number(organization.workspace.id);
+                    })
+                ) {
+                    response.status(200);
+                    return organization;
+                } else {
+                    throw new ForbiddenException("Операция запрещена!");
+                }
             }
         } catch (e) {
             throw e;
@@ -138,23 +158,36 @@ export class OrganizationsController {
 
     @Patch(":id")
     async update(
-        @Req() request: Request,
+        @AuthUser() user: User,
         @Param("id") id: string,
         @Body() extendedOrganizationDto: UpdateOrganizationExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const userId = this.getUserIdFromRequest(request);
+            // Получаем организацию
+            const organization = await this.organizationsService.findOne(+id);
 
-            const result = await this.organizationsService.updateExtended(
-                +id,
-                extendedOrganizationDto,
-                userId,
-            );
+            if (organization) {
+                // Проверяем, что пользователю разрешено ее получить
+                if (
+                    user.workspaces?.some((ws) => {
+                        return ws.id === Number(organization.workspace.id);
+                    })
+                ) {
+                    const result =
+                        await this.organizationsService.updateExtended(
+                            +id,
+                            extendedOrganizationDto,
+                            organization.workspace.id,
+                        );
 
-            if (result) {
-                response.status(200);
-                return result;
+                    if (result) {
+                        response.status(200);
+                        return result;
+                    }
+                } else {
+                    throw new ForbiddenException("Операция запрещена!");
+                }
             }
         } catch (e) {
             throw e;
@@ -163,14 +196,29 @@ export class OrganizationsController {
 
     @Delete(":id")
     async remove(
+        @AuthUser() user: User,
         @Param("id") id: string,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const result = await this.organizationsService.remove(+id);
+            // Получаем организацию
+            const organization = await this.organizationsService.findOne(+id);
 
-            if (result > 0) {
-                response.status(200);
+            if (organization) {
+                // Проверяем, что пользователю разрешено ее удалить
+                if (
+                    user.workspaces?.some((ws) => {
+                        return ws.id === Number(organization.workspace.id);
+                    })
+                ) {
+                    const result = await this.organizationsService.remove(+id);
+
+                    if (result > 0) {
+                        response.status(200);
+                    }
+                } else {
+                    throw new ForbiddenException("Операция запрещена!");
+                }
             }
         } catch (e) {
             throw e;

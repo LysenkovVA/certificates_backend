@@ -5,6 +5,7 @@ import { RolesModule } from "../roles/roles.module";
 import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
 import { TokensModule } from "../tokens/tokens.module";
 import { UsersModule } from "../users/users.module";
+import { WorkspacesModule } from "../workspaces/workspaces.module";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 
@@ -17,6 +18,7 @@ import { AuthService } from "./auth.service";
         SubscriptionsModule,
         TokensModule,
         ProfilesModule,
+        WorkspacesModule,
         JwtModule.register({
             signOptions: {
                 expiresIn: "24h",

@@ -57,6 +57,7 @@ import { TokensModule } from "./core/tokens/tokens.module";
 import { UserRoles } from "./core/user-roles/entities/user-roles.entity";
 import { UserRolesModule } from "./core/user-roles/user-roles.module";
 import { UserSubscription } from "./core/user-subscriptions/entities/user-subscription.entity";
+import { UserWorkspaces } from "./core/user-workspaces/entities/user-workspaces.entity";
 import { User } from "./core/users/entity/users.entity";
 import { UsersModule } from "./core/users/users.module";
 import { ViolationComment } from "./core/violation-comments/entities/violation-comment.entity";
@@ -65,6 +66,8 @@ import { ViolationEmployeeComment } from "./core/violation-employee-comments/ent
 import { ViolationEmployeeCommentsModule } from "./core/violation-employee-comments/violation-employee-comments.module";
 import { ViolationPhoto } from "./core/violation-photos/entities/violation-photos.entity";
 import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation_viewed_by.entity";
+import { Workspace } from "./core/workspaces/entities/workspace.entity";
+import { WorkspacesModule } from "./core/workspaces/workspaces.module";
 
 @Module({
     controllers: [],
@@ -124,6 +127,8 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
                 CheckListCheck,
                 Profile,
                 Token,
+                Workspace,
+                UserWorkspaces,
             ],
             define: {
                 createdAt: false,
@@ -170,6 +175,7 @@ import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation
         CheckListChecksModule,
         ProfilesModule,
         TokensModule,
+        WorkspacesModule,
     ],
 })
 export class AppModule {}

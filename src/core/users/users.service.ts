@@ -12,6 +12,7 @@ import { Profile } from "../profiles/entities/profile.entity";
 import { Role } from "../roles/entities/roles.entity";
 import { RolesService } from "../roles/roles.service";
 import { Subscription } from "../subscriptions/entities/subscription.entity";
+import { Workspace } from "../workspaces/entities/workspace.entity";
 import { AddRoleDto } from "./dto/add-role.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user-dto";
@@ -40,7 +41,6 @@ export class UsersService {
                 attributes: this.profileAttributes,
                 include: [File],
             },
-            // { model: Token },
             {
                 model: Role,
                 attributes: this.roleAttributes,
@@ -50,6 +50,10 @@ export class UsersService {
                 model: Subscription,
                 attributes: this.subscriptionAttributes,
                 through: { attributes: [] }, // Чтобы не показывалась промежуточная таблица
+            },
+            {
+                model: Workspace,
+                through: { attributes: [] },
             },
         ];
     }

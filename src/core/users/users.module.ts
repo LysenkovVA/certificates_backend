@@ -1,4 +1,4 @@
-import { forwardRef, Module } from "@nestjs/common";
+import { forwardRef, Global, Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { SeederModule } from "nestjs-sequelize-seeder";
 import { AuthModule } from "../auth/auth.module";
@@ -8,11 +8,13 @@ import { RolesModule } from "../roles/roles.module";
 import { Subscription } from "../subscriptions/entities/subscription.entity";
 import { UserRoles } from "../user-roles/entities/user-roles.entity";
 import { UserSubscription } from "../user-subscriptions/entities/user-subscription.entity";
+import { Workspace } from "../workspaces/entities/workspace.entity";
 import { User } from "./entity/users.entity";
 import { UsersController } from "./users.controller";
 import { SeedUser } from "./users.seeder";
 import { UsersService } from "./users.service";
 
+@Global()
 @Module({
     controllers: [UsersController],
     providers: [UsersService],
@@ -24,6 +26,7 @@ import { UsersService } from "./users.service";
             Subscription,
             UserSubscription,
             Profile,
+            Workspace,
         ]),
         SeederModule.forFeature([SeedUser]),
         RolesModule,

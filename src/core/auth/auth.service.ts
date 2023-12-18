@@ -18,6 +18,7 @@ import { TokensService } from "../tokens/tokens.service";
 import { CreateUserDto } from "../users/dto/create-user.dto";
 import { User } from "../users/entity/users.entity";
 import { UsersService } from "../users/users.service";
+import { WorkspacesService } from "../workspaces/workspaces.service";
 import { LoginDto } from "./dto/login.dto";
 
 @Injectable()
@@ -31,6 +32,7 @@ export class AuthService {
         private jwtService: JwtService,
         private tokenService: TokensService,
         private profileService: ProfilesService,
+        private workspaceService: WorkspacesService,
     ) {}
 
     /**
@@ -57,17 +59,6 @@ export class AuthService {
                 createUserDto,
                 transaction,
             );
-
-            // Создаем профиль пользователя
-            const profile = await this.profileService.create(
-                { surname: null, name: null, birthDate: null },
-                transaction,
-            );
-
-            if (profile) {
-                // ОБЯЗАТЕЛЬНО ПЕРЕДАВАТЬ id, а не объект
-                await user.$set("profile", [profile.id], { transaction });
-            }
 
             // Добавляем роль пользователя
             const userRole = await this.roleService.getRoleByValue(
@@ -103,6 +94,15 @@ export class AuthService {
                 },
             });
 
+            // Добавляем рабочее пространство
+            const workSpace = await this.workspaceService.create({
+                name: "Моё рабочее пространство",
+            });
+
+            if (workSpace) {
+                await user.$add("workspaces", [workSpace.id], { transaction });
+            }
+
             // Генерируем токены
             const accessToken = await this.generateAccessToken(user);
             const refreshToken = await this.generateRefreshToken(user);
@@ -128,6 +128,7 @@ export class AuthService {
                     profile: createdUser.profile,
                     roles: createdUser.roles,
                     subscriptions: createdUser.subscriptions,
+                    workspaces: createdUser.workspaces,
                 },
                 accessToken,
                 refreshToken,
@@ -171,6 +172,21 @@ export class AuthService {
                 });
             }
 
+            // Пользователь логинится в первый раз и у него еще нет
+            // профиля
+            if (!user.profile) {
+                // Создаем профиль пользователя
+                const profile = await this.profileService.create(
+                    { surname: null, name: null, birthDate: null },
+                    transaction,
+                );
+
+                if (profile) {
+                    // ОБЯЗАТЕЛЬНО ПЕРЕДАВАТЬ id, а не объект
+                    await user.$set("profile", [profile.id], { transaction });
+                }
+            }
+
             // Генерируем токены
             const accessToken = await this.generateAccessToken(user);
             const refreshToken = await this.generateRefreshToken(user);
@@ -203,6 +219,7 @@ export class AuthService {
                     profile: loggedInUser.profile,
                     roles: loggedInUser.roles,
                     subscriptions: loggedInUser.subscriptions,
+                    workspaces: loggedInUser.workspaces,
                 },
                 accessToken,
                 refreshToken,
@@ -262,6 +279,10 @@ export class AuthService {
                 user: {
                     id: user.id,
                     email: user.email,
+                    profile: user.profile,
+                    roles: user.roles,
+                    subscriptions: user.subscriptions,
+                    workspaces: user.workspaces,
                 },
                 accessToken,
                 refreshToken,
