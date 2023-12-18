@@ -1,15 +1,19 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-
-// export const UserId = createParamDecorator(
-//     (data: any, ctx: ExecutionContext) => {
-//         const request = ctx.switchToHttp().getRequest();
-//         return request.userId;
-//     },
-// );
+import {
+    BadRequestException,
+    createParamDecorator,
+    ExecutionContext,
+} from "@nestjs/common";
 
 export const AuthUser = createParamDecorator(
     (data: any, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest();
-        return request.user;
+        const user = request.user;
+        if (!user) {
+            throw new BadRequestException(
+                "AuthUser: Пользователь не определен!",
+            );
+        }
+
+        return user;
     },
 );

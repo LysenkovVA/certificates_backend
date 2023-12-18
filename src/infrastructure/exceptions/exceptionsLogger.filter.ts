@@ -21,5 +21,16 @@ export class ExceptionsLoggerFilter implements ExceptionFilter {
             path: request.url,
             error: exception.message,
         });
+
+        console.log(
+            ">>> ExceptionsLoggerFilter:\n" +
+                JSON.stringify({
+                    statusCode: status,
+                    timestamp: new Date().toISOString(),
+                    method: request.method,
+                    path: request.url,
+                    error: exception.message,
+                }),
+        );
     }
 }

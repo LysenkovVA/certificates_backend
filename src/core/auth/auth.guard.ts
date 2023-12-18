@@ -68,7 +68,6 @@ export class AuthGuard implements CanActivate {
                                 );
                             }
 
-                            req.userId = id;
                             req.user = value;
                             return true;
                         })

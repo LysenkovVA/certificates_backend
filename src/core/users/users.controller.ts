@@ -1,18 +1,9 @@
-import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Patch,
-    Post,
-    UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AuthGuard } from "../auth/auth.guard";
 import { Roles } from "../roles/roles-auth.decorator";
 import { RolesGuard } from "../roles/roles.guard";
 import { AddRoleDto } from "./dto/add-role.dto";
-import { UpdateUserDto } from "./dto/update-user-dto";
 import { User } from "./entity/users.entity";
 import { UsersService } from "./users.service";
 
@@ -50,14 +41,14 @@ export class UsersController {
         return this.usersService.addRole(dto);
     }
 
-    @Patch(":id")
-    async update(
-        @Param("id") id: string,
-        @Body() updateUserDto: UpdateUserDto,
-    ) {
-        return await this.usersService.update(+id, updateUserDto);
-    }
-
+    // @Patch(":id")
+    // async update(
+    //     @Param("id") id: string,
+    //     @Body() updateUserDto: UpdateUserDto,
+    // ) {
+    //     return await this.usersService.update(+id, updateUserDto);
+    // }
+    //
     @Get(":id")
     @UseGuards(AuthGuard)
     async getById(@Param("id") id: string) {

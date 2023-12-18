@@ -192,30 +192,15 @@ export class OrganizationsService {
     async updateExtended(
         id: number,
         updateOrganizationExtendedDto: UpdateOrganizationExtendedDto,
-        workspaceId: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
         try {
-            // const user = await this.userService.getUserById(userId);
-            //
-            // if (!user) {
-            //     throw new InternalServerErrorException(
-            //         "Пользователь не найден!",
-            //     );
-            // }
-            //
             const organization = await this.findOne(id, transaction);
 
             if (!organization) {
                 throw new BadRequestException("Организация не найдена");
             }
-            //
-            // if (organization.user.id !== user.id) {
-            //     throw new InternalServerErrorException(
-            //         "Пользователь не может изменить чужую организацию",
-            //     );
-            // }
 
             await this.update(
                 id,

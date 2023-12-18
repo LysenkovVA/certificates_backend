@@ -3,7 +3,7 @@ import { Type } from "class-transformer";
 import { Berth } from "../../berthes/entities/berth.entity";
 import { Department } from "../../departments/entities/department.entity";
 
-export class EmployeeDto {
+export class CreateEmployeeDto {
     @ApiProperty({
         example: "Иванов",
         description: "Фамилия",
@@ -14,7 +14,7 @@ export class EmployeeDto {
     @ApiProperty({
         example: "Иван",
         description: "Имя",
-        required: false,
+        required: true,
     })
     readonly name: string;
 
@@ -54,12 +54,10 @@ export class EmployeeDto {
     readonly email: string;
 
     @Type(() => Berth)
-    // @ValidateNested()
     @ApiProperty({ required: false })
     readonly berth: Berth;
 
     @Type(() => Department)
-    // @ValidateNested()
     @ApiProperty({ required: false })
     readonly department: Department;
 }

@@ -13,5 +13,5 @@ export class CreateOrganizationExtendedDto extends IntersectionType(
 
     @Type(() => Array<UpdateConstructionObjectDto>)
     @ApiProperty({ type: [UpdateConstructionObjectDto], required: false })
-    constructionObjects: UpdateConstructionObjectDto[];
+    readonly constructionObjects: UpdateConstructionObjectDto[];
 }

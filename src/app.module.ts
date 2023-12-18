@@ -87,6 +87,8 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
             database: process.env.POSTGRES_DB,
             autoLoadModels: true,
             synchronize: true,
+            // logging: false,
+            // logQueryParameters: false,
             // Чтобы изменения подхватывались при изменении моделей
             sync: {
                 alter: true,
