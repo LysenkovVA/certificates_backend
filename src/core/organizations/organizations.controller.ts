@@ -16,7 +16,7 @@ import { AuthGuard } from "../auth/auth.guard";
 import { WorkspaceQueryGuard } from "../workspaces/workspaceQuery.guard";
 import { CreateOrganizationExtendedDto } from "./dto/createOrganizationExtended.dto";
 import { UpdateOrganizationExtendedDto } from "./dto/updateOrganizationExtended.dto";
-import { OrganizationGuard } from "./entities/organization.guard";
+import { OrganizationGuard } from "./organization.guard";
 import { OrganizationsService } from "./organizations.service";
 
 @ApiTags("Организации")

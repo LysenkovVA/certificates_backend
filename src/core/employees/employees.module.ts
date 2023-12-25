@@ -1,7 +1,9 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { BerthesModule } from "../berthes/berthes.module";
 import { DepartmentsModule } from "../departments/departments.module";
+import { File } from "../files/entities/file.entity";
+import { FilesModule } from "../files/files.module";
 import { Inspection } from "../inspections/entities/inspection.entity";
 import { Inspector } from "../inspectors/entities/inspectors.entity";
 import { RepresentativeEmployee } from "../representative-employees/entities/representative-employees.entity";
@@ -23,10 +25,12 @@ import { Employee } from "./entities/employee.entity";
             Inspector,
             ViolationViewedBy,
             ViolationEmployeeComment,
+            File,
         ]),
         BerthesModule,
         DepartmentsModule,
         WorkspacesModule,
+        forwardRef(() => FilesModule),
     ],
     exports: [EmployeesService],
 })

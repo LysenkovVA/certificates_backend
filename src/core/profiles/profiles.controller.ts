@@ -1,15 +1,15 @@
 import {
     Body,
     Controller,
-    Delete,
     Get,
     Param,
     Patch,
-    Post,
+    Res,
+    UploadedFiles,
     UseGuards,
 } from "@nestjs/common";
+import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
-import { CreateProfileDto } from "./dto/create-profile.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { ProfilesService } from "./profiles.service";
 
@@ -19,31 +19,47 @@ import { ProfilesService } from "./profiles.service";
 export class ProfilesController {
     constructor(private readonly profilesService: ProfilesService) {}
 
-    @Post()
-    create(@Body() createProfileDto: CreateProfileDto) {
-        return this.profilesService.create(createProfileDto);
-    }
+    @Get(":id")
+    async findById(
+        @Param("id") id: string,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const candidate = await this.profilesService.findOne(+id);
 
-    @Get()
-    findAll() {
-        return this.profilesService.findAll();
-    }
-
-    @Get(":profileId")
-    async fetchByUserId(@Param("profileId") profileId: string) {
-        return await this.profilesService.findById(+profileId);
+            response.status(200);
+            return candidate;
+        } catch (e) {
+            throw e;
+        }
     }
 
     @Patch(":id")
     async update(
         @Param("id") id: string,
         @Body() updateProfileDto: UpdateProfileDto,
+        @UploadedFiles() files: { avatar?: Express.Multer.File[] },
+        @Res({ passthrough: true }) response: Response,
     ) {
-        return await this.profilesService.update(+id, updateProfileDto);
-    }
+        try {
+            let avatar: Express.Multer.File = null;
 
-    @Delete(":id")
-    remove(@Param("id") id: string) {
-        return this.profilesService.remove(+id);
+            if (files && files.avatar?.length > 0) {
+                avatar = files.avatar[0];
+            }
+
+            const result = await this.profilesService.update(
+                +id,
+                updateProfileDto,
+                avatar,
+            );
+
+            if (result) {
+                response.status(200);
+                return result;
+            }
+        } catch (e) {
+            throw e;
+        }
     }
 }

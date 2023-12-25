@@ -7,38 +7,38 @@ import {
     InternalServerErrorException,
 } from "@nestjs/common";
 import { Observable } from "rxjs";
-import { Workspace } from "../../workspaces/entities/workspace.entity";
-import { OrganizationsService } from "../organizations.service";
+import { Workspace } from "../workspaces/entities/workspace.entity";
+import { BerthesService } from "./berthes.service";
 
 @Injectable()
-export class OrganizationGuard implements CanActivate {
-    constructor(private organizationService: OrganizationsService) {}
+export class BerthGuard implements CanActivate {
+    constructor(private berthService: BerthesService) {}
 
     canActivate(
         context: ExecutionContext,
     ): boolean | Promise<boolean> | Observable<boolean> {
         const req = context.switchToHttp().getRequest();
-        const { id: organizationId } = req.params;
+        const { id: berthId } = req.params;
         const user = req.user;
 
-        if (!organizationId) {
+        if (!berthId) {
             throw new BadRequestException(
-                "OrganizationGuard: Идентификатор организации не указан!",
+                "BerthGuard: Идентификатор должности не указан!",
             );
         }
 
         if (!user) {
             throw new BadRequestException(
-                "OrganizationGuard: Пользователь не определен!",
+                "BerthGuard: Пользователь не определен!",
             );
         }
 
-        const result = this.organizationService
-            .findOne(organizationId)
+        const result = this.berthService
+            .findOne(berthId)
             .then((value) => {
                 if (!value) {
                     throw new InternalServerErrorException(
-                        "OrganizationGuard: Организация не найдена!",
+                        "BerthGuard: Должность не найдена!",
                     );
                 }
 
@@ -51,7 +51,7 @@ export class OrganizationGuard implements CanActivate {
                 }
 
                 throw new ForbiddenException(
-                    "OrganizationGuard: Данная операция запрещена!",
+                    "BerthGuard: Данная операция запрещена!",
                 );
             })
             .catch((error) => {

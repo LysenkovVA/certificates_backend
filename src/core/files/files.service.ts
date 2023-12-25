@@ -3,24 +3,18 @@ import { InjectModel } from "@nestjs/sequelize";
 import fs from "fs";
 import path from "path";
 import { Transaction } from "sequelize";
-import { EmployeesService } from "../employees/employees.service";
-import { ProfilesService } from "../profiles/profiles.service";
 import { File } from "./entities/file.entity";
 import { FILES_PATH } from "./storage/storage";
 
 @Injectable()
 export class FilesService {
-    constructor(
-        @InjectModel(File) private fileRepository: typeof File,
-        private profileService: ProfilesService,
-        private employeeService: EmployeesService,
-    ) {}
+    constructor(@InjectModel(File) private fileRepository: typeof File) {}
 
     async findOne(id: number, transaction?: Transaction) {
         return await this.fileRepository.findByPk(id, { transaction });
     }
 
-    private async uploadFile(
+    public async uploadFile(
         fileToUpload: Express.Multer.File,
         fileId?: number,
     ) {
@@ -71,56 +65,26 @@ export class FilesService {
         }
     }
 
-    async uploadProfileAvatar(file: Express.Multer.File, profileId: number) {
-        try {
-            const profile = await this.profileService.findById(profileId);
-
-            if (!profile) {
-                throw new BadRequestException(
-                    `Профиль с идентификатором ${profileId} не найден в БД!`,
-                );
-            }
-
-            const uploadedFile = await this.uploadFile(
-                file,
-                profile.avatar?.id,
-            );
-
-            if (uploadedFile) {
-                await profile.$set("avatar", uploadedFile);
-            }
-        } catch (e) {
-            throw e;
-        }
-    }
-
-    async uploadEmployeeAvatar(file: Express.Multer.File, employeeId: number) {
-        try {
-            const employee = await this.employeeService.findOne(employeeId);
-
-            if (!employee) {
-                throw new BadRequestException(
-                    `Сотрудник с идентификатором ${employeeId} не найден в БД!`,
-                );
-            }
-
-            const uploadedFile = await this.uploadFile(
-                file,
-                employee.avatar?.id,
-            );
-
-            if (uploadedFile) {
-                await employee.$set("avatar", uploadedFile);
-            }
-        } catch (e) {
-            throw e;
-        }
-    }
-
     async remove(id: number, transaction?: Transaction) {
-        return await this.fileRepository.destroy({
-            where: { id },
-            transaction,
-        });
+        try {
+            if (id) {
+                const existingFile = await this.fileRepository.findByPk(id);
+
+                if (!existingFile) {
+                    throw new BadRequestException(
+                        `Файл с идентификатором ${id} не найден в БД!`,
+                    );
+                }
+                // Удаляем старый файл из хранилища файлов
+                fs.rmSync(path.resolve(FILES_PATH, existingFile.path));
+            }
+
+            return await this.fileRepository.destroy({
+                where: { id },
+                transaction,
+            });
+        } catch (e) {
+            throw e;
+        }
     }
 }

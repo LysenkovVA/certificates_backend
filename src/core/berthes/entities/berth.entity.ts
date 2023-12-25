@@ -9,6 +9,8 @@ import {
 } from "sequelize-typescript";
 import { BerthType } from "../../berth-types/entities/berth-type.entity";
 import { Employee } from "../../employees/entities/employee.entity";
+import { Organization } from "../../organizations/entities/organization.entity";
+import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface IBerthCreationAttrs {}
 
@@ -36,9 +38,15 @@ export class Berth extends Model<Berth, IBerthCreationAttrs> {
     })
     value: string;
 
+    @BelongsTo(() => Workspace, "workspaceId")
+    workspace: Workspace;
+
     @HasMany(() => Employee, "berthId")
     employees: Employee[];
 
     @BelongsTo(() => BerthType, "berthTypeId")
     berthType: BerthType;
+
+    @BelongsTo(() => Organization, "organizationId")
+    organization: Organization;
 }

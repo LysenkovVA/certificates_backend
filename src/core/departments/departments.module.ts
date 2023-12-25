@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { Organization } from "../organizations/entities/organization.entity";
+import { OrganizationsModule } from "../organizations/organizations.module";
 import { DepartmentsController } from "./departments.controller";
 import { DepartmentsService } from "./departments.service";
 import { Department } from "./entities/department.entity";
@@ -8,7 +9,10 @@ import { Department } from "./entities/department.entity";
 @Module({
     controllers: [DepartmentsController],
     providers: [DepartmentsService],
-    imports: [SequelizeModule.forFeature([Department, Organization])],
+    imports: [
+        SequelizeModule.forFeature([Department, Organization]),
+        forwardRef(() => OrganizationsModule),
+    ],
     exports: [DepartmentsService],
 })
 export class DepartmentsModule {}

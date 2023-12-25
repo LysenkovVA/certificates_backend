@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { ConstructionObjectsModule } from "../construction-objects/construction-objects.module";
 import { DepartmentsModule } from "../departments/departments.module";
@@ -13,7 +13,7 @@ import { OrganizationsService } from "./organizations.service";
     providers: [OrganizationsService],
     imports: [
         SequelizeModule.forFeature([Organization]),
-        DepartmentsModule,
+        forwardRef(() => DepartmentsModule),
         ConstructionObjectsModule,
         UsersModule,
         WorkspacesModule,

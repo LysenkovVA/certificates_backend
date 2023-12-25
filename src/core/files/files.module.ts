@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { EmployeesModule } from "../employees/employees.module";
 import { ProfilesModule } from "../profiles/profiles.module";
@@ -14,8 +14,8 @@ import { FilesService } from "./files.service";
     providers: [FilesService],
     imports: [
         SequelizeModule.forFeature([File, Protocol, Scan, ViolationPhoto]),
-        ProfilesModule,
-        EmployeesModule,
+        forwardRef(() => ProfilesModule),
+        forwardRef(() => EmployeesModule),
     ],
     exports: [FilesService],
 })

@@ -1,48 +1,137 @@
-import { Injectable } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    InternalServerErrorException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { Sequelize } from "sequelize-typescript";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
+import { Organization } from "../organizations/entities/organization.entity";
+import { Workspace } from "../workspaces/entities/workspace.entity";
+import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateBerthDto } from "./dto/create-berth.dto";
 import { UpdateBerthDto } from "./dto/update-berth.dto";
 import { Berth } from "./entities/berth.entity";
 
 @Injectable()
 export class BerthesService {
-    constructor(@InjectModel(Berth) private berthRepository: typeof Berth) {}
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
+    constructor(
+        @InjectModel(Berth) private berthRepository: typeof Berth,
+        private sequelize: Sequelize,
+        private workspaceService: WorkspacesService,
+    ) {
+        // Параметры запросов к БД
+        this.attributes = ["id", "value"];
+        this.include = [
+            { model: Workspace },
+            { model: Organization },
+            { model: BerthType },
+        ];
+    }
 
     async create(createBertheDto: CreateBerthDto, transaction?: Transaction) {
-        return await this.berthRepository.create(createBertheDto, {
-            transaction,
-        });
+        try {
+            return await this.berthRepository.create(createBertheDto, {
+                transaction,
+            });
+        } catch (e) {
+            throw new InternalServerErrorException(e);
+        }
+    }
+
+    async createExtended(createBertheDto: CreateBerthDto, workspaceId: number) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const workspace = await this.workspaceService.findOne(
+                workspaceId,
+                transaction,
+            );
+
+            if (!workspace) {
+                throw new InternalServerErrorException(
+                    "Рабочее пространство не найдено!",
+                );
+            }
+
+            const berth = await this.create(createBertheDto, transaction);
+
+            await berth.$set("workspace", [workspace.id], {
+                transaction,
+            });
+
+            await transaction.commit();
+
+            // Возвращаем полностью объект
+            if (berth) {
+                // Обновляем значения
+                return await berth.reload({
+                    attributes: this.attributes,
+                    include: this.include,
+                });
+            }
+        } catch (e) {
+            await transaction.rollback();
+            throw e;
+        }
     }
 
     async findAll(
-        // limit: number,
-        // offset: number,
-        // searchQuery?: string,
+        workspaceId: number,
+        organizationId?: string,
         transaction?: Transaction,
     ) {
-        return await this.berthRepository.findAndCountAll({
-            // limit,
-            // offset,
-            // where: {
-            //     value: {
-            //         [Op.iLike]: `%${searchQuery}%`,
-            //     },
-            // },
-            transaction,
-            include: [{ model: BerthType }],
-            distinct: true,
-            order: [["value", "ASC"]],
-        });
+        try {
+            if (!organizationId) {
+                return await this.berthRepository.findAndCountAll({
+                    where: {
+                        "$workspace.id$": workspaceId,
+                    },
+                    attributes: this.attributes,
+                    include: this.include,
+                    order: [["value", "ASC"]],
+                    distinct: true,
+                    transaction,
+                });
+            } else {
+                return await this.berthRepository.findAndCountAll({
+                    where: {
+                        "$workspace.id$": workspaceId,
+                        "$organization.id$": +organizationId,
+                    },
+                    attributes: this.attributes,
+                    include: this.include,
+                    order: [["value", "ASC"]],
+                    distinct: true,
+                    transaction,
+                });
+            }
+        } catch (e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     async findOne(id: number, transaction?: Transaction) {
-        return await this.berthRepository.findOne({
-            where: { id },
-            include: [{ model: BerthType }],
-            transaction,
-        });
+        try {
+            const candidate = await this.berthRepository.findByPk(id, {
+                attributes: this.attributes,
+                include: this.include,
+                order: [["value", "ASC"]],
+                transaction,
+            });
+
+            if (!candidate) {
+                throw new BadRequestException("Должность не найдена");
+            }
+
+            return candidate;
+        } catch (e) {
+            throw e;
+        }
     }
 
     async update(
@@ -50,16 +139,55 @@ export class BerthesService {
         updateBertheDto: UpdateBerthDto,
         transaction?: Transaction,
     ) {
-        return await this.berthRepository.update(updateBertheDto, {
-            where: { id },
-            transaction,
-        });
+        try {
+            const candidate = await this.findOne(id, transaction);
+
+            if (candidate) {
+                return await this.berthRepository.update(updateBertheDto, {
+                    where: { id },
+                    transaction,
+                });
+            }
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    async updateExtended(id: number, updateBertheDto: UpdateBerthDto) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const berth = await this.findOne(id, transaction);
+
+            if (!berth) {
+                throw new BadRequestException("Должность не найдена");
+            }
+
+            await this.update(id, updateBertheDto, transaction);
+
+            await transaction.commit();
+
+            return await this.findOne(id);
+        } catch (e) {
+            await transaction.rollback();
+            throw e;
+        }
     }
 
     async remove(id: number, transaction?: Transaction) {
-        return await this.berthRepository.destroy({
-            where: { id },
-            transaction,
-        });
+        try {
+            const candidate = await this.findOne(id, transaction);
+
+            if (!candidate) {
+                throw new BadRequestException("Должность не найдена");
+            }
+
+            return await this.berthRepository.destroy({
+                where: { id },
+                transaction,
+            });
+        } catch (e) {
+            throw e;
+        }
     }
 }

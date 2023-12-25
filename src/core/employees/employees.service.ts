@@ -1,5 +1,7 @@
 import {
     BadRequestException,
+    forwardRef,
+    Inject,
     Injectable,
     InternalServerErrorException,
 } from "@nestjs/common";
@@ -14,6 +16,7 @@ import { Certificate } from "../certificates/entities/certificate.entity";
 import { DepartmentsService } from "../departments/departments.service";
 import { Department } from "../departments/entities/department.entity";
 import { File } from "../files/entities/file.entity";
+import { FilesService } from "../files/files.service";
 import { Organization } from "../organizations/entities/organization.entity";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { WorkspacesService } from "../workspaces/workspaces.service";
@@ -32,6 +35,8 @@ export class EmployeesService {
         private berthService: BerthesService,
         private departmentService: DepartmentsService,
         private workspaceService: WorkspacesService,
+        @Inject(forwardRef(() => FilesService))
+        private fileService: FilesService,
     ) {
         // Параметры запросов к БД
         this.attributes = [
@@ -83,8 +88,9 @@ export class EmployeesService {
     }
 
     async createExtended(
-        createEmployeeDto: CreateEmployeeDto,
         workspaceId: number,
+        createEmployeeDto: CreateEmployeeDto,
+        avatar?: Express.Multer.File,
     ) {
         const transaction = await this.sequelize.transaction();
 
@@ -130,6 +136,15 @@ export class EmployeesService {
                 });
             }
 
+            // Аватар
+            if (avatar) {
+                const file = await this.fileService.uploadFile(avatar);
+
+                if (file) {
+                    await employee.$set("avatar", [file.id], { transaction });
+                }
+            }
+
             await transaction.commit();
 
             return this.findOne(employee.id);
@@ -158,7 +173,11 @@ export class EmployeesService {
         }
     }
 
-    async updateExtended(id: number, updateEmployeeDto: UpdateEmployeeDto) {
+    async updateExtended(
+        id: number,
+        updateEmployeeDto: UpdateEmployeeDto,
+        avatar?: Express.Multer.File,
+    ) {
         const transaction = await this.sequelize.transaction();
 
         try {
@@ -192,6 +211,30 @@ export class EmployeesService {
                 await employee.$set("department", [department.id], {
                     transaction,
                 });
+            }
+
+            // Аватар
+            if (avatar) {
+                // Загрузка аватара
+                const file = await this.fileService.uploadFile(
+                    avatar,
+                    employee.avatar?.id,
+                );
+
+                if (file) {
+                    await employee.$set("avatar", [file.id], { transaction });
+                }
+            } else {
+                // Удаляем связи
+                await employee.$set("avatar", null, { transaction });
+
+                // Аватар удален
+                if (employee.avatar) {
+                    await this.fileService.remove(
+                        employee.avatar.id,
+                        transaction,
+                    );
+                }
             }
 
             await transaction.commit();
@@ -256,18 +299,6 @@ export class EmployeesService {
         } catch (e) {
             throw new InternalServerErrorException(e);
         }
-
-        // return await this.employeeRepository.findAndCountAll({
-        //     limit,
-        //     offset,
-        //     transaction,
-        //     //subQuery: true, // без этого аттрибута косячил поиск на фронтенде
-        //     attributes: this.attributes,
-        //     include: this.include,
-        //     where,
-        //     distinct: true, // Обязательно потому что выдает неверное количество записей при пописке
-        //     order: [["surname", "ASC"]],
-        // });
     }
 
     async findOne(id: number, transaction?: Transaction) {
@@ -289,93 +320,6 @@ export class EmployeesService {
         }
     }
 
-    // async save(id: string, updateEmployeeDto: CreateEmployeeDto) {
-    //     console.log(">>> Start save employee");
-    //     const transaction = await this.sequelize.transaction();
-    //     console.log("DTO: " + JSON.stringify(updateEmployeeDto));
-    //
-    //     try {
-    //         // const employeeData: EmployeeDto = {
-    //         //     surname: updateEmployeeDto.surname,
-    //         //     name: updateEmployeeDto.name,
-    //         //     hireDate: updateEmployeeDto.hireDate,
-    //         //     dismissDate: updateEmployeeDto.dismissDate,
-    //         //     email: updateEmployeeDto.email,
-    //         //     phone: updateEmployeeDto.phone,
-    //         //     rank: updateEmployeeDto.rank,
-    //         //     berth: null,
-    //         //     department: null
-    //         // };
-    //
-    //         let employee = null;
-    //
-    //         if (id) {
-    //             employee = await this.findOne(+id, transaction);
-    //
-    //             if (!employee) {
-    //                 console.log(">>> Error finding employee");
-    //                 throw new BadRequestException(
-    //                     "Ошибка при обновлении/создании пользователя",
-    //                 );
-    //             }
-    //
-    //             // Обновление информации пользователя
-    //             await this.employeeRepository.update(updateEmployeeDto, {
-    //                 where: { id },
-    //                 transaction,
-    //             });
-    //         } else {
-    //             employee = await this.employeeRepository.create(
-    //                 updateEmployeeDto,
-    //                 {
-    //                     transaction,
-    //                 },
-    //             );
-    //
-    //             if (!employee) {
-    //                 console.log(">>> Error creating employee");
-    //                 throw new BadRequestException(
-    //                     "Ошибка при обновлении/создании пользователя",
-    //                 );
-    //             }
-    //         }
-    //
-    //         // Должность
-    //         if (updateEmployeeDto.berth) {
-    //             const berth = await this.berthService.findOne(
-    //                 updateEmployeeDto.berth.id,
-    //                 transaction,
-    //             );
-    //
-    //             await employee.$set("berth", [berth.id], {
-    //                 transaction,
-    //             });
-    //         }
-    //
-    //         // Участок
-    //         if (updateEmployeeDto.department) {
-    //             const department = await this.departmentService.findOne(
-    //                 updateEmployeeDto.department.id,
-    //                 transaction,
-    //             );
-    //
-    //             await employee.$set("department", [department.id], {
-    //                 transaction,
-    //             });
-    //         }
-    //
-    //         await transaction.commit();
-    //
-    //         await employee.reload();
-    //
-    //         return employee;
-    //     } catch (error) {
-    //         await transaction.rollback();
-    //         console.log("Rollback error: " + JSON.stringify(error));
-    //         throw error;
-    //     }
-    // }
-
     async remove(id: number, transaction?: Transaction) {
         try {
             const candidate = await this.findOne(id, transaction);
@@ -389,6 +333,33 @@ export class EmployeesService {
                 transaction,
             });
         } catch (e) {
+            throw e;
+        }
+    }
+
+    async removeExtended(id: number) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const candidate = await this.findOne(id, transaction);
+
+            if (!candidate) {
+                throw new BadRequestException("Сотрудник не найден");
+            }
+
+            if (candidate.avatar) {
+                await this.fileService.remove(candidate.avatar.id, transaction);
+            }
+
+            const result = await this.employeeRepository.destroy({
+                where: { id },
+                transaction,
+            });
+
+            await transaction.commit();
+            return result;
+        } catch (e) {
+            await transaction.rollback();
             throw e;
         }
     }

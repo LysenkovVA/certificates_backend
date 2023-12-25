@@ -15,6 +15,7 @@ import { File } from "../../files/entities/file.entity";
 import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
 import { Inspection } from "../../inspections/entities/inspection.entity";
 import { Inspector } from "../../inspectors/entities/inspectors.entity";
+import { Organization } from "../../organizations/entities/organization.entity";
 import { RepresentativeEmployee } from "../../representative-employees/entities/representative-employees.entity";
 import { ViolationComment } from "../../violation-comments/entities/violation-comment.entity";
 import { ViolationEmployeeComment } from "../../violation-employee-comments/entities/violation-employee-comment.entity";
@@ -141,4 +142,7 @@ export class Employee extends Model<Employee, IEmployeeCreationAttrs> {
 
     @BelongsTo(() => Workspace, "workspaceId")
     workspace: Workspace;
+
+    @BelongsTo(() => Organization, "organizationId")
+    organization: Organization;
 }

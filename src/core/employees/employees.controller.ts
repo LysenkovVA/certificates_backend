@@ -7,13 +7,16 @@ import {
     Patch,
     Post,
     Query,
-    Req,
     Res,
+    UploadedFiles,
     UseGuards,
+    UseInterceptors,
 } from "@nestjs/common";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
+import { storage } from "../files/storage/storage";
 import { WorkspaceQueryGuard } from "../workspaces/workspaceQuery.guard";
 import { CreateEmployeeDto } from "./dto/createEmployee.dto";
 import { UpdateEmployeeDto } from "./dto/updateEmployee.dto";
@@ -29,43 +32,60 @@ export class EmployeesController {
 
     @Post("create")
     @UseGuards(WorkspaceQueryGuard)
+    @UseInterceptors(
+        FileFieldsInterceptor([{ name: "avatar", maxCount: 1 }], { storage }),
+    )
     async create(
         @Query("workspaceId") workspaceId: string,
         @Body() createEmployeeDto: CreateEmployeeDto,
+        @UploadedFiles() files: { avatar?: Express.Multer.File[] },
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const result = await this.employeesService.createExtended(
-                createEmployeeDto,
+            let avatar: Express.Multer.File = null;
+
+            if (files && files.avatar?.length > 0) {
+                avatar = files.avatar[0];
+            }
+
+            // Создаем работника
+            const newEmployee = await this.employeesService.createExtended(
                 +workspaceId,
+                createEmployeeDto,
+                avatar,
             );
 
-            if (result) {
+            if (newEmployee) {
                 response.status(200);
-                return result;
+                return newEmployee;
             }
         } catch (e) {
             throw e;
         }
-
-        // try {
-        //     return await this.employeesService.save("", createEmployeeDto);
-        // } catch (e) {
-        //     throw e;
-        // }
     }
 
     @Patch(":id")
     @UseGuards(EmployeeGuard)
+    @UseInterceptors(
+        FileFieldsInterceptor([{ name: "avatar", maxCount: 1 }], { storage }),
+    )
     async update(
         @Param("id") id: string,
         @Body() updateEmployeeDto: UpdateEmployeeDto,
+        @UploadedFiles() files: { avatar?: Express.Multer.File[] },
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
+            let avatar: Express.Multer.File = null;
+
+            if (files && files.avatar?.length > 0) {
+                avatar = files.avatar[0];
+            }
+
             const result = await this.employeesService.updateExtended(
                 +id,
                 updateEmployeeDto,
+                avatar,
             );
 
             if (result) {
@@ -75,8 +95,6 @@ export class EmployeesController {
         } catch (e) {
             throw e;
         }
-
-        //return await this.employeesService.save(id, updateEmployeeDto);
     }
 
     @Delete(":id")
@@ -86,7 +104,7 @@ export class EmployeesController {
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const result = await this.employeesService.remove(+id);
+            const result = await this.employeesService.removeExtended(+id);
 
             if (result > 0) {
                 response.status(200);
@@ -135,15 +153,13 @@ export class EmployeesController {
     @UseGuards(EmployeeGuard)
     async findOne(
         @Param("id") id: string,
-        @Req() request: Request,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            // Получаем организацию
-            const organization = await this.employeesService.findOne(+id);
+            const candidate = await this.employeesService.findOne(+id);
 
             response.status(200);
-            return organization;
+            return candidate;
         } catch (e) {
             throw e;
         }
