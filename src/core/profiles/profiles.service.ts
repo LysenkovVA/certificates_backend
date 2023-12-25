@@ -58,6 +58,7 @@ export class ProfilesService {
     ) {
         const transaction = await this.sequelize.transaction();
 
+        console.log("PROFILE DTO: " + JSON.stringify(updateProfileDto));
         try {
             const candidate = await this.findOne(id, transaction);
 
@@ -65,7 +66,11 @@ export class ProfilesService {
                 throw new BadRequestException("Профиль не найден");
             }
 
-            await candidate.update(updateProfileDto, { transaction });
+            await this.profileRepository.update(updateProfileDto, {
+                where: { id: candidate.id },
+                transaction,
+            });
+            // await candidate.update(updateProfileDto, { transaction });
 
             // Аватар
             if (avatar) {
@@ -92,12 +97,16 @@ export class ProfilesService {
             }
 
             await transaction.commit();
+
+            const result = await this.findOne(candidate.id);
+
+            console.log("Updated profile: " + JSON.stringify(result));
+
+            return result;
         } catch (e) {
             await transaction.rollback();
             throw e;
         }
-
-        return await this.findOne(id);
     }
 
     async findOne(id: number, transaction?: Transaction) {

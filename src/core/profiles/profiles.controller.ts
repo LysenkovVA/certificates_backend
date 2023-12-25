@@ -7,9 +7,12 @@ import {
     Res,
     UploadedFiles,
     UseGuards,
+    UseInterceptors,
 } from "@nestjs/common";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
+import { storage } from "../files/storage/storage";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { ProfilesService } from "./profiles.service";
 
@@ -35,6 +38,9 @@ export class ProfilesController {
     }
 
     @Patch(":id")
+    @UseInterceptors(
+        FileFieldsInterceptor([{ name: "avatar", maxCount: 1 }], { storage }),
+    )
     async update(
         @Param("id") id: string,
         @Body() updateProfileDto: UpdateProfileDto,
