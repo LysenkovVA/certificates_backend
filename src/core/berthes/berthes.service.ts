@@ -8,6 +8,7 @@ import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
 import { Organization } from "../organizations/entities/organization.entity";
+import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateBerthDto } from "./dto/create-berth.dto";
@@ -23,6 +24,7 @@ export class BerthesService {
         @InjectModel(Berth) private berthRepository: typeof Berth,
         private sequelize: Sequelize,
         private workspaceService: WorkspacesService,
+        private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
         this.attributes = ["id", "value"];
@@ -43,7 +45,11 @@ export class BerthesService {
         }
     }
 
-    async createExtended(createBertheDto: CreateBerthDto, workspaceId: number) {
+    async createExtended(
+        createBertheDto: CreateBerthDto,
+        workspaceId: number,
+        organizationId: number,
+    ) {
         const transaction = await this.sequelize.transaction();
 
         try {
@@ -58,9 +64,24 @@ export class BerthesService {
                 );
             }
 
+            const organization = await this.organizationService.findOne(
+                organizationId,
+                transaction,
+            );
+
+            if (!organization) {
+                throw new InternalServerErrorException(
+                    "Организация не найдена!",
+                );
+            }
+
             const berth = await this.create(createBertheDto, transaction);
 
             await berth.$set("workspace", [workspace.id], {
+                transaction,
+            });
+
+            await berth.$set("organization", [organization.id], {
                 transaction,
             });
 

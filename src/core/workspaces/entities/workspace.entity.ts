@@ -7,6 +7,7 @@ import {
     Model,
     Table,
 } from "sequelize-typescript";
+import { BerthType } from "../../berth-types/entities/berth-type.entity";
 import { Berth } from "../../berthes/entities/berth.entity";
 import { Certificate } from "../../certificates/entities/certificate.entity";
 import { ConstructionObject } from "../../construction-objects/entities/construction-object.entity";
@@ -71,4 +72,7 @@ export class Workspace extends Model<Workspace, IWorkspaceCreationAttrs> {
 
     @HasMany(() => Berth, "workspaceId")
     berthes: Berth[];
+
+    @HasMany(() => BerthType, "workspaceId")
+    berthTypes: BerthType[];
 }

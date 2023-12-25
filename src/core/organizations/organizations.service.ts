@@ -1,5 +1,7 @@
 import {
     BadRequestException,
+    forwardRef,
+    Inject,
     Injectable,
     InternalServerErrorException,
 } from "@nestjs/common";
@@ -29,6 +31,7 @@ export class OrganizationsService {
         @InjectModel(Organization)
         private organizationRepository: typeof Organization,
         private sequelize: Sequelize,
+        @Inject(forwardRef(() => DepartmentsService))
         private departmentsService: DepartmentsService,
         private constructionObjectsService: ConstructionObjectsService,
         private workspaceService: WorkspacesService,

@@ -1,6 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import {
+    BelongsTo,
+    Column,
+    DataType,
+    HasMany,
+    Model,
+    Table,
+} from "sequelize-typescript";
 import { Berth } from "../../berthes/entities/berth.entity";
+import { Organization } from "../../organizations/entities/organization.entity";
+import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface IBerthTypeCreationAttrs {}
 
@@ -27,6 +36,12 @@ export class BerthType extends Model<BerthType, IBerthTypeCreationAttrs> {
         allowNull: false,
     })
     value: string;
+
+    @BelongsTo(() => Workspace, "workspaceId")
+    workspace: Workspace;
+
+    @BelongsTo(() => Organization, "organizationId")
+    organization: Organization;
 
     @HasMany(() => Berth, "berthTypeId")
     berthes: Berth[];

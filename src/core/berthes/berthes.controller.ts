@@ -30,6 +30,7 @@ export class BerthesController {
     @UseGuards(WorkspaceQueryGuard)
     async create(
         @Query("workspaceId") workspaceId: string,
+        @Query("organizationId") organizationId: string,
         @Body() createBertheDto: CreateBerthDto,
         @Res({ passthrough: true }) response: Response,
     ) {
@@ -37,6 +38,7 @@ export class BerthesController {
             const result = await this.berthesService.createExtended(
                 createBertheDto,
                 +workspaceId,
+                +organizationId,
             );
 
             if (result) {
