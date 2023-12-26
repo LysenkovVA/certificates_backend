@@ -1,7 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { Berth } from "../../berthes/entities/berth.entity";
-import { Department } from "../../departments/entities/department.entity";
 
 export class CreateEmployeeDto {
     @ApiProperty({
@@ -52,12 +49,4 @@ export class CreateEmployeeDto {
         required: false,
     })
     readonly email: string;
-
-    @Type(() => Berth)
-    @ApiProperty({ required: false })
-    readonly berth: Berth;
-
-    @Type(() => Department)
-    @ApiProperty({ required: false })
-    readonly department: Department;
 }

@@ -18,10 +18,13 @@ import { Department } from "../departments/entities/department.entity";
 import { File } from "../files/entities/file.entity";
 import { FilesService } from "../files/files.service";
 import { Organization } from "../organizations/entities/organization.entity";
+import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateEmployeeDto } from "./dto/createEmployee.dto";
+import { CreateEmployeeExtendedDto } from "./dto/createEmployeeExtended.dto";
 import { UpdateEmployeeDto } from "./dto/updateEmployee.dto";
+import { UpdateEmployeeExtendedDto } from "./dto/updateEmployeeExtended.dto";
 import { Employee } from "./entities/employee.entity";
 
 @Injectable()
@@ -37,6 +40,7 @@ export class EmployeesService {
         private workspaceService: WorkspacesService,
         @Inject(forwardRef(() => FilesService))
         private fileService: FilesService,
+        private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
         this.attributes = [
@@ -46,9 +50,12 @@ export class EmployeesService {
             "hireDate",
             "dismissDate",
             "rank",
+            "phone",
+            "email",
         ];
         this.include = [
             { model: Workspace },
+            { model: Organization },
             {
                 model: Berth,
                 include: [BerthType],
@@ -74,6 +81,58 @@ export class EmployeesService {
         ];
     }
 
+    async uploadAvatar(avatar: Express.Multer.File, employeeId: number) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const employee = await this.findOne(employeeId, transaction);
+
+            if (!employee) {
+                throw new InternalServerErrorException("Сотрудник не найден!");
+            }
+
+            const file = await this.fileService.uploadFile(
+                avatar,
+                employee.avatar?.id,
+                transaction,
+            );
+
+            await employee.$set("avatar", [file.id], { transaction });
+
+            await transaction.commit();
+
+            return this.fileService.findOne(file.id);
+        } catch (e) {
+            await transaction.rollback();
+            throw new InternalServerErrorException(e);
+        }
+    }
+
+    async deleteAvatar(employeeId: number) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const employee = await this.findOne(employeeId, transaction);
+
+            if (!employee) {
+                throw new InternalServerErrorException("Сотрудник не найден!");
+            }
+
+            if (employee.avatar) {
+                await this.fileService.remove(employee.avatar.id, transaction);
+            }
+
+            await employee.$set("avatar", null, { transaction });
+
+            await transaction.commit();
+
+            return true;
+        } catch (e) {
+            await transaction.rollback();
+            throw new InternalServerErrorException(e);
+        }
+    }
+
     async create(
         createEmployeeDto: CreateEmployeeDto,
         transaction?: Transaction,
@@ -89,8 +148,7 @@ export class EmployeesService {
 
     async createExtended(
         workspaceId: number,
-        createEmployeeDto: CreateEmployeeDto,
-        avatar?: Express.Multer.File,
+        createEmployeeDto: CreateEmployeeExtendedDto,
     ) {
         const transaction = await this.sequelize.transaction();
 
@@ -111,6 +169,20 @@ export class EmployeesService {
             await employee.$set("workspace", [workspace.id], {
                 transaction,
             });
+
+            // Организация
+            if (createEmployeeDto.organization) {
+                const organization = await this.organizationService.findOne(
+                    createEmployeeDto.organization.id,
+                    transaction,
+                );
+
+                await employee.$set("organization", [organization.id], {
+                    transaction,
+                });
+            } else {
+                await employee.$set("organization", null, { transaction });
+            }
 
             // Должность
             if (createEmployeeDto.berth) {
@@ -134,15 +206,6 @@ export class EmployeesService {
                 await employee.$set("department", [department.id], {
                     transaction,
                 });
-            }
-
-            // Аватар
-            if (avatar) {
-                const file = await this.fileService.uploadFile(avatar);
-
-                if (file) {
-                    await employee.$set("avatar", [file.id], { transaction });
-                }
             }
 
             await transaction.commit();
@@ -175,8 +238,7 @@ export class EmployeesService {
 
     async updateExtended(
         id: number,
-        updateEmployeeDto: UpdateEmployeeDto,
-        avatar?: Express.Multer.File,
+        updateEmployeeDto: UpdateEmployeeExtendedDto,
     ) {
         const transaction = await this.sequelize.transaction();
 
@@ -187,54 +249,50 @@ export class EmployeesService {
                 throw new BadRequestException("Сотрудник не найден");
             }
 
-            await this.update(id, updateEmployeeDto, transaction);
+            await this.update(
+                id,
+                updateEmployeeDto as UpdateEmployeeDto,
+                transaction,
+            );
 
-            // Должность
-            if (updateEmployeeDto.berth) {
-                const berth = await this.berthService.findOne(
-                    updateEmployeeDto.berth.id,
+            // Организация
+            if (updateEmployeeDto.organization) {
+                const organization = await this.organizationService.findOne(
+                    updateEmployeeDto.organization.id,
                     transaction,
                 );
 
-                await employee.$set("berth", [berth.id], {
+                await employee.$set("organization", [organization.id], {
+                    transaction,
+                });
+            } else {
+                await employee.$set("organization", null, { transaction });
+            }
+
+            // Должность
+            if (updateEmployeeDto.berth) {
+                await employee.$set("berth", [updateEmployeeDto.berth.id], {
+                    transaction,
+                });
+            } else {
+                await employee.$set("berth", null, {
                     transaction,
                 });
             }
 
             // Участок
             if (updateEmployeeDto.department) {
-                const department = await this.departmentService.findOne(
-                    updateEmployeeDto.department.id,
-                    transaction,
+                await employee.$set(
+                    "department",
+                    [updateEmployeeDto.department.id],
+                    {
+                        transaction,
+                    },
                 );
-
-                await employee.$set("department", [department.id], {
+            } else {
+                await employee.$set("department", null, {
                     transaction,
                 });
-            }
-
-            // Аватар
-            if (avatar) {
-                // Загрузка аватара
-                const file = await this.fileService.uploadFile(
-                    avatar,
-                    employee.avatar?.id,
-                );
-
-                if (file) {
-                    await employee.$set("avatar", [file.id], { transaction });
-                }
-            } else {
-                // Удаляем связи
-                await employee.$set("avatar", null, { transaction });
-
-                // Аватар удален
-                if (employee.avatar) {
-                    await this.fileService.remove(
-                        employee.avatar.id,
-                        transaction,
-                    );
-                }
             }
 
             await transaction.commit();

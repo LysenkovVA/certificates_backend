@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
-import { createReadStream } from "fs";
+import fs, { createReadStream } from "fs";
 import path from "path";
 import { AuthGuard } from "../auth/auth.guard";
 import { FilesService } from "./files.service";
@@ -79,21 +79,35 @@ export class FilesController {
         @Param("id") id: string,
         @Res({ passthrough: true }) response: Response,
     ): Promise<StreamableFile> {
-        const file = await this.filesService.findOne(+id);
+        try {
+            const file = await this.filesService.findOne(+id);
 
-        if (!file) {
+            if (!file) {
+                return null;
+            }
+
+            const downloadPath = path.resolve(FILES_PATH, file.path);
+
+            // Если файл не будет существовать вылетает ошибка
+            // body.errorLogger is not a function
+            // и она не отлавливается почему-то
+            if (fs.existsSync(downloadPath)) {
+                // console.log(downloadPath);
+                const fileStream = createReadStream(downloadPath);
+                response.set("Content-Type", file.format);
+                response.set(
+                    "Content-Disposition",
+                    `attachment; filename="${file.name}"`,
+                );
+                return new StreamableFile(fileStream);
+            }
+
             return null;
+        } catch (e) {
+            console.log("ERROR AT DOWNLOAD FILE");
+            console.log(e);
+            throw e;
         }
-
-        const downloadPath = path.resolve(FILES_PATH, file.path);
-        const fileStream = createReadStream(downloadPath);
-        response.set("Content-Type", file.format);
-        response.set(
-            "Content-Disposition",
-            `attachment; filename="${file.name}"`,
-        );
-        console.log("Downloading file: " + file.name);
-        return new StreamableFile(fileStream);
     }
 
     // @Delete(":id")

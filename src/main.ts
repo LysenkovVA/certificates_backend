@@ -8,6 +8,7 @@ import { ExceptionsLoggerFilter } from "./infrastructure/exceptions/exceptionsLo
 async function start() {
     const PORT = process.env.PORT || 5001;
     const app = await NestFactory.create(AppModule, {
+        logger: ["error", "warn"],
         // Опция для Frontend
         // В Axios цепляются куки, сообщаем по какому адресу наш фронтент
         cors: {
@@ -17,8 +18,9 @@ async function start() {
     });
     app.setGlobalPrefix("/api");
     app.use(cookieParser());
+    // app.use(morgan("combined"));
 
-    // ВСЕГДА ПОСЛЕДНИЙ! Перехватчика ошибок
+    // ВСЕГДА ПОСЛЕДНИЙ! Перехватчик ошибок
     app.useGlobalFilters(new ExceptionsLoggerFilter());
 
     // Настройка документации

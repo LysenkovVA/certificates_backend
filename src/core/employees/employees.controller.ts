@@ -4,22 +4,23 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
     Res,
-    UploadedFiles,
+    UploadedFile,
     UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
-import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
 import { storage } from "../files/storage/storage";
 import { WorkspaceQueryGuard } from "../workspaces/workspaceQuery.guard";
-import { CreateEmployeeDto } from "./dto/createEmployee.dto";
-import { UpdateEmployeeDto } from "./dto/updateEmployee.dto";
+import { CreateEmployeeExtendedDto } from "./dto/createEmployeeExtended.dto";
+import { UpdateEmployeeExtendedDto } from "./dto/updateEmployeeExtended.dto";
 import { EmployeeGuard } from "./employee.guard";
 import { EmployeesService } from "./employees.service";
 
@@ -32,27 +33,16 @@ export class EmployeesController {
 
     @Post("create")
     @UseGuards(WorkspaceQueryGuard)
-    @UseInterceptors(
-        FileFieldsInterceptor([{ name: "avatar", maxCount: 1 }], { storage }),
-    )
     async create(
-        @Query("workspaceId") workspaceId: string,
-        @Body() createEmployeeDto: CreateEmployeeDto,
-        @UploadedFiles() files: { avatar?: Express.Multer.File[] },
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Body() createEmployeeDto: CreateEmployeeExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            let avatar: Express.Multer.File = null;
-
-            if (files && files.avatar?.length > 0) {
-                avatar = files.avatar[0];
-            }
-
             // Создаем работника
             const newEmployee = await this.employeesService.createExtended(
-                +workspaceId,
+                workspaceId,
                 createEmployeeDto,
-                avatar,
             );
 
             if (newEmployee) {
@@ -64,28 +54,56 @@ export class EmployeesController {
         }
     }
 
-    @Patch(":id")
-    @UseGuards(EmployeeGuard)
-    @UseInterceptors(
-        FileFieldsInterceptor([{ name: "avatar", maxCount: 1 }], { storage }),
-    )
-    async update(
-        @Param("id") id: string,
-        @Body() updateEmployeeDto: UpdateEmployeeDto,
-        @UploadedFiles() files: { avatar?: Express.Multer.File[] },
+    @Post("upload/avatar/:employeeId")
+    @UseInterceptors(FileInterceptor("avatar", { storage }))
+    async uploadAvatar(
+        @Param("employeeId", ParseIntPipe) employeeId: number,
+        @UploadedFile() avatar: Express.Multer.File,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            let avatar: Express.Multer.File = null;
-
-            if (files && files.avatar?.length > 0) {
-                avatar = files.avatar[0];
-            }
-
-            const result = await this.employeesService.updateExtended(
-                +id,
-                updateEmployeeDto,
+            const file = await this.employeesService.uploadAvatar(
                 avatar,
+                employeeId,
+            );
+
+            if (file) {
+                response.status(200);
+                return file;
+            }
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    @Post("delete/avatar/:employeeId")
+    async deleteAvatar(
+        @Param("employeeId", ParseIntPipe) employeeId: number,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const result = await this.employeesService.deleteAvatar(employeeId);
+
+            if (result) {
+                response.status(200);
+                return result;
+            }
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    @Patch(":id")
+    @UseGuards(EmployeeGuard)
+    async update(
+        @Param("id", ParseIntPipe) id: number,
+        @Body() updateEmployeeDto: UpdateEmployeeExtendedDto,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const result = await this.employeesService.updateExtended(
+                id,
+                updateEmployeeDto,
             );
 
             if (result) {
