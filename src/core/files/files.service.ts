@@ -2,12 +2,15 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import fs from "fs";
 import path from "path";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
 import { File } from "./entities/file.entity";
 import { FILES_PATH } from "./storage/storage";
 
 @Injectable()
 export class FilesService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(@InjectModel(File) private fileRepository: typeof File) {}
 
     async findOne(id: number, transaction?: Transaction) {

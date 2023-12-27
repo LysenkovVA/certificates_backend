@@ -7,6 +7,11 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
+import {
+    fileTableAttributes,
+    profileTableAttributes,
+    userTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
 import { File } from "../files/entities/file.entity";
 import { FilesService } from "../files/files.service";
 import { User } from "../users/entity/users.entity";
@@ -26,10 +31,10 @@ export class ProfilesService {
         private fileService: FilesService,
     ) {
         // Параметры запросов к БД
-        this.attributes = ["id", "surname", "name", "birthDate"];
+        this.attributes = profileTableAttributes;
         this.include = [
-            { model: User, attributes: ["id", "email"] },
-            { model: File },
+            { model: User, attributes: userTableAttributes },
+            { model: File, attributes: fileTableAttributes },
         ];
     }
 

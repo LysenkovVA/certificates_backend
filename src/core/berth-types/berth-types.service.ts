@@ -6,6 +6,7 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
+import { berthTypeTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { Organization } from "../organizations/entities/organization.entity";
 import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
@@ -26,7 +27,7 @@ export class BerthTypesService {
         private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
-        this.attributes = ["id", "value"];
+        this.attributes = berthTypeTableAttributes;
         this.include = [{ model: Workspace }, { model: Organization }];
     }
 

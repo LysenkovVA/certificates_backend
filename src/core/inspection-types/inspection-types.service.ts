@@ -1,16 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { inspectionTypeTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateInspectionTypeDto } from "./dto/create-inspection-type.dto";
 import { UpdateInspectionTypeDto } from "./dto/update-inspection-type.dto";
 import { InspectionType } from "./entities/inspection-type.entity";
 
 @Injectable()
 export class InspectionTypesService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(InspectionType)
         private inspectionTypesRepository: typeof InspectionType,
-    ) {}
+    ) {
+        this.attributes = inspectionTypeTableAttributes;
+    }
 
     async create(
         createInspectionTypeDto: CreateInspectionTypeDto,

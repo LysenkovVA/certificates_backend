@@ -1,16 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { resultDocumentTypeTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateResultDocumentTypeDto } from "./dto/create-result_document_type.dto";
 import { UpdateResultDocumentTypeDto } from "./dto/update-result_document_type.dto";
 import { ResultDocumentType } from "./entities/result_document_type.entity";
 
 @Injectable()
 export class ResultDocumentTypesService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(ResultDocumentType)
         private resultDocumentTypesRepository: typeof ResultDocumentType,
-    ) {}
+    ) {
+        this.attributes = resultDocumentTypeTableAttributes;
+    }
 
     async create(
         createResultDocumentTypeDto: CreateResultDocumentTypeDto,

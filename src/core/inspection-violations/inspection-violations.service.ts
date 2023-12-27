@@ -1,16 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { inspectionViolationTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateInspectionViolationDto } from "./dto/create-inspection-violation.dto";
 import { UpdateInspectionViolationDto } from "./dto/update-inspection-violation.dto";
 import { InspectionViolation } from "./entities/inspection-violation.entity";
 
 @Injectable()
 export class InspectionViolationsService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(InspectionViolation)
         private inspectionViolationsRepository: typeof InspectionViolation,
-    ) {}
+    ) {
+        this.attributes = inspectionViolationTableAttributes;
+    }
 
     async create(
         createInspectionViolationDto: CreateInspectionViolationDto,

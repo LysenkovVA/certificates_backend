@@ -1,16 +1,22 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { subscriptionTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateSubscriptionDto } from "./dto/create-subscription.dto";
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto";
 import { Subscription } from "./entities/subscription.entity";
 
 @Injectable()
 export class SubscriptionsService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(Subscription)
         private subscriptionRepository: typeof Subscription,
-    ) {}
+    ) {
+        this.attributes = subscriptionTableAttributes;
+    }
 
     async create(
         createSubscriptionDto: CreateSubscriptionDto,

@@ -38,6 +38,13 @@ export class Berth extends Model<Berth, IBerthCreationAttrs> {
     })
     value: string;
 
+    @Column({
+        type: DataType.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    })
+    hasRank: boolean;
+
     @BelongsTo(() => Workspace, "workspaceId")
     workspace: Workspace;
 

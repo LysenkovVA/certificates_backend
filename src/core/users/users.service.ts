@@ -7,6 +7,14 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import * as bcrypt from "bcryptjs";
 import { IncludeOptions, Transaction } from "sequelize";
+import {
+    fileTableAttributes,
+    profileTableAttributes,
+    roleTableAttributes,
+    subscriptionTableAttributes,
+    userTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
 import { File } from "../files/entities/file.entity";
 import { Profile } from "../profiles/entities/profile.entity";
 import { Role } from "../roles/entities/roles.entity";
@@ -21,38 +29,33 @@ import { User } from "./entity/users.entity";
 @Injectable()
 export class UsersService {
     attributes: Array<string>;
-    profileAttributes: Array<string>;
-    roleAttributes: Array<string>;
-    subscriptionAttributes: Array<string>;
     include: Array<IncludeOptions>;
 
     constructor(
         @InjectModel(User) private userRepository: typeof User,
         private roleService: RolesService,
     ) {
-        this.attributes = ["id", "email", "password"];
-        this.profileAttributes = ["id", "surname", "name", "birthDate"];
-        this.roleAttributes = ["id", "value"];
-        this.subscriptionAttributes = ["id", "value"];
+        this.attributes = userTableAttributes;
 
         this.include = [
             {
                 model: Profile,
-                attributes: this.profileAttributes,
-                include: [File],
+                attributes: profileTableAttributes,
+                include: [{ model: File, attributes: fileTableAttributes }],
             },
             {
                 model: Role,
-                attributes: this.roleAttributes,
+                attributes: roleTableAttributes,
                 through: { attributes: [] }, // Чтобы не показывалась промежуточная таблица
             },
             {
                 model: Subscription,
-                attributes: this.subscriptionAttributes,
+                attributes: subscriptionTableAttributes,
                 through: { attributes: [] }, // Чтобы не показывалась промежуточная таблица
             },
             {
                 model: Workspace,
+                attributes: workspaceTableAttributes,
                 through: { attributes: [] },
             },
         ];

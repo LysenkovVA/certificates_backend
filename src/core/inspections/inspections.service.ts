@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { inspectionTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { ConstructionObject } from "../construction-objects/entities/construction-object.entity";
 import { InspectionType } from "../inspection-types/entities/inspection-type.entity";
 import { ResultDocumentType } from "../result_document_types/entities/result_document_type.entity";
@@ -10,10 +11,15 @@ import { Inspection } from "./entities/inspection.entity";
 
 @Injectable()
 export class InspectionsService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(Inspection)
         private inspectionsRepository: typeof Inspection,
-    ) {}
+    ) {
+        this.attributes = inspectionTableAttributes;
+    }
 
     async create(
         createInspectionDto: CreateInspectionDto,

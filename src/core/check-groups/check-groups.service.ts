@@ -1,16 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { checkGroupsTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateCheckGroupDto } from "./dto/create-check-group.dto";
 import { UpdateCheckGroupDto } from "./dto/update-check-group.dto";
 import { CheckGroup } from "./entities/check-group.entity";
 
 @Injectable()
 export class CheckGroupsService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(CheckGroup)
         private checkGroupsRepository: typeof CheckGroup,
-    ) {}
+    ) {
+        this.attributes = checkGroupsTableAttributes;
+    }
 
     async create(
         createCheckGroupDto: CreateCheckGroupDto,

@@ -1,13 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { roleTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { Role } from "./entities/roles.entity";
 import { RoleTypes } from "./types/RoleTypes";
 
 @Injectable()
 export class RolesService {
-    constructor(@InjectModel(Role) private roleRepository: typeof Role) {}
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
+    constructor(@InjectModel(Role) private roleRepository: typeof Role) {
+        this.attributes = roleTableAttributes;
+    }
 
     async createRole(dto: CreateRoleDto, transaction?: Transaction) {
         const candidate = await this.getRoleByValue(dto.value, transaction);

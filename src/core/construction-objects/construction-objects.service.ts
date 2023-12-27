@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
+import { constructionObjectsTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { Inspection } from "../inspections/entities/inspection.entity";
 import { CreateConstructionObjectDto } from "./dto/createConstructionObject.dto";
 import { UpdateConstructionObjectDto } from "./dto/updateConstructionObject.dto";
@@ -20,7 +21,7 @@ export class ConstructionObjectsService {
         private constructionObjectsRepository: typeof ConstructionObject,
     ) {
         // Параметры запросов к БД
-        this.attributes = ["id", "name", "address", "startDate", "endDate"];
+        this.attributes = constructionObjectsTableAttributes;
         this.include = [{ model: Inspection, required: false }];
     }
 

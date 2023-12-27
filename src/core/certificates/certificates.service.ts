@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { certificateTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
 import { Employee } from "../employees/entities/employee.entity";
 import { CreateCertificateDto } from "./dto/create-certificate.dto";
@@ -9,10 +10,15 @@ import { Certificate } from "./entities/certificate.entity";
 
 @Injectable()
 export class CertificatesService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(Certificate)
         private certificateRepository: typeof Certificate,
-    ) {}
+    ) {
+        this.attributes = certificateTableAttributes;
+    }
 
     async create(
         createCertificateDto: CreateCertificateDto,

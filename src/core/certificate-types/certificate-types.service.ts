@@ -1,16 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { certificateTypeTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateCertificateTypeDto } from "./dto/create-certificate-type.dto";
 import { UpdateCertificateTypeDto } from "./dto/update-certificate-type.dto";
 import { CertificateType } from "./entities/certificate-type.entity";
 
 @Injectable()
 export class CertificateTypesService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(CertificateType)
         private certificateTypesRepository: typeof CertificateType,
-    ) {}
+    ) {
+        this.attributes = certificateTypeTableAttributes;
+    }
 
     async create(
         createCertificateTypeDto: CreateCertificateTypeDto,

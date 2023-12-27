@@ -1,13 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { tokenTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateTokenDto } from "./dto/create-token.dto";
 import { UpdateTokenDto } from "./dto/update-token.dto";
 import { Token } from "./entities/token.entity";
 
 @Injectable()
 export class TokensService {
-    constructor(@InjectModel(Token) private tokenRepository: typeof Token) {}
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
+    constructor(@InjectModel(Token) private tokenRepository: typeof Token) {
+        this.attributes = tokenTableAttributes;
+    }
 
     async create(createTokenDto: CreateTokenDto, transaction?: Transaction) {
         return await this.tokenRepository.create(createTokenDto, {

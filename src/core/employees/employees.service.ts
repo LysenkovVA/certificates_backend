@@ -8,6 +8,17 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Op, Transaction, WhereOptions } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
+import {
+    berthTableAttributes,
+    berthTypeTableAttributes,
+    certificateTableAttributes,
+    certificateTypeTableAttributes,
+    departmentTableAttributes,
+    employeeTableAttributes,
+    fileTableAttributes,
+    organizationTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
 import { BerthesService } from "../berthes/berthes.service";
 import { Berth } from "../berthes/entities/berth.entity";
@@ -43,40 +54,50 @@ export class EmployeesService {
         private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
-        this.attributes = [
-            "id",
-            "surname",
-            "name",
-            "hireDate",
-            "dismissDate",
-            "rank",
-            "phone",
-            "email",
-        ];
+        this.attributes = employeeTableAttributes;
         this.include = [
-            { model: Workspace },
-            { model: Organization },
+            { model: Workspace, attributes: workspaceTableAttributes },
+            { model: Organization, attributes: organizationTableAttributes },
             {
                 model: Berth,
-                include: [BerthType],
-                attributes: ["id", "value"],
+                include: [
+                    { model: BerthType, attributes: berthTypeTableAttributes },
+                ],
+                attributes: berthTableAttributes,
             },
             {
                 model: Department,
-                include: [{ model: Organization, attributes: ["id", "name"] }],
-                attributes: ["id", "name"],
+                include: [
+                    {
+                        model: Organization,
+                        attributes: organizationTableAttributes,
+                    },
+                ],
+                attributes: departmentTableAttributes,
             },
             {
                 model: Certificate,
                 include: [
-                    { model: CertificateType },
-                    { model: File, as: "scans" },
-                    { model: File, as: "protocols" },
+                    {
+                        model: CertificateType,
+                        attributes: certificateTypeTableAttributes,
+                    },
+                    {
+                        model: File,
+                        attributes: fileTableAttributes,
+                        as: "scans",
+                    },
+                    {
+                        model: File,
+                        attributes: fileTableAttributes,
+                        as: "protocols",
+                    },
                 ],
-                attributes: ["id", "number", "startDate", "group"],
+                attributes: certificateTableAttributes,
             },
             {
                 model: File,
+                attributes: fileTableAttributes,
             },
         ];
     }

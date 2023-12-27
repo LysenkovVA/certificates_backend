@@ -1,16 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
+import { violationCommentTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { CreateViolationCommentDto } from "./dto/create-violation-comment.dto";
 import { UpdateViolationCommentDto } from "./dto/update-violation-comment.dto";
 import { ViolationComment } from "./entities/violation-comment.entity";
 
 @Injectable()
 export class ViolationCommentsService {
+    attributes: Array<string>;
+    include: Array<IncludeOptions>;
+
     constructor(
         @InjectModel(ViolationComment)
         private violationCommentsRepository: typeof ViolationComment,
-    ) {}
+    ) {
+        this.attributes = violationCommentTableAttributes;
+    }
 
     async create(
         createViolationCommentDto: CreateViolationCommentDto,

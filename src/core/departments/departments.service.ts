@@ -8,6 +8,7 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
+import { departmentTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { Employee } from "../employees/entities/employee.entity";
 import { Organization } from "../organizations/entities/organization.entity";
 import { OrganizationsService } from "../organizations/organizations.service";
@@ -32,7 +33,7 @@ export class DepartmentsService {
         private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
-        this.attributes = ["id", "name"];
+        this.attributes = departmentTableAttributes;
         this.include = [
             { model: Workspace },
             { model: Employee, required: false },
