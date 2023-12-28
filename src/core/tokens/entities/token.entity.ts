@@ -36,7 +36,7 @@ export class Token extends Model<Token, ITokenCreationAttrs> {
         description: "Значение Refresh токена",
     })
     @Column({
-        type: DataType.STRING,
+        type: DataType.TEXT,
         allowNull: false,
     })
     refreshToken: string;

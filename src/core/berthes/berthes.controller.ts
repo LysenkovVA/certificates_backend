@@ -16,8 +16,8 @@ import { AuthGuard } from "../auth/auth.guard";
 import { WorkspaceQueryGuard } from "../workspaces/workspaceQuery.guard";
 import { BerthGuard } from "./berth.guard";
 import { BerthesService } from "./berthes.service";
-import { CreateBerthDto } from "./dto/create-berth.dto";
-import { UpdateBerthDto } from "./dto/update-berth.dto";
+import { CreateBerthExtendedDto } from "./dto/createBerthExtended.dto";
+import { UpdateBerthExtendedDto } from "./dto/updateBerthExtended.dto";
 
 @ApiTags("Должности")
 @Controller("berthes")
@@ -31,7 +31,7 @@ export class BerthesController {
     async create(
         @Query("workspaceId") workspaceId: string,
         @Query("organizationId") organizationId: string,
-        @Body() createBertheDto: CreateBerthDto,
+        @Body() createBertheDto: CreateBerthExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
@@ -92,7 +92,7 @@ export class BerthesController {
     @UseGuards(BerthGuard)
     async update(
         @Param("id") id: string,
-        @Body() updateBertheDto: UpdateBerthDto,
+        @Body() updateBertheDto: UpdateBerthExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {

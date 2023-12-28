@@ -13,7 +13,9 @@ import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateBerthDto } from "./dto/create-berth.dto";
+import { CreateBerthExtendedDto } from "./dto/createBerthExtended.dto";
 import { UpdateBerthDto } from "./dto/update-berth.dto";
+import { UpdateBerthExtendedDto } from "./dto/updateBerthExtended.dto";
 import { Berth } from "./entities/berth.entity";
 
 @Injectable()
@@ -47,7 +49,7 @@ export class BerthesService {
     }
 
     async createExtended(
-        createBertheDto: CreateBerthDto,
+        createBertheDto: CreateBerthExtendedDto,
         workspaceId: number,
         organizationId: number,
     ) {
@@ -76,7 +78,10 @@ export class BerthesService {
                 );
             }
 
-            const berth = await this.create(createBertheDto, transaction);
+            const berth = await this.create(
+                createBertheDto as CreateBerthDto,
+                transaction,
+            );
 
             await berth.$set("workspace", [workspace.id], {
                 transaction,
@@ -85,6 +90,12 @@ export class BerthesService {
             await berth.$set("organization", [organization.id], {
                 transaction,
             });
+
+            if (createBertheDto.berthType) {
+                await berth.$set("berthType", [createBertheDto.berthType.id], {
+                    transaction,
+                });
+            }
 
             await transaction.commit();
 
@@ -175,7 +186,7 @@ export class BerthesService {
         }
     }
 
-    async updateExtended(id: number, updateBertheDto: UpdateBerthDto) {
+    async updateExtended(id: number, updateBertheDto: UpdateBerthExtendedDto) {
         const transaction = await this.sequelize.transaction();
 
         try {
@@ -185,7 +196,17 @@ export class BerthesService {
                 throw new BadRequestException("Должность не найдена");
             }
 
-            await this.update(id, updateBertheDto, transaction);
+            await this.update(
+                id,
+                updateBertheDto as UpdateBerthDto,
+                transaction,
+            );
+
+            if (updateBertheDto.berthType) {
+                await berth.$set("berthType", [updateBertheDto.berthType.id], {
+                    transaction,
+                });
+            }
 
             await transaction.commit();
 
