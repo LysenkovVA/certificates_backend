@@ -162,14 +162,15 @@ export class BerthTypesService {
             const candidate = await this.findOne(id, transaction);
 
             if (candidate) {
-                return await this.berthTypeRepository.update(
-                    updateBerthTypeDto,
-                    {
-                        where: { id },
-                        transaction,
-                    },
-                );
+                await this.berthTypeRepository.update(updateBerthTypeDto, {
+                    where: { id },
+                    transaction,
+                });
+
+                return await this.findOne(candidate.id);
             }
+
+            return null;
         } catch (e) {
             throw e;
         }

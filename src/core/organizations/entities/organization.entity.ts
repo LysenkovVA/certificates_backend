@@ -9,6 +9,8 @@ import {
 } from "sequelize-typescript";
 import { BerthType } from "../../berth-types/entities/berth-type.entity";
 import { Berth } from "../../berthes/entities/berth.entity";
+import { CertificateType } from "../../certificate-types/entities/certificate-type.entity";
+import { Certificate } from "../../certificates/entities/certificate.entity";
 import { ConstructionObject } from "../../construction-objects/entities/construction-object.entity";
 import { Department } from "../../departments/entities/department.entity";
 import { Employee } from "../../employees/entities/employee.entity";
@@ -73,4 +75,10 @@ export class Organization extends Model<
 
     @HasMany(() => BerthType, "organizationId")
     berthTypes: Array<BerthType>;
+
+    @HasMany(() => CertificateType, "organizationId")
+    certificateTypes: Array<CertificateType>;
+
+    @HasMany(() => Certificate, "organizationId")
+    certificates: Array<Certificate>;
 }

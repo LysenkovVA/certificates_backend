@@ -7,13 +7,17 @@ import {
     Patch,
     Post,
     Query,
+    Res,
     UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
+import { WorkspaceQueryGuard } from "../workspaces/workspaceQuery.guard";
+import { CertificateGuard } from "./certificate.guard";
 import { CertificatesService } from "./certificates.service";
-import { CreateCertificateDto } from "./dto/create-certificate.dto";
-import { UpdateCertificateDto } from "./dto/update-certificate.dto";
+import { CreateCertificateExtendedDto } from "./dto/createCertificateExtended.dto";
+import { UpdateCertificateExtendedDto } from "./dto/updateCertificateExtended.dto";
 
 @ApiTags("Удостоверения")
 @Controller("certificates")
@@ -22,39 +26,104 @@ import { UpdateCertificateDto } from "./dto/update-certificate.dto";
 export class CertificatesController {
     constructor(private readonly certificatesService: CertificatesService) {}
 
-    @Post()
-    async create(@Body() createCertificateDto: CreateCertificateDto) {
-        return await this.certificatesService.create(createCertificateDto);
+    @Post("create")
+    @UseGuards(WorkspaceQueryGuard)
+    async create(
+        @Query("workspaceId") workspaceId: string,
+        @Query("organizationId") organizationId: string,
+        @Body() createCertificateExtendedDto: CreateCertificateExtendedDto,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const result = await this.certificatesService.createExtended(
+                createCertificateExtendedDto,
+                +workspaceId,
+                +organizationId,
+            );
+
+            if (result) {
+                response.status(200);
+                return result;
+            }
+        } catch (e) {
+            throw e;
+        }
     }
 
     @Get()
+    @UseGuards(WorkspaceQueryGuard)
     async findAll(
-        @Query("limit") limit: string,
-        @Query("offset") offset: string,
+        @Res({ passthrough: true }) response: Response,
+        @Query("workspaceId") workspaceId: string,
+        @Query("organizationId") organizationId: string,
     ) {
-        return await this.certificatesService.findAll(+limit, +offset);
+        try {
+            const result = await this.certificatesService.findAll(
+                +workspaceId,
+                organizationId,
+            );
+
+            if (result) {
+                response.status(200);
+                return result;
+            }
+        } catch (e) {
+            throw e;
+        }
     }
 
     @Get(":id")
-    async findOne(@Param("id") id: string) {
-        return await this.certificatesService.findOne(+id);
-    }
+    @UseGuards(CertificateGuard)
+    async findOne(
+        @Param("id") id: string,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const candidate = await this.certificatesService.findOne(+id);
 
-    @Get("/employee/:employeeId")
-    async fetchByEmployeeId(@Param("employeeId") employeeId: string) {
-        return await this.certificatesService.fetchByEmployeeId(+employeeId);
+            response.status(200);
+            return candidate;
+        } catch (e) {
+            throw e;
+        }
     }
 
     @Patch(":id")
+    @UseGuards(CertificateGuard)
     async update(
         @Param("id") id: string,
-        @Body() updateCertificateDto: UpdateCertificateDto,
+        @Body() updateCertificateExtendedDto: UpdateCertificateExtendedDto,
+        @Res({ passthrough: true }) response: Response,
     ) {
-        return await this.certificatesService.update(+id, updateCertificateDto);
+        try {
+            const result = await this.certificatesService.updateExtended(
+                +id,
+                updateCertificateExtendedDto,
+            );
+
+            if (result) {
+                response.status(200);
+                return result;
+            }
+        } catch (e) {
+            throw e;
+        }
     }
 
     @Delete(":id")
-    async remove(@Param("id") id: string) {
-        return await this.certificatesService.remove(+id);
+    @UseGuards(CertificateGuard)
+    async remove(
+        @Param("id") id: string,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const result = await this.certificatesService.remove(+id);
+
+            if (result > 0) {
+                response.status(200);
+            }
+        } catch (e) {
+            throw e;
+        }
     }
 }

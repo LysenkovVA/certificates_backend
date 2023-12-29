@@ -1,6 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import {
+    BelongsTo,
+    Column,
+    DataType,
+    HasMany,
+    Model,
+    Table,
+} from "sequelize-typescript";
 import { Certificate } from "../../certificates/entities/certificate.entity";
+import { Organization } from "../../organizations/entities/organization.entity";
+import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface ICertificateTypeCreationsAttrs {}
 
@@ -53,4 +62,10 @@ export class CertificateType extends Model<
 
     @HasMany(() => Certificate, "certificateTypeId")
     certificates: Certificate[];
+
+    @BelongsTo(() => Workspace, "workspaceId")
+    workspace: Workspace;
+
+    @BelongsTo(() => Organization, "organizationId")
+    organization: Organization;
 }

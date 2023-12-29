@@ -1,11 +1,26 @@
-import { Injectable } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    InternalServerErrorException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
-import { certificateTableAttributes } from "../../infrastructure/const/tableAttributes";
+import { Sequelize } from "sequelize-typescript";
+import {
+    certificateTableAttributes,
+    certificateTypeTableAttributes,
+    organizationTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
 import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
-import { Employee } from "../employees/entities/employee.entity";
+import { Organization } from "../organizations/entities/organization.entity";
+import { OrganizationsService } from "../organizations/organizations.service";
+import { Workspace } from "../workspaces/entities/workspace.entity";
+import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateCertificateDto } from "./dto/create-certificate.dto";
+import { CreateCertificateExtendedDto } from "./dto/createCertificateExtended.dto";
 import { UpdateCertificateDto } from "./dto/update-certificate.dto";
+import { UpdateCertificateExtendedDto } from "./dto/updateCertificateExtended.dto";
 import { Certificate } from "./entities/certificate.entity";
 
 @Injectable()
@@ -16,43 +31,156 @@ export class CertificatesService {
     constructor(
         @InjectModel(Certificate)
         private certificateRepository: typeof Certificate,
+        private sequelize: Sequelize,
+        private workspaceService: WorkspacesService,
+        private organizationService: OrganizationsService,
     ) {
+        // Параметры запросов к БД
         this.attributes = certificateTableAttributes;
+        this.include = [
+            { model: Workspace, attributes: workspaceTableAttributes },
+            { model: Organization, attributes: organizationTableAttributes },
+            {
+                model: CertificateType,
+                attributes: certificateTypeTableAttributes,
+            },
+        ];
     }
 
     async create(
         createCertificateDto: CreateCertificateDto,
         transaction?: Transaction,
     ) {
-        return await this.certificateRepository.create(createCertificateDto, {
-            transaction,
-        });
+        try {
+            return await this.certificateRepository.create(
+                createCertificateDto,
+                {
+                    transaction,
+                },
+            );
+        } catch (e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
-    async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.certificateRepository.findAndCountAll({
-            limit,
-            offset,
-            transaction,
-            include: [{ model: CertificateType }],
-        });
+    async createExtended(
+        createCertificateExtendedDto: CreateCertificateExtendedDto,
+        workspaceId: number,
+        organizationId: number,
+    ) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const workspace = await this.workspaceService.findOne(
+                workspaceId,
+                transaction,
+            );
+
+            if (!workspace) {
+                throw new InternalServerErrorException(
+                    "Рабочее пространство не найдено!",
+                );
+            }
+
+            const organization = await this.organizationService.findOne(
+                organizationId,
+                transaction,
+            );
+
+            if (!organization) {
+                throw new InternalServerErrorException(
+                    "Организация не найдена!",
+                );
+            }
+
+            const certificate = await this.create(
+                createCertificateExtendedDto as CreateCertificateDto,
+                transaction,
+            );
+
+            await certificate.$set("workspace", [workspace.id], {
+                transaction,
+            });
+
+            await certificate.$set("organization", [organization.id], {
+                transaction,
+            });
+
+            if (createCertificateExtendedDto.certificateType) {
+                await certificate.$set(
+                    "certificateType",
+                    [createCertificateExtendedDto.certificateType.id],
+                    {
+                        transaction,
+                    },
+                );
+            }
+
+            await transaction.commit();
+
+            // Возвращаем полностью объект
+            if (certificate) {
+                // Обновляем значения
+                return await this.findOne(certificate.id);
+            }
+        } catch (e) {
+            await transaction.rollback();
+            throw e;
+        }
+    }
+
+    async findAll(
+        workspaceId: number,
+        organizationId?: string,
+        transaction?: Transaction,
+    ) {
+        try {
+            if (!organizationId) {
+                return await this.certificateRepository.findAndCountAll({
+                    where: {
+                        "$workspace.id$": workspaceId,
+                    },
+                    attributes: this.attributes,
+                    include: this.include,
+                    order: [["number", "ASC"]],
+                    distinct: true,
+                    transaction,
+                });
+            } else {
+                return await this.certificateRepository.findAndCountAll({
+                    where: {
+                        "$workspace.id$": workspaceId,
+                        "$organization.id$": +organizationId,
+                    },
+                    attributes: this.attributes,
+                    include: this.include,
+                    order: [["number", "ASC"]],
+                    distinct: true,
+                    transaction,
+                });
+            }
+        } catch (e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     async findOne(id: number, transaction?: Transaction) {
-        return await this.certificateRepository.findOne({
-            where: { id },
-            transaction,
-        });
-    }
+        try {
+            const candidate = await this.certificateRepository.findByPk(id, {
+                attributes: this.attributes,
+                include: this.include,
+                order: [["number", "ASC"]],
+                transaction,
+            });
 
-    async fetchByEmployeeId(employeeId: number, transaction?: Transaction) {
-        return await this.certificateRepository.findAndCountAll({
-            where: {
-                "$employee.id$": employeeId,
-            },
-            include: [Employee],
-            transaction,
-        });
+            if (!candidate) {
+                throw new BadRequestException("Удостоверение не найдена");
+            }
+
+            return candidate;
+        } catch (e) {
+            throw e;
+        }
     }
 
     async update(
@@ -60,16 +188,75 @@ export class CertificatesService {
         updateCertificateDto: UpdateCertificateDto,
         transaction?: Transaction,
     ) {
-        return await this.certificateRepository.update(updateCertificateDto, {
-            where: { id },
-            transaction,
-        });
+        try {
+            const candidate = await this.findOne(id, transaction);
+
+            if (candidate) {
+                return await this.certificateRepository.update(
+                    updateCertificateDto,
+                    {
+                        where: { id },
+                        transaction,
+                    },
+                );
+            }
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    async updateExtended(
+        id: number,
+        updateCertificateExtendedDto: UpdateCertificateExtendedDto,
+    ) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const certificate = await this.findOne(id, transaction);
+
+            if (!certificate) {
+                throw new BadRequestException("Удостоверение не найдено");
+            }
+
+            await this.update(
+                id,
+                updateCertificateExtendedDto as UpdateCertificateDto,
+                transaction,
+            );
+
+            if (updateCertificateExtendedDto.certificateType) {
+                await certificate.$set(
+                    "certificateType",
+                    [updateCertificateExtendedDto.certificateType.id],
+                    {
+                        transaction,
+                    },
+                );
+            }
+
+            await transaction.commit();
+
+            return await this.findOne(id);
+        } catch (e) {
+            await transaction.rollback();
+            throw e;
+        }
     }
 
     async remove(id: number, transaction?: Transaction) {
-        return await this.certificateRepository.destroy({
-            where: { id },
-            transaction,
-        });
+        try {
+            const candidate = await this.findOne(id, transaction);
+
+            if (!candidate) {
+                throw new BadRequestException("Удостоверение не найдено");
+            }
+
+            return await this.certificateRepository.destroy({
+                where: { id },
+                transaction,
+            });
+        } catch (e) {
+            throw e;
+        }
     }
 }
