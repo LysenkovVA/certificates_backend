@@ -8,8 +8,10 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
-import { departmentTableAttributes } from "../../infrastructure/const/tableAttributes";
-import { Employee } from "../employees/entities/employee.entity";
+import {
+    departmentTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
 import { Organization } from "../organizations/entities/organization.entity";
 import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
@@ -35,8 +37,17 @@ export class DepartmentsService {
         // Параметры запросов к БД
         this.attributes = departmentTableAttributes;
         this.include = [
-            { model: Workspace },
-            { model: Employee, required: false },
+            {
+                model: Workspace,
+                attributes: workspaceTableAttributes,
+                required: true,
+            },
+            // Не возвращает корректно
+            // {
+            //     model: Employee,
+            //     attributes: employeeTableAttributes,
+            //     required: false,
+            // },
             { model: Organization, required: false },
         ];
     }
@@ -64,23 +75,12 @@ export class DepartmentsService {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const workspace = await this.workspaceService.findOne(
-                workspaceId,
-                transaction,
-            );
-
-            if (!workspace) {
-                throw new InternalServerErrorException(
-                    "Рабочее пространство не найдено!",
-                );
-            }
-
             const department = await this.create(
                 createDepartmentDto,
                 transaction,
             );
 
-            await department.$set("workspace", [workspace.id], {
+            await department.$set("workspace", [workspaceId], {
                 transaction,
             });
 
@@ -146,12 +146,6 @@ export class DepartmentsService {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const department = await this.findOne(id, transaction);
-
-            if (!department) {
-                throw new BadRequestException("Подразделение не найдено");
-            }
-
             await this.update(id, updateDepartmentDto, transaction);
 
             await transaction.commit();
@@ -165,7 +159,7 @@ export class DepartmentsService {
 
     async findAll(
         workspaceId: number,
-        organizationId?: string,
+        organizationId?: number,
         limit?: number,
         offset?: number,
         transaction?: Transaction,
@@ -241,7 +235,7 @@ export class DepartmentsService {
             });
 
             if (!candidate) {
-                throw new BadRequestException("Участок не найден");
+                throw new BadRequestException("Подразделение не найдено");
             }
 
             return candidate;

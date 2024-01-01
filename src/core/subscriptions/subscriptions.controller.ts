@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
@@ -29,30 +30,30 @@ export class SubscriptionsController {
 
     @Get()
     async findAll(
-        @Query("limit") limit: number,
-        @Query("offset") offset: number,
+        @Query("limit", ParseIntPipe) limit: number,
+        @Query("offset", ParseIntPipe) offset: number,
     ) {
         return await this.subscriptionsService.findAll(limit, offset);
     }
 
     @Get(":id")
-    async findOne(@Param("id") id: string) {
-        return await this.subscriptionsService.findOne(+id);
+    async findOne(@Param("id", ParseIntPipe) id: number) {
+        return await this.subscriptionsService.findOne(id);
     }
 
     @Patch(":id")
     async update(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Body() updateSubscriptionDto: UpdateSubscriptionDto,
     ) {
         return await this.subscriptionsService.update(
-            +id,
+            id,
             updateSubscriptionDto,
         );
     }
 
     @Delete(":id")
-    async remove(@Param("id") id: string) {
+    async remove(@Param("id", ParseIntPipe) id: number) {
         return await this.subscriptionsService.remove(+id);
     }
 }

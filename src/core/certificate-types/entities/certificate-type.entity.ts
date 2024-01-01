@@ -60,6 +60,12 @@ export class CertificateType extends Model<
     })
     isUnlimited: boolean;
 
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: true,
+    })
+    durationAtMonths: number;
+
     @HasMany(() => Certificate, "certificateTypeId")
     certificates: Certificate[];
 

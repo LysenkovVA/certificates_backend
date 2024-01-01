@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
@@ -29,14 +30,14 @@ export class OrganizationsController {
     @Post("create")
     @UseGuards(WorkspaceQueryGuard)
     async create(
-        @Query("workspaceId") workspaceId: string,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
         @Body() extendedOrganizationDto: CreateOrganizationExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
             const result = await this.organizationsService.createExtended(
                 extendedOrganizationDto,
-                +workspaceId,
+                workspaceId,
             );
 
             if (result) {
@@ -51,13 +52,13 @@ export class OrganizationsController {
     @Patch(":id")
     @UseGuards(OrganizationGuard)
     async update(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Body() extendedOrganizationDto: UpdateOrganizationExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
             const result = await this.organizationsService.updateExtended(
-                +id,
+                id,
                 extendedOrganizationDto,
             );
 
@@ -73,7 +74,7 @@ export class OrganizationsController {
     @Delete(":id")
     @UseGuards(OrganizationGuard)
     async remove(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
@@ -91,30 +92,19 @@ export class OrganizationsController {
     @UseGuards(WorkspaceQueryGuard)
     async findAll(
         @Res({ passthrough: true }) response: Response,
-        @Query("workspaceId") workspaceId: string,
-        @Query("limit") limit?: string,
-        @Query("offset") offset?: string,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("limit") limit?: number,
+        @Query("offset") offset?: number,
     ) {
         try {
-            if (!limit || !offset) {
-                const result = await this.organizationsService.findAll(
-                    +workspaceId,
-                );
-
-                if (result) {
-                    response.status(200);
-                    return result;
-                }
-            } else {
-                const result = await this.organizationsService.findAll(
-                    +workspaceId,
-                    +limit,
-                    +offset,
-                );
-                if (result) {
-                    response.status(200);
-                    return result;
-                }
+            const result = await this.organizationsService.findAll(
+                workspaceId,
+                limit,
+                offset,
+            );
+            if (result) {
+                response.status(200);
+                return result;
             }
         } catch (e) {
             throw e;
@@ -124,12 +114,12 @@ export class OrganizationsController {
     @Get(":id")
     @UseGuards(OrganizationGuard)
     async findOne(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
             // Получаем организацию
-            const organization = await this.organizationsService.findOne(+id);
+            const organization = await this.organizationsService.findOne(id);
 
             response.status(200);
             return organization;

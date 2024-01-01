@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { Employee } from "../employees/entities/employee.entity";
+import { FilesModule } from "../files/files.module";
 import { Inspector } from "../inspectors/entities/inspectors.entity";
 import { RepresentativeEmployee } from "../representative-employees/entities/representative-employees.entity";
 import { Inspection } from "./entities/inspection.entity";
@@ -17,6 +18,7 @@ import { InspectionsService } from "./inspections.service";
             Employee,
             Inspector,
         ]),
+        forwardRef(() => FilesModule),
     ],
     exports: [InspectionsService],
 })

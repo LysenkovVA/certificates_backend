@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
@@ -29,16 +30,16 @@ export class BerthesController {
     @Post("create")
     @UseGuards(WorkspaceQueryGuard)
     async create(
-        @Query("workspaceId") workspaceId: string,
-        @Query("organizationId") organizationId: string,
         @Body() createBertheDto: CreateBerthExtendedDto,
         @Res({ passthrough: true }) response: Response,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.berthesService.createExtended(
                 createBertheDto,
-                +workspaceId,
-                +organizationId,
+                workspaceId,
+                organizationId,
             );
 
             if (result) {
@@ -54,12 +55,12 @@ export class BerthesController {
     @UseGuards(WorkspaceQueryGuard)
     async findAll(
         @Res({ passthrough: true }) response: Response,
-        @Query("workspaceId") workspaceId: string,
-        @Query("organizationId") organizationId: string,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.berthesService.findAll(
-                +workspaceId,
+                workspaceId,
                 organizationId,
             );
 
@@ -75,11 +76,11 @@ export class BerthesController {
     @Get(":id")
     @UseGuards(BerthGuard)
     async findOne(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const candidate = await this.berthesService.findOne(+id);
+            const candidate = await this.berthesService.findOne(id);
 
             response.status(200);
             return candidate;
@@ -91,13 +92,13 @@ export class BerthesController {
     @Patch(":id")
     @UseGuards(BerthGuard)
     async update(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Body() updateBertheDto: UpdateBerthExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
             const result = await this.berthesService.updateExtended(
-                +id,
+                id,
                 updateBertheDto,
             );
 
@@ -113,11 +114,11 @@ export class BerthesController {
     @Delete(":id")
     @UseGuards(BerthGuard)
     async remove(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const result = await this.berthesService.remove(+id);
+            const result = await this.berthesService.remove(id);
 
             if (result > 0) {
                 response.status(200);

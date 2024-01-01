@@ -14,9 +14,7 @@ import {
 } from "../../infrastructure/const/tableAttributes";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
 import { Organization } from "../organizations/entities/organization.entity";
-import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
-import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateBerthDto } from "./dto/create-berth.dto";
 import { CreateBerthExtendedDto } from "./dto/createBerthExtended.dto";
 import { UpdateBerthDto } from "./dto/update-berth.dto";
@@ -31,8 +29,6 @@ export class BerthesService {
     constructor(
         @InjectModel(Berth) private berthRepository: typeof Berth,
         private sequelize: Sequelize,
-        private workspaceService: WorkspacesService,
-        private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
         this.attributes = berthTableAttributes;
@@ -56,45 +52,25 @@ export class BerthesService {
     async createExtended(
         createBertheDto: CreateBerthExtendedDto,
         workspaceId: number,
-        organizationId: number,
+        organizationId?: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const workspace = await this.workspaceService.findOne(
-                workspaceId,
-                transaction,
-            );
-
-            if (!workspace) {
-                throw new InternalServerErrorException(
-                    "Рабочее пространство не найдено!",
-                );
-            }
-
-            const organization = await this.organizationService.findOne(
-                organizationId,
-                transaction,
-            );
-
-            if (!organization) {
-                throw new InternalServerErrorException(
-                    "Организация не найдена!",
-                );
-            }
-
             const berth = await this.create(
                 createBertheDto as CreateBerthDto,
                 transaction,
             );
 
-            await berth.$set("workspace", [workspace.id], {
+            await berth.$set("workspace", [workspaceId], {
                 transaction,
             });
 
-            await berth.$set("organization", [organization.id], {
-                transaction,
-            });
+            if (organizationId) {
+                await berth.$set("organization", [organizationId], {
+                    transaction,
+                });
+            }
 
             if (createBertheDto.berthType) {
                 await berth.$set("berthType", [createBertheDto.berthType.id], {
@@ -104,14 +80,7 @@ export class BerthesService {
 
             await transaction.commit();
 
-            // Возвращаем полностью объект
-            if (berth) {
-                // Обновляем значения
-                return await berth.reload({
-                    attributes: this.attributes,
-                    include: this.include,
-                });
-            }
+            return await this.findOne(berth.id);
         } catch (e) {
             await transaction.rollback();
             throw e;
@@ -120,7 +89,7 @@ export class BerthesService {
 
     async findAll(
         workspaceId: number,
-        organizationId?: string,
+        organizationId?: number,
         transaction?: Transaction,
     ) {
         try {

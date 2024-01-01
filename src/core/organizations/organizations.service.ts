@@ -21,7 +21,6 @@ import { DepartmentsService } from "../departments/departments.service";
 import { CreateDepartmentDto } from "../departments/dto/createDepartment.dto";
 import { Department } from "../departments/entities/department.entity";
 import { Workspace } from "../workspaces/entities/workspace.entity";
-import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateOrganizationDto } from "./dto/createOrganization.dto";
 import { CreateOrganizationExtendedDto } from "./dto/createOrganizationExtended.dto";
 import { UpdateOrganizationDto } from "./dto/updateOrganization.dto";
@@ -40,7 +39,6 @@ export class OrganizationsService {
         @Inject(forwardRef(() => DepartmentsService))
         private departmentsService: DepartmentsService,
         private constructionObjectsService: ConstructionObjectsService,
-        private workspaceService: WorkspacesService,
     ) {
         // Параметры запросов к БД
         this.attributes = organizationTableAttributes;
@@ -55,7 +53,11 @@ export class OrganizationsService {
                 attributes: constructionObjectsTableAttributes,
                 required: false,
             },
-            { model: Workspace, attributes: workspaceTableAttributes },
+            {
+                model: Workspace,
+                attributes: workspaceTableAttributes,
+                required: true,
+            },
         ];
     }
 
@@ -104,23 +106,12 @@ export class OrganizationsService {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const workspace = await this.workspaceService.findOne(
-                workspaceId,
-                transaction,
-            );
-
-            if (!workspace) {
-                throw new InternalServerErrorException(
-                    "Рабочее пространство не найдено!",
-                );
-            }
-
             const organization = await this.create(
                 createOrganizationExtendedDto as CreateOrganizationDto,
                 transaction,
             );
 
-            await organization.$set("workspace", [workspace.id], {
+            await organization.$set("workspace", [workspaceId], {
                 transaction,
             });
 
@@ -143,7 +134,7 @@ export class OrganizationsService {
                         if (newDepartment) {
                             await newDepartment.$set(
                                 "workspace",
-                                [workspace.id],
+                                [workspaceId],
                                 { transaction },
                             );
 
@@ -176,7 +167,7 @@ export class OrganizationsService {
                         if (newConstructionObject) {
                             await newConstructionObject.$set(
                                 "workspace",
-                                [workspace.id],
+                                [workspaceId],
                                 { transaction },
                             );
 
@@ -226,7 +217,7 @@ export class OrganizationsService {
             );
 
             // Удаляем старые участки
-            await organization.$set("departments", [], { transaction });
+            await organization.$set("departments", null, { transaction });
 
             // Добавляем или обновляем участки
             for (const department of updateOrganizationExtendedDto.departments) {
@@ -267,7 +258,9 @@ export class OrganizationsService {
             }
 
             // Удаляем старые объекты
-            await organization.$set("constructionObjects", [], { transaction });
+            await organization.$set("constructionObjects", null, {
+                transaction,
+            });
 
             // Добавляем или обновляем объекты
             for (const constructionObject of updateOrganizationExtendedDto.constructionObjects) {

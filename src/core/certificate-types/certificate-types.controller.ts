@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
@@ -31,16 +32,16 @@ export class CertificateTypesController {
     @Post("create")
     @UseGuards(WorkspaceQueryGuard)
     async create(
-        @Query("workspaceId") workspaceId: string,
-        @Query("organizationId") organizationId: string,
         @Body() createCertificateTypeDto: CreateCertificateTypeDto,
         @Res({ passthrough: true }) response: Response,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.certificateTypesService.createExtended(
                 createCertificateTypeDto,
-                +workspaceId,
-                +organizationId,
+                workspaceId,
+                organizationId,
             );
 
             if (result) {
@@ -56,12 +57,12 @@ export class CertificateTypesController {
     @UseGuards(WorkspaceQueryGuard)
     async findAll(
         @Res({ passthrough: true }) response: Response,
-        @Query("workspaceId") workspaceId: string,
-        @Query("organizationId") organizationId: string,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.certificateTypesService.findAll(
-                +workspaceId,
+                workspaceId,
                 organizationId,
             );
 
@@ -77,11 +78,11 @@ export class CertificateTypesController {
     @Get(":id")
     @UseGuards(CertificateTypeGuard)
     async findOne(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const candidate = await this.certificateTypesService.findOne(+id);
+            const candidate = await this.certificateTypesService.findOne(id);
 
             response.status(200);
             return candidate;
@@ -93,13 +94,13 @@ export class CertificateTypesController {
     @Patch(":id")
     @UseGuards(CertificateTypeGuard)
     async update(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Body() updateCertificateTypeDto: UpdateCertificateTypeDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
             const result = await this.certificateTypesService.update(
-                +id,
+                id,
                 updateCertificateTypeDto,
             );
 
@@ -115,11 +116,11 @@ export class CertificateTypesController {
     @Delete(":id")
     @UseGuards(CertificateTypeGuard)
     async remove(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const result = await this.certificateTypesService.remove(+id);
+            const result = await this.certificateTypesService.remove(id);
 
             if (result > 0) {
                 response.status(200);

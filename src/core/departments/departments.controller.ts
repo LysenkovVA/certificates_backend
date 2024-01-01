@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
@@ -29,18 +30,14 @@ export class DepartmentsController {
     @Post("create")
     @UseGuards(WorkspaceQueryGuard)
     async create(
-        @Query("workspaceId") workspaceId: string,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
         @Body() createDepartmentDto: CreateDepartmentExtendedDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            console.log(
-                "CREATE DEPARTMENT: " + JSON.stringify(createDepartmentDto),
-            );
-
             const result = await this.departmentsService.createExtended(
                 createDepartmentDto,
-                +workspaceId,
+                workspaceId,
             );
 
             if (result) {
@@ -56,34 +53,22 @@ export class DepartmentsController {
     @UseGuards(WorkspaceQueryGuard)
     async findAll(
         @Res({ passthrough: true }) response: Response,
-        @Query("workspaceId") workspaceId: string,
-        @Query("organizationId") organizationId: string,
-        @Query("limit") limit?: string,
-        @Query("offset") offset?: string,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("organizationId") organizationId?: number,
+        @Query("limit") limit?: number,
+        @Query("offset") offset?: number,
     ) {
         try {
-            if (!limit || !offset) {
-                const result = await this.departmentsService.findAll(
-                    +workspaceId,
-                    organizationId,
-                );
+            const result = await this.departmentsService.findAll(
+                workspaceId,
+                organizationId,
+                limit,
+                offset,
+            );
 
-                if (result) {
-                    response.status(200);
-                    return result;
-                }
-            } else {
-                const result = await this.departmentsService.findAll(
-                    +workspaceId,
-                    organizationId,
-                    +limit,
-                    +offset,
-                );
-
-                if (result) {
-                    response.status(200);
-                    return result;
-                }
+            if (result) {
+                response.status(200);
+                return result;
             }
         } catch (e) {
             throw e;
@@ -93,11 +78,11 @@ export class DepartmentsController {
     @Get(":id")
     @UseGuards(DepartmentGuard)
     async findOne(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const candidate = await this.departmentsService.findOne(+id);
+            const candidate = await this.departmentsService.findOne(id);
 
             response.status(200);
             return candidate;
@@ -109,13 +94,13 @@ export class DepartmentsController {
     @Patch(":id")
     @UseGuards(DepartmentGuard)
     async update(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Body() updateDepartmentDto: UpdateDepartmentDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
             const result = await this.departmentsService.updateExtended(
-                +id,
+                id,
                 updateDepartmentDto,
             );
 
@@ -131,7 +116,7 @@ export class DepartmentsController {
     @Delete(":id")
     @UseGuards(DepartmentGuard)
     async remove(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {

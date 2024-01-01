@@ -118,11 +118,11 @@ export class EmployeesController {
     @Delete(":id")
     @UseGuards(EmployeeGuard)
     async remove(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const result = await this.employeesService.removeExtended(+id);
+            const result = await this.employeesService.removeExtended(id);
 
             if (result > 0) {
                 response.status(200);
@@ -136,31 +136,21 @@ export class EmployeesController {
     @UseGuards(WorkspaceQueryGuard)
     async findAll(
         @Res({ passthrough: true }) response: Response,
-        @Query("workspaceId") workspaceId: string,
-        @Query("limit") limit: string,
-        @Query("offset") offset: string,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("limit") limit?: number,
+        @Query("offset") offset?: number,
         @Query("searchQuery") searchQuery?: string,
     ) {
         try {
-            if (!limit || !offset) {
-                const result = await this.employeesService.findAll(
-                    +workspaceId,
-                );
-
-                if (result) {
-                    response.status(200);
-                    return result;
-                }
-            } else {
-                const result = await this.employeesService.findAll(
-                    +workspaceId,
-                    +limit,
-                    +offset,
-                );
-                if (result) {
-                    response.status(200);
-                    return result;
-                }
+            const result = await this.employeesService.findAll(
+                workspaceId,
+                limit,
+                offset,
+                searchQuery,
+            );
+            if (result) {
+                response.status(200);
+                return result;
             }
         } catch (e) {
             throw e;
@@ -170,11 +160,11 @@ export class EmployeesController {
     @Get(":id")
     @UseGuards(EmployeeGuard)
     async findOne(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const candidate = await this.employeesService.findOne(+id);
+            const candidate = await this.employeesService.findOne(id);
 
             response.status(200);
             return candidate;

@@ -63,7 +63,6 @@ export class ProfilesService {
     ) {
         const transaction = await this.sequelize.transaction();
 
-        console.log("PROFILE DTO: " + JSON.stringify(updateProfileDto));
         try {
             const candidate = await this.findOne(id, transaction);
 
@@ -72,10 +71,9 @@ export class ProfilesService {
             }
 
             await this.profileRepository.update(updateProfileDto, {
-                where: { id: candidate.id },
+                where: { id },
                 transaction,
             });
-            // await candidate.update(updateProfileDto, { transaction });
 
             // Аватар
             if (avatar) {
@@ -103,11 +101,7 @@ export class ProfilesService {
 
             await transaction.commit();
 
-            const result = await this.findOne(candidate.id);
-
-            console.log("Updated profile: " + JSON.stringify(result));
-
-            return result;
+            return await this.findOne(candidate.id);
         } catch (e) {
             await transaction.rollback();
             throw e;

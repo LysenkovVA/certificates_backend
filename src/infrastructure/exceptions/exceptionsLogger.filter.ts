@@ -20,6 +20,7 @@ export class ExceptionsLoggerFilter implements ExceptionFilter {
             method: request.method,
             path: request.url,
             error: exception.message,
+            stack: exception.stack,
         });
 
         console.log(
@@ -30,6 +31,7 @@ export class ExceptionsLoggerFilter implements ExceptionFilter {
                     method: request.method,
                     path: request.url,
                     error: exception.message,
+                    stack: exception.stack,
                 }),
         );
     }

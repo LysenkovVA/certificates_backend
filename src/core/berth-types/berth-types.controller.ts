@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
@@ -29,16 +30,16 @@ export class BerthTypesController {
     @Post("create")
     @UseGuards(WorkspaceQueryGuard)
     async create(
-        @Query("workspaceId") workspaceId: string,
-        @Query("organizationId") organizationId: string,
         @Body() createBerthTypeDto: CreateBerthTypeDto,
         @Res({ passthrough: true }) response: Response,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.berthTypesService.createExtended(
                 createBerthTypeDto,
-                +workspaceId,
-                +organizationId,
+                workspaceId,
+                organizationId,
             );
 
             if (result) {
@@ -54,12 +55,12 @@ export class BerthTypesController {
     @UseGuards(WorkspaceQueryGuard)
     async findAll(
         @Res({ passthrough: true }) response: Response,
-        @Query("workspaceId") workspaceId: string,
-        @Query("organizationId") organizationId: string,
+        @Query("workspaceId", ParseIntPipe) workspaceId: number,
+        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.berthTypesService.findAll(
-                +workspaceId,
+                workspaceId,
                 organizationId,
             );
 
@@ -75,11 +76,11 @@ export class BerthTypesController {
     @Get(":id")
     @UseGuards(BerthTypeGuard)
     async findOne(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const candidate = await this.berthTypesService.findOne(+id);
+            const candidate = await this.berthTypesService.findOne(id);
 
             response.status(200);
             return candidate;
@@ -91,13 +92,13 @@ export class BerthTypesController {
     @Patch(":id")
     @UseGuards(BerthTypeGuard)
     async update(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Body() updateBerthTypeDto: UpdateBerthTypeDto,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
             const result = await this.berthTypesService.update(
-                +id,
+                id,
                 updateBerthTypeDto,
             );
 
@@ -113,11 +114,11 @@ export class BerthTypesController {
     @Delete(":id")
     @UseGuards(BerthTypeGuard)
     async remove(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const result = await this.berthTypesService.remove(+id);
+            const result = await this.berthTypesService.remove(id);
 
             if (result > 0) {
                 response.status(200);

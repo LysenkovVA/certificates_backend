@@ -5,8 +5,12 @@ import {
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
-import { constructionObjectsTableAttributes } from "../../infrastructure/const/tableAttributes";
+import {
+    constructionObjectsTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
 import { Inspection } from "../inspections/entities/inspection.entity";
+import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateConstructionObjectDto } from "./dto/createConstructionObject.dto";
 import { UpdateConstructionObjectDto } from "./dto/updateConstructionObject.dto";
 import { ConstructionObject } from "./entities/construction-object.entity";
@@ -22,7 +26,14 @@ export class ConstructionObjectsService {
     ) {
         // Параметры запросов к БД
         this.attributes = constructionObjectsTableAttributes;
-        this.include = [{ model: Inspection, required: false }];
+        this.include = [
+            { model: Inspection, required: false },
+            {
+                model: Workspace,
+                attributes: workspaceTableAttributes,
+                required: true,
+            },
+        ];
     }
 
     async create(

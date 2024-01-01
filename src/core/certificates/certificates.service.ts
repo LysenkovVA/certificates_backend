@@ -14,9 +14,7 @@ import {
 } from "../../infrastructure/const/tableAttributes";
 import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
 import { Organization } from "../organizations/entities/organization.entity";
-import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
-import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateCertificateDto } from "./dto/create-certificate.dto";
 import { CreateCertificateExtendedDto } from "./dto/createCertificateExtended.dto";
 import { UpdateCertificateDto } from "./dto/update-certificate.dto";
@@ -32,13 +30,15 @@ export class CertificatesService {
         @InjectModel(Certificate)
         private certificateRepository: typeof Certificate,
         private sequelize: Sequelize,
-        private workspaceService: WorkspacesService,
-        private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
         this.attributes = certificateTableAttributes;
         this.include = [
-            { model: Workspace, attributes: workspaceTableAttributes },
+            {
+                model: Workspace,
+                attributes: workspaceTableAttributes,
+                required: true,
+            },
             { model: Organization, attributes: organizationTableAttributes },
             {
                 model: CertificateType,
@@ -66,45 +66,25 @@ export class CertificatesService {
     async createExtended(
         createCertificateExtendedDto: CreateCertificateExtendedDto,
         workspaceId: number,
-        organizationId: number,
+        organizationId?: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const workspace = await this.workspaceService.findOne(
-                workspaceId,
-                transaction,
-            );
-
-            if (!workspace) {
-                throw new InternalServerErrorException(
-                    "Рабочее пространство не найдено!",
-                );
-            }
-
-            const organization = await this.organizationService.findOne(
-                organizationId,
-                transaction,
-            );
-
-            if (!organization) {
-                throw new InternalServerErrorException(
-                    "Организация не найдена!",
-                );
-            }
-
             const certificate = await this.create(
                 createCertificateExtendedDto as CreateCertificateDto,
                 transaction,
             );
 
-            await certificate.$set("workspace", [workspace.id], {
+            await certificate.$set("workspace", [workspaceId], {
                 transaction,
             });
 
-            await certificate.$set("organization", [organization.id], {
-                transaction,
-            });
+            if (organizationId) {
+                await certificate.$set("organization", [organizationId], {
+                    transaction,
+                });
+            }
 
             if (createCertificateExtendedDto.certificateType) {
                 await certificate.$set(
@@ -131,7 +111,7 @@ export class CertificatesService {
 
     async findAll(
         workspaceId: number,
-        organizationId?: string,
+        organizationId?: number,
         transaction?: Transaction,
     ) {
         try {

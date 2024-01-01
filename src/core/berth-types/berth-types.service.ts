@@ -4,13 +4,11 @@ import {
     InternalServerErrorException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { IncludeOptions, Transaction } from "sequelize";
+import { IncludeOptions, Transaction, ValidationError } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { berthTypeTableAttributes } from "../../infrastructure/const/tableAttributes";
 import { Organization } from "../organizations/entities/organization.entity";
-import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
-import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateBerthTypeDto } from "./dto/create-berth-type.dto";
 import { UpdateBerthTypeDto } from "./dto/update-berth-type.dto";
 import { BerthType } from "./entities/berth-type.entity";
@@ -23,8 +21,6 @@ export class BerthTypesService {
     constructor(
         @InjectModel(BerthType) private berthTypeRepository: typeof BerthType,
         private sequelize: Sequelize,
-        private workspaceService: WorkspacesService,
-        private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
         this.attributes = berthTypeTableAttributes;
@@ -40,6 +36,10 @@ export class BerthTypesService {
                 transaction,
             });
         } catch (e) {
+            if (e instanceof ValidationError) {
+                throw JSON.stringify(e.errors);
+            }
+
             throw new InternalServerErrorException(e);
         }
     }
@@ -47,45 +47,25 @@ export class BerthTypesService {
     async createExtended(
         createBerthTypeDto: CreateBerthTypeDto,
         workspaceId: number,
-        organizationId: number,
+        organizationId?: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const workspace = await this.workspaceService.findOne(
-                workspaceId,
-                transaction,
-            );
-
-            if (!workspace) {
-                throw new InternalServerErrorException(
-                    "Рабочее пространство не найдено!",
-                );
-            }
-
-            const organization = await this.organizationService.findOne(
-                organizationId,
-                transaction,
-            );
-
-            if (!organization) {
-                throw new InternalServerErrorException(
-                    "Организация не найдена!",
-                );
-            }
-
             const berthType = await this.create(
                 createBerthTypeDto,
                 transaction,
             );
 
-            await berthType.$set("workspace", [workspace.id], {
+            await berthType.$set("workspace", [workspaceId], {
                 transaction,
             });
 
-            await berthType.$set("organization", [organization.id], {
-                transaction,
-            });
+            if (organizationId) {
+                await berthType.$set("organization", [organizationId], {
+                    transaction,
+                });
+            }
 
             await transaction.commit();
 
@@ -101,7 +81,7 @@ export class BerthTypesService {
 
     async findAll(
         workspaceId: number,
-        organizationId?: string,
+        organizationId?: number,
         transaction?: Transaction,
     ) {
         try {

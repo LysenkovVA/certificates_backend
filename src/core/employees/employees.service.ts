@@ -11,8 +11,6 @@ import { Sequelize } from "sequelize-typescript";
 import {
     berthTableAttributes,
     berthTypeTableAttributes,
-    certificateTableAttributes,
-    certificateTypeTableAttributes,
     departmentTableAttributes,
     employeeTableAttributes,
     fileTableAttributes,
@@ -20,18 +18,12 @@ import {
     workspaceTableAttributes,
 } from "../../infrastructure/const/tableAttributes";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
-import { BerthesService } from "../berthes/berthes.service";
 import { Berth } from "../berthes/entities/berth.entity";
-import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
-import { Certificate } from "../certificates/entities/certificate.entity";
-import { DepartmentsService } from "../departments/departments.service";
 import { Department } from "../departments/entities/department.entity";
 import { File } from "../files/entities/file.entity";
 import { FilesService } from "../files/files.service";
 import { Organization } from "../organizations/entities/organization.entity";
-import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
-import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateEmployeeDto } from "./dto/createEmployee.dto";
 import { CreateEmployeeExtendedDto } from "./dto/createEmployeeExtended.dto";
 import { UpdateEmployeeDto } from "./dto/updateEmployee.dto";
@@ -46,58 +38,64 @@ export class EmployeesService {
     constructor(
         @InjectModel(Employee) private employeeRepository: typeof Employee,
         private sequelize: Sequelize,
-        private berthService: BerthesService,
-        private departmentService: DepartmentsService,
-        private workspaceService: WorkspacesService,
         @Inject(forwardRef(() => FilesService))
         private fileService: FilesService,
-        private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
         this.attributes = employeeTableAttributes;
         this.include = [
-            { model: Workspace, attributes: workspaceTableAttributes },
-            { model: Organization, attributes: organizationTableAttributes },
+            {
+                model: Workspace,
+                attributes: workspaceTableAttributes,
+                required: true,
+            },
+            {
+                model: Organization,
+                attributes: organizationTableAttributes,
+                required: false,
+            },
             {
                 model: Berth,
                 include: [
-                    { model: BerthType, attributes: berthTypeTableAttributes },
+                    {
+                        model: BerthType,
+                        attributes: berthTypeTableAttributes,
+                        required: false,
+                    },
                 ],
                 attributes: berthTableAttributes,
+                required: false,
             },
             {
                 model: Department,
-                include: [
-                    {
-                        model: Organization,
-                        attributes: organizationTableAttributes,
-                    },
-                ],
                 attributes: departmentTableAttributes,
+                required: false,
             },
-            {
-                model: Certificate,
-                include: [
-                    {
-                        model: CertificateType,
-                        attributes: certificateTypeTableAttributes,
-                    },
-                    {
-                        model: File,
-                        attributes: fileTableAttributes,
-                        as: "scans",
-                    },
-                    {
-                        model: File,
-                        attributes: fileTableAttributes,
-                        as: "protocols",
-                    },
-                ],
-                attributes: certificateTableAttributes,
-            },
+            // {
+            //     model: Certificate,
+            //     include: [
+            //         {
+            //             model: CertificateType,
+            //             attributes: certificateTypeTableAttributes,
+            //         },
+            //         {
+            //             model: File,
+            //             attributes: fileTableAttributes,
+            //             as: "scans",
+            //         },
+            //         {
+            //             model: File,
+            //             attributes: fileTableAttributes,
+            //             as: "protocols",
+            //         },
+            //     ],
+            //     attributes: certificateTableAttributes,
+            //     required: false,
+            // },
             {
                 model: File,
                 attributes: fileTableAttributes,
+                required: false,
             },
         ];
     }
@@ -174,59 +172,41 @@ export class EmployeesService {
         const transaction = await this.sequelize.transaction();
 
         try {
-            const workspace = await this.workspaceService.findOne(
-                workspaceId,
-                transaction,
-            );
-
-            if (!workspace) {
-                throw new InternalServerErrorException(
-                    "Рабочее пространство не найдено!",
-                );
-            }
-
             const employee = await this.create(createEmployeeDto, transaction);
 
-            await employee.$set("workspace", [workspace.id], {
+            await employee.$set("workspace", [workspaceId], {
                 transaction,
             });
 
             // Организация
-            if (createEmployeeDto.organization) {
-                const organization = await this.organizationService.findOne(
-                    createEmployeeDto.organization.id,
-                    transaction,
+            if (createEmployeeDto.organization?.id) {
+                await employee.$set(
+                    "organization",
+                    [createEmployeeDto.organization?.id],
+                    {
+                        transaction,
+                    },
                 );
-
-                await employee.$set("organization", [organization.id], {
-                    transaction,
-                });
             } else {
                 await employee.$set("organization", null, { transaction });
             }
 
             // Должность
-            if (createEmployeeDto.berth) {
-                const berth = await this.berthService.findOne(
-                    createEmployeeDto.berth.id,
-                    transaction,
-                );
-
-                await employee.$set("berth", [berth.id], {
+            if (createEmployeeDto.berth?.id) {
+                await employee.$set("berth", [createEmployeeDto.berth?.id], {
                     transaction,
                 });
             }
 
             // Участок
-            if (createEmployeeDto.department) {
-                const department = await this.departmentService.findOne(
-                    createEmployeeDto.department.id,
-                    transaction,
+            if (createEmployeeDto.department?.id) {
+                await employee.$set(
+                    "department",
+                    [createEmployeeDto.department?.id],
+                    {
+                        transaction,
+                    },
                 );
-
-                await employee.$set("department", [department.id], {
-                    transaction,
-                });
             }
 
             await transaction.commit();
@@ -277,22 +257,21 @@ export class EmployeesService {
             );
 
             // Организация
-            if (updateEmployeeDto.organization) {
-                const organization = await this.organizationService.findOne(
-                    updateEmployeeDto.organization.id,
-                    transaction,
+            if (updateEmployeeDto.organization?.id) {
+                await employee.$set(
+                    "organization",
+                    [updateEmployeeDto.organization?.id],
+                    {
+                        transaction,
+                    },
                 );
-
-                await employee.$set("organization", [organization.id], {
-                    transaction,
-                });
             } else {
                 await employee.$set("organization", null, { transaction });
             }
 
             // Должность
-            if (updateEmployeeDto.berth) {
-                await employee.$set("berth", [updateEmployeeDto.berth.id], {
+            if (updateEmployeeDto.berth?.id) {
+                await employee.$set("berth", [updateEmployeeDto.berth?.id], {
                     transaction,
                 });
             } else {
@@ -302,10 +281,10 @@ export class EmployeesService {
             }
 
             // Участок
-            if (updateEmployeeDto.department) {
+            if (updateEmployeeDto.department?.id) {
                 await employee.$set(
                     "department",
-                    [updateEmployeeDto.department.id],
+                    [updateEmployeeDto.department?.id],
                     {
                         transaction,
                     },

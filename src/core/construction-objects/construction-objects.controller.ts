@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
@@ -35,30 +36,30 @@ export class ConstructionObjectsController {
 
     @Get()
     async findAll(
-        @Query("limit") limit: string,
-        @Query("offset") offset: string,
+        @Query("limit") limit?: number,
+        @Query("offset") offset?: number,
     ) {
-        return await this.constructionObjectsService.findAll(+limit, +offset);
+        return await this.constructionObjectsService.findAll(limit, offset);
     }
 
     @Get(":id")
-    async findOne(@Param("id") id: string) {
-        return await this.constructionObjectsService.findOne(+id);
+    async findOne(@Param("id", ParseIntPipe) id: number) {
+        return await this.constructionObjectsService.findOne(id);
     }
 
     @Patch(":id")
     async update(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Body() updateConstructionObjectDto: UpdateConstructionObjectDto,
     ) {
         return await this.constructionObjectsService.update(
-            +id,
+            id,
             updateConstructionObjectDto,
         );
     }
 
     @Delete(":id")
-    async remove(@Param("id") id: string) {
-        return await this.constructionObjectsService.remove(+id);
+    async remove(@Param("id", ParseIntPipe) id: number) {
+        return await this.constructionObjectsService.remove(id);
     }
 }

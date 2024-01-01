@@ -3,6 +3,7 @@ import {
     Controller,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Res,
     UploadedFiles,
@@ -24,11 +25,11 @@ export class ProfilesController {
 
     @Get(":id")
     async findById(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            const candidate = await this.profilesService.findOne(+id);
+            const candidate = await this.profilesService.findOne(id);
 
             response.status(200);
             return candidate;
@@ -42,7 +43,7 @@ export class ProfilesController {
         FileFieldsInterceptor([{ name: "avatar", maxCount: 1 }], { storage }),
     )
     async update(
-        @Param("id") id: string,
+        @Param("id", ParseIntPipe) id: number,
         @Body() updateProfileDto: UpdateProfileDto,
         @UploadedFiles() files: { avatar?: Express.Multer.File[] },
         @Res({ passthrough: true }) response: Response,
@@ -55,7 +56,7 @@ export class ProfilesController {
             }
 
             const result = await this.profilesService.update(
-                +id,
+                id,
                 updateProfileDto,
                 avatar,
             );
