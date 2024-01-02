@@ -3,6 +3,7 @@ import {
     forwardRef,
     Inject,
     Injectable,
+    InternalServerErrorException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
@@ -38,6 +39,58 @@ export class ProfilesService {
         ];
     }
 
+    async uploadAvatar(avatar: Express.Multer.File, profileId: number) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const profile = await this.findOne(profileId, transaction);
+
+            if (!profile) {
+                throw new InternalServerErrorException("Профиль не найден!");
+            }
+
+            const file = await this.fileService.uploadFile(
+                avatar,
+                profile.avatar?.id,
+                transaction,
+            );
+
+            await profile.$set("avatar", [file.id], { transaction });
+
+            await transaction.commit();
+
+            return this.fileService.findOne(file.id);
+        } catch (e) {
+            await transaction.rollback();
+            throw new InternalServerErrorException(e);
+        }
+    }
+
+    async deleteAvatar(profileId: number) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const profile = await this.findOne(profileId, transaction);
+
+            if (!profile) {
+                throw new InternalServerErrorException("Профиль не найден!");
+            }
+
+            if (profile.avatar) {
+                await this.fileService.remove(profile.avatar.id, transaction);
+            }
+
+            await profile.$set("avatar", null, { transaction });
+
+            await transaction.commit();
+
+            return true;
+        } catch (e) {
+            await transaction.rollback();
+            throw new InternalServerErrorException(e);
+        }
+    }
+
     /**
      * Вызывается только при регистрации пользователя
      * @param createProfileDto
@@ -56,11 +109,7 @@ export class ProfilesService {
         }
     }
 
-    async update(
-        id: number,
-        updateProfileDto: UpdateProfileDto,
-        avatar?: Express.Multer.File,
-    ) {
+    async update(id: number, updateProfileDto: UpdateProfileDto) {
         const transaction = await this.sequelize.transaction();
 
         try {
@@ -74,30 +123,6 @@ export class ProfilesService {
                 where: { id },
                 transaction,
             });
-
-            // Аватар
-            if (avatar) {
-                // Загрузка аватара
-                const file = await this.fileService.uploadFile(
-                    avatar,
-                    candidate.avatar?.id,
-                );
-
-                if (file) {
-                    await candidate.$set("avatar", [file.id], { transaction });
-                }
-            } else {
-                // Удаляем связи
-                await candidate.$set("avatar", null, { transaction });
-
-                // Аватар удален
-                if (candidate.avatar) {
-                    await this.fileService.remove(
-                        candidate.avatar.id,
-                        transaction,
-                    );
-                }
-            }
 
             await transaction.commit();
 

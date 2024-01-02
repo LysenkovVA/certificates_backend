@@ -5,12 +5,13 @@ import {
     Param,
     ParseIntPipe,
     Patch,
+    Post,
     Res,
-    UploadedFiles,
+    UploadedFile,
     UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
-import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
 import { storage } from "../files/storage/storage";
@@ -38,27 +39,55 @@ export class ProfilesController {
         }
     }
 
-    @Patch(":id")
-    @UseInterceptors(
-        FileFieldsInterceptor([{ name: "avatar", maxCount: 1 }], { storage }),
-    )
-    async update(
-        @Param("id", ParseIntPipe) id: number,
-        @Body() updateProfileDto: UpdateProfileDto,
-        @UploadedFiles() files: { avatar?: Express.Multer.File[] },
+    @Post("upload/avatar/:profileId")
+    @UseInterceptors(FileInterceptor("avatar", { storage }))
+    async uploadAvatar(
+        @Param("profileId", ParseIntPipe) profileId: number,
+        @UploadedFile() avatar: Express.Multer.File,
         @Res({ passthrough: true }) response: Response,
     ) {
         try {
-            let avatar: Express.Multer.File = null;
+            const file = await this.profilesService.uploadAvatar(
+                avatar,
+                profileId,
+            );
 
-            if (files && files.avatar?.length > 0) {
-                avatar = files.avatar[0];
+            if (file) {
+                response.status(200);
+                return file;
             }
+        } catch (e) {
+            throw e;
+        }
+    }
 
+    @Post("delete/avatar/:profileId")
+    async deleteAvatar(
+        @Param("profileId", ParseIntPipe) profileId: number,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const result = await this.profilesService.deleteAvatar(profileId);
+
+            if (result) {
+                response.status(200);
+                return result;
+            }
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    @Patch(":id")
+    async update(
+        @Param("id", ParseIntPipe) id: number,
+        @Body() updateProfileDto: UpdateProfileDto,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
             const result = await this.profilesService.update(
                 id,
                 updateProfileDto,
-                avatar,
             );
 
             if (result) {
@@ -69,4 +98,36 @@ export class ProfilesController {
             throw e;
         }
     }
+
+    // @Patch(":id")
+    // @UseInterceptors(
+    //     FileFieldsInterceptor([{ name: "avatar", maxCount: 1 }], { storage }),
+    // )
+    // async update(
+    //     @Param("id", ParseIntPipe) id: number,
+    //     @Body() updateProfileDto: UpdateProfileDto,
+    //     @UploadedFiles() files: { avatar?: Express.Multer.File[] },
+    //     @Res({ passthrough: true }) response: Response,
+    // ) {
+    //     try {
+    //         let avatar: Express.Multer.File = null;
+    //
+    //         if (files && files.avatar?.length > 0) {
+    //             avatar = files.avatar[0];
+    //         }
+    //
+    //         const result = await this.profilesService.update(
+    //             id,
+    //             updateProfileDto,
+    //             avatar,
+    //         );
+    //
+    //         if (result) {
+    //             response.status(200);
+    //             return result;
+    //         }
+    //     } catch (e) {
+    //         throw e;
+    //     }
+    // }
 }
