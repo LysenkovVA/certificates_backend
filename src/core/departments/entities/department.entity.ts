@@ -39,6 +39,16 @@ export class Department extends Model<Department, IDepartmentCreationAttrs> {
     })
     name: string;
 
+    @ApiProperty({
+        example: "1",
+        description: "Позиция в списке (для упорядочивания по важности)",
+    })
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: true,
+    })
+    position: number;
+
     @HasMany(() => Employee, "departmentId")
     employees: Employee[];
 
@@ -47,4 +57,10 @@ export class Department extends Model<Department, IDepartmentCreationAttrs> {
 
     @BelongsTo(() => Workspace, "workspaceId")
     workspace: Workspace;
+
+    @HasMany(() => Department, "parentDepartmentId")
+    departments: Department[];
+
+    @BelongsTo(() => Department, "parentDepartmentId")
+    parentDepartment: Department;
 }

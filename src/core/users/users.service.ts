@@ -5,7 +5,6 @@ import {
     Injectable,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import * as bcrypt from "bcryptjs";
 import { IncludeOptions, Transaction } from "sequelize";
 import {
     fileTableAttributes,
@@ -78,13 +77,7 @@ export class UsersService {
             );
         }
 
-        // Хешируем пароль
-        const hashPassword = await bcrypt.hash(dto.password, 5);
-
-        return await this.userRepository.create(
-            { ...dto, password: hashPassword },
-            { transaction },
-        );
+        return await this.userRepository.create(dto, { transaction });
     }
 
     async getUserByEmail(email: string, transaction?: Transaction) {

@@ -100,7 +100,7 @@ export const tokenTableAttributes: Array<string> = ["id", "refreshToken"];
 
 export const workspaceTableAttributes: Array<string> = ["id", "name"];
 
-export const userTableAttributes: Array<string> = ["id", "email", "password"];
+export const userTableAttributes: Array<string> = ["id", "email"]; // "password"
 
 export const violationCommentTableAttributes: Array<string> = ["id", "value"];
 

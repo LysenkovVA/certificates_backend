@@ -1,5 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
+import * as bcrypt from "bcryptjs";
 import {
+    BeforeCreate,
     BelongsToMany,
     Column,
     DataType,
@@ -73,4 +75,10 @@ export class User extends Model<User, IUserCreationAttrs> {
 
     @BelongsToMany(() => Workspace, () => UserWorkspaces)
     workspaces: Workspace[];
+
+    // Перед созданием пользователя, хешируем пароль
+    @BeforeCreate
+    static async hashPassword(instance: User) {
+        instance.password = await bcrypt.hash(instance.password, 5);
+    }
 }

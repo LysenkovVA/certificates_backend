@@ -49,6 +49,16 @@ export class Organization extends Model<
     name: string;
 
     @ApiProperty({
+        example: "1",
+        description: "Позиция в списке (для упорядочивания по важности)",
+    })
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: true,
+    })
+    position: number;
+
+    @ApiProperty({
         example: [],
         description: "Участки",
         type: [Department],
