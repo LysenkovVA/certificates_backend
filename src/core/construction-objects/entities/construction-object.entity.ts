@@ -8,6 +8,7 @@ import {
     Table,
 } from "sequelize-typescript";
 import { Inspection } from "../../inspections/entities/inspection.entity";
+import { Organization } from "../../organizations/entities/organization.entity";
 import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface IConstructionObjectCreationAttrs {}
@@ -76,4 +77,7 @@ export class ConstructionObject extends Model<
 
     @BelongsTo(() => Workspace, "workspaceId")
     workspace: Workspace;
+
+    @BelongsTo(() => Organization, "organizationId")
+    organization: Organization;
 }

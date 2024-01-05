@@ -14,6 +14,7 @@ import { Certificate } from "../../certificates/entities/certificate.entity";
 import { ConstructionObject } from "../../construction-objects/entities/construction-object.entity";
 import { Department } from "../../departments/entities/department.entity";
 import { Employee } from "../../employees/entities/employee.entity";
+import { InspectionType } from "../../inspection-types/entities/inspection-type.entity";
 import { Inspection } from "../../inspections/entities/inspection.entity";
 import { Organization } from "../../organizations/entities/organization.entity";
 import { UserWorkspaces } from "../../user-workspaces/entities/user-workspaces.entity";
@@ -79,4 +80,7 @@ export class Workspace extends Model<Workspace, IWorkspaceCreationAttrs> {
 
     @HasMany(() => CertificateType, "workspaceId")
     certificateTypes: CertificateType[];
+
+    @HasMany(() => InspectionType, "workspaceId")
+    inspectionTypes: InspectionType[];
 }

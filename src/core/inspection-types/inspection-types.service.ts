@@ -1,7 +1,16 @@
-import { Injectable } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    InternalServerErrorException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { IncludeOptions, Transaction } from "sequelize";
-import { inspectionTypeTableAttributes } from "../../infrastructure/const/tableAttributes";
+import { IncludeOptions, Transaction, ValidationError } from "sequelize";
+import { Sequelize } from "sequelize-typescript";
+import {
+    inspectionTypeTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
+import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateInspectionTypeDto } from "./dto/create-inspection-type.dto";
 import { UpdateInspectionTypeDto } from "./dto/update-inspection-type.dto";
 import { InspectionType } from "./entities/inspection-type.entity";
@@ -13,34 +22,98 @@ export class InspectionTypesService {
 
     constructor(
         @InjectModel(InspectionType)
-        private inspectionTypesRepository: typeof InspectionType,
+        private inspectionTypeRepository: typeof InspectionType,
+        private sequelize: Sequelize,
     ) {
+        // Параметры запросов к БД
         this.attributes = inspectionTypeTableAttributes;
+        this.include = [
+            { model: Workspace, attributes: workspaceTableAttributes },
+        ];
     }
 
     async create(
         createInspectionTypeDto: CreateInspectionTypeDto,
         transaction?: Transaction,
     ) {
-        return await this.inspectionTypesRepository.create(
-            createInspectionTypeDto,
-            { transaction },
-        );
+        try {
+            return await this.inspectionTypeRepository.create(
+                createInspectionTypeDto,
+                {
+                    transaction,
+                },
+            );
+        } catch (e) {
+            if (e instanceof ValidationError) {
+                throw JSON.stringify(e.errors);
+            }
+
+            throw new InternalServerErrorException(e);
+        }
     }
 
-    async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.inspectionTypesRepository.findAll({
-            limit,
-            offset,
-            transaction,
-        });
+    async createExtended(
+        createInspectionTypeDto: CreateInspectionTypeDto,
+        workspaceId: number,
+    ) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const berthType = await this.create(
+                createInspectionTypeDto,
+                transaction,
+            );
+
+            await berthType.$set("workspace", [workspaceId], {
+                transaction,
+            });
+
+            await transaction.commit();
+
+            // Возвращаем полностью объект
+            if (berthType) {
+                return await this.findOne(berthType.id);
+            }
+        } catch (e) {
+            await transaction.rollback();
+            throw e;
+        }
+    }
+
+    async findAll(workspaceId: number, transaction?: Transaction) {
+        try {
+            return await this.inspectionTypeRepository.findAndCountAll({
+                where: {
+                    "$workspace.id$": workspaceId,
+                },
+                attributes: this.attributes,
+                include: this.include,
+                order: [["value", "ASC"]],
+                distinct: true,
+                transaction,
+            });
+        } catch (e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     async findOne(id: number, transaction?: Transaction) {
-        return await this.inspectionTypesRepository.findOne({
-            where: { id },
-            transaction,
-        });
+        try {
+            const candidate = await this.inspectionTypeRepository.findByPk(id, {
+                attributes: this.attributes,
+                include: this.include,
+                order: [["value", "ASC"]],
+                transaction,
+            });
+
+            if (!candidate) {
+                throw new BadRequestException("Тип проверки не найден");
+            }
+
+            return candidate;
+        } catch (e) {
+            throw e;
+        }
     }
 
     async update(
@@ -48,16 +121,41 @@ export class InspectionTypesService {
         updateInspectionTypeDto: UpdateInspectionTypeDto,
         transaction?: Transaction,
     ) {
-        return await this.inspectionTypesRepository.update(
-            updateInspectionTypeDto,
-            { where: { id }, transaction },
-        );
+        try {
+            const candidate = await this.findOne(id, transaction);
+
+            if (candidate) {
+                await this.inspectionTypeRepository.update(
+                    updateInspectionTypeDto,
+                    {
+                        where: { id },
+                        transaction,
+                    },
+                );
+
+                return await this.findOne(candidate.id);
+            }
+
+            return null;
+        } catch (e) {
+            throw e;
+        }
     }
 
     async remove(id: number, transaction?: Transaction) {
-        return await this.inspectionTypesRepository.destroy({
-            where: { id },
-            transaction,
-        });
+        try {
+            const candidate = await this.findOne(id, transaction);
+
+            if (!candidate) {
+                throw new BadRequestException("Тип проверки не найден");
+            }
+
+            return await this.inspectionTypeRepository.destroy({
+                where: { id },
+                transaction,
+            });
+        } catch (e) {
+            throw e;
+        }
     }
 }

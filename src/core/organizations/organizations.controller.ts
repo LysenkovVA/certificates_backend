@@ -95,12 +95,14 @@ export class OrganizationsController {
         @Query("workspaceId", ParseIntPipe) workspaceId: number,
         @Query("limit") limit?: number,
         @Query("offset") offset?: number,
+        @Query("searchQuery") searchQuery?: string,
     ) {
         try {
             const result = await this.organizationsService.findAll(
                 workspaceId,
                 limit,
                 offset,
+                searchQuery,
             );
             if (result) {
                 response.status(200);

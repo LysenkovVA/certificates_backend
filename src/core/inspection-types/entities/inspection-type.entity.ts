@@ -1,6 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import {
+    BelongsTo,
+    Column,
+    DataType,
+    HasMany,
+    Model,
+    Table,
+} from "sequelize-typescript";
 import { Inspection } from "../../inspections/entities/inspection.entity";
+import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface IInspectionTypeCreationAttrs {}
 
@@ -33,4 +41,7 @@ export class InspectionType extends Model<
 
     @HasMany(() => Inspection, "inspectionTypeId")
     inspections: Inspection[];
+
+    @BelongsTo(() => Workspace, "workspaceId")
+    workspace: Workspace;
 }

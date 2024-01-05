@@ -6,7 +6,7 @@ import {
     InternalServerErrorException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { IncludeOptions, Transaction } from "sequelize";
+import { IncludeOptions, Op, Transaction, WhereOptions } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import {
     constructionObjectsTableAttributes,
@@ -314,14 +314,22 @@ export class OrganizationsService {
         workspaceId: number,
         limit?: number,
         offset?: number,
+        searchQuery?: string,
         transaction?: Transaction,
     ) {
         try {
+            const whereOptions: WhereOptions<Organization> = !searchQuery
+                ? { "$workspace.id$": workspaceId }
+                : {
+                      "$workspace.id$": workspaceId,
+                      name: {
+                          [Op.iLike]: `%${searchQuery}%`,
+                      },
+                  };
+
             if (!limit || !offset) {
                 return await this.organizationRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                    },
+                    where: whereOptions,
                     attributes: this.attributes,
                     include: this.include,
                     order: [["name", "ASC"]],
@@ -332,9 +340,7 @@ export class OrganizationsService {
                 return await this.organizationRepository.findAndCountAll({
                     limit,
                     offset,
-                    where: {
-                        "$workspace.id$": workspaceId,
-                    },
+                    where: whereOptions,
                     attributes: this.attributes,
                     include: this.include,
                     order: [["name", "ASC"]],

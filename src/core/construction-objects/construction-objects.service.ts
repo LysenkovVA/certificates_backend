@@ -5,14 +5,16 @@ import {
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
+import { Sequelize } from "sequelize-typescript";
 import {
     constructionObjectsTableAttributes,
     workspaceTableAttributes,
 } from "../../infrastructure/const/tableAttributes";
-import { Inspection } from "../inspections/entities/inspection.entity";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateConstructionObjectDto } from "./dto/createConstructionObject.dto";
+import { CreateConstructionObjectExtendedDto } from "./dto/createConstructionObjectExtended.dto";
 import { UpdateConstructionObjectDto } from "./dto/updateConstructionObject.dto";
+import { UpdateConstructionObjectExtendedDto } from "./dto/updateConstructionObjectExtended.dto";
 import { ConstructionObject } from "./entities/construction-object.entity";
 
 @Injectable()
@@ -23,11 +25,11 @@ export class ConstructionObjectsService {
     constructor(
         @InjectModel(ConstructionObject)
         private constructionObjectsRepository: typeof ConstructionObject,
+        private sequelize: Sequelize,
     ) {
         // Параметры запросов к БД
         this.attributes = constructionObjectsTableAttributes;
         this.include = [
-            { model: Inspection, required: false },
             {
                 model: Workspace,
                 attributes: workspaceTableAttributes,
@@ -52,33 +54,50 @@ export class ConstructionObjectsService {
         }
     }
 
-    async update(
-        id: number,
-        updateConstructionObjectDto: UpdateConstructionObjectDto,
-        transaction?: Transaction,
+    async createExtended(
+        createConstructionObjectExtendedDto: CreateConstructionObjectExtendedDto,
+        workspaceId: number,
+        organizationId?: number,
     ) {
-        try {
-            const candidate = await this.findOne(id, transaction);
+        const transaction = await this.sequelize.transaction();
 
-            if (candidate) {
-                return await this.constructionObjectsRepository.update(
-                    updateConstructionObjectDto,
-                    {
-                        where: { id },
-                        transaction,
-                    },
-                );
+        try {
+            const co = await this.create(
+                createConstructionObjectExtendedDto as CreateConstructionObjectDto,
+                transaction,
+            );
+
+            await co.$set("workspace", [workspaceId], {
+                transaction,
+            });
+
+            if (organizationId) {
+                await co.$set("organization", [organizationId], {
+                    transaction,
+                });
             }
+
+            await transaction.commit();
+
+            return await this.findOne(co.id);
         } catch (e) {
+            await transaction.rollback();
             throw e;
         }
     }
 
-    async findAll(limit?: number, offset?: number, transaction?: Transaction) {
+    async findAll(
+        workspaceId: number,
+        organizationId?: number,
+        transaction?: Transaction,
+    ) {
         try {
-            if (!limit || !offset) {
+            if (!organizationId) {
                 return await this.constructionObjectsRepository.findAndCountAll(
                     {
+                        where: {
+                            "$workspace.id$": workspaceId,
+                        },
                         attributes: this.attributes,
                         include: this.include,
                         order: [["name", "ASC"]],
@@ -89,8 +108,10 @@ export class ConstructionObjectsService {
             } else {
                 return await this.constructionObjectsRepository.findAndCountAll(
                     {
-                        limit,
-                        offset,
+                        where: {
+                            "$workspace.id$": workspaceId,
+                            "$organization.id$": +organizationId,
+                        },
                         attributes: this.attributes,
                         include: this.include,
                         order: [["name", "ASC"]],
@@ -100,7 +121,7 @@ export class ConstructionObjectsService {
                 );
             }
         } catch (e) {
-            throw e;
+            throw new InternalServerErrorException(e);
         }
     }
 
@@ -126,13 +147,55 @@ export class ConstructionObjectsService {
         }
     }
 
-    async remove(id: number, transaction?: Transaction) {
+    async update(
+        id: number,
+        updateConstructionObjectDto: UpdateConstructionObjectDto,
+        transaction?: Transaction,
+    ) {
         try {
             const candidate = await this.findOne(id, transaction);
 
-            if (!candidate) {
-                throw new BadRequestException("Объект не найден");
+            if (candidate) {
+                return await this.constructionObjectsRepository.update(
+                    updateConstructionObjectDto,
+                    {
+                        where: { id },
+                        transaction,
+                    },
+                );
             }
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    async updateExtended(
+        id: number,
+        updateConstructionObjectExtendedDto: UpdateConstructionObjectExtendedDto,
+    ) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const co = await this.findOne(id, transaction);
+
+            await this.update(
+                id,
+                updateConstructionObjectExtendedDto as UpdateConstructionObjectDto,
+                transaction,
+            );
+
+            await transaction.commit();
+
+            return await this.findOne(id);
+        } catch (e) {
+            await transaction.rollback();
+            throw e;
+        }
+    }
+
+    async remove(id: number, transaction?: Transaction) {
+        try {
+            const candidate = await this.findOne(id, transaction);
 
             return await this.constructionObjectsRepository.destroy({
                 where: { id },
