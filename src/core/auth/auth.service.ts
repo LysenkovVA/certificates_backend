@@ -7,6 +7,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
+import { ValidationError } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { Dates } from "../../infrastructure/helpers/Dates";
 import { ProfilesService } from "../profiles/profiles.service";
@@ -103,6 +104,18 @@ export class AuthService {
                 await user.$add("workspaces", [workSpace.id], { transaction });
             }
 
+            // Создаем профиль пользователя
+            const profile = await this.profileService.create(
+                { surname: null, name: null, birthDate: null },
+                transaction,
+            );
+
+            if (profile) {
+                await user.$set("profile", [profile.id], { transaction });
+            }
+
+            // TODO - Отправка подтверждения на email
+
             // Генерируем токены
             const accessToken = await this.generateAccessToken(user);
             const refreshToken = await this.generateRefreshToken(user);
@@ -135,7 +148,12 @@ export class AuthService {
             };
         } catch (error) {
             await transaction.rollback();
-            throw error;
+
+            if (error instanceof ValidationError) {
+                throw new InternalServerErrorException(error.errors);
+            }
+
+            throw new InternalServerErrorException(error);
         }
     }
 
@@ -226,7 +244,12 @@ export class AuthService {
             };
         } catch (error) {
             await transaction.rollback();
-            throw error;
+
+            if (error instanceof ValidationError) {
+                throw new InternalServerErrorException(error.errors);
+            }
+
+            throw new InternalServerErrorException(error);
         }
     }
 
@@ -235,58 +258,71 @@ export class AuthService {
      * @param refreshToken
      */
     async logout(refreshToken: string) {
-        const token = await this.tokenService.findRefreshToken(refreshToken);
+        try {
+            const token =
+                await this.tokenService.findRefreshToken(refreshToken);
 
-        if (token) {
-            await this.tokenService.remove(token.id);
+            if (token) {
+                await this.tokenService.remove(token.id);
+            }
+
+            return true;
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                throw new InternalServerErrorException(error.errors);
+            }
+
+            throw new InternalServerErrorException(error);
         }
-
-        return true;
     }
 
     async refresh(refreshToken: string) {
-        if (!refreshToken) {
-            throw new UnauthorizedException("Токен не найден!");
-        }
-
-        // Валидация
-        const payload = await this.verifyRefreshToken(refreshToken);
-
-        // Поиск в БД
-        const token = this.tokenService.findRefreshToken(refreshToken);
-
-        if (!payload || !token) {
-            throw new UnauthorizedException("Ошибка верификации токена!");
-        }
-
-        // Получаем email пользователя
-        const { id } = payload;
-
-        if (id) {
-            // Получаем пользователя из БД с актуальными данными
-            const user = await this.userService.getUserById(id);
-
-            if (!user) {
-                throw new InternalServerErrorException(
-                    "Ошибка при получении пользователя!",
-                );
+        try {
+            if (!refreshToken) {
+                throw new UnauthorizedException("Токен не найден!");
             }
 
-            // Генерируем access токен
-            const accessToken = await this.generateAccessToken(user);
+            // Валидация
+            const payload = await this.verifyRefreshToken(refreshToken);
 
-            return {
-                user: {
-                    id: user.id,
-                    email: user.email,
-                    profile: user.profile,
-                    roles: user.roles,
-                    subscriptions: user.subscriptions,
-                    workspaces: user.workspaces,
-                },
-                accessToken,
-                refreshToken,
-            };
+            // Поиск в БД
+            const token = this.tokenService.findRefreshToken(refreshToken);
+
+            if (!payload || !token) {
+                throw new UnauthorizedException("Ошибка верификации токена!");
+            }
+
+            // Получаем email пользователя
+            const { id } = payload;
+
+            if (id) {
+                // Получаем пользователя из БД с актуальными данными
+                const user = await this.userService.getUserById(id);
+
+                if (!user) {
+                    throw new InternalServerErrorException(
+                        "Ошибка при получении пользователя!",
+                    );
+                }
+
+                // Генерируем access токен
+                const accessToken = await this.generateAccessToken(user);
+
+                return {
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        profile: user.profile,
+                        roles: user.roles,
+                        subscriptions: user.subscriptions,
+                        workspaces: user.workspaces,
+                    },
+                    accessToken,
+                    refreshToken,
+                };
+            }
+        } catch (e) {
+            throw new InternalServerErrorException(e);
         }
     }
 

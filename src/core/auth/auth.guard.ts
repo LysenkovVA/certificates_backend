@@ -7,7 +7,6 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { Observable } from "rxjs";
 import { UsersService } from "../users/users.service";
 
 /**
@@ -20,9 +19,7 @@ export class AuthGuard implements CanActivate {
         private jwtService: JwtService,
         private userService: UsersService,
     ) {}
-    canActivate(
-        context: ExecutionContext,
-    ): boolean | Promise<boolean> | Observable<boolean> {
+    async canActivate(context: ExecutionContext): Promise<boolean> {
         const req = context.switchToHttp().getRequest();
 
         try {
@@ -56,28 +53,18 @@ export class AuthGuard implements CanActivate {
                         );
                     }
 
-                    // req.userId = id;
-                    // return true;
+                    const user = await this.userService.getUserById(id);
 
-                    const result = this.userService
-                        .getUserById(id)
-                        .then((value) => {
-                            if (!value) {
-                                throw new InternalServerErrorException(
-                                    "AUTH GUARD: Неизвестный пользователь!",
-                                );
-                            }
+                    if (!user) {
+                        throw new InternalServerErrorException(
+                            "AUTH GUARD: Неизвестный пользователь!",
+                        );
+                    }
+                    // ВСЕ ДОБАВЛЯЕТСЯ
+                    req.user = user;
+                    req.userId = user.id;
 
-                            req.user = value;
-                            return true;
-                        })
-                        .catch((error) => {
-                            return false;
-                        });
-
-                    return result;
-
-                    // console.log(`>> AUTH GUARD for '${req.path}': Granted!`);
+                    return true;
                 } catch {
                     console.log(`>> AUTH GUARD for '${req.path}': DENIED!`);
                     throw new UnauthorizedException({

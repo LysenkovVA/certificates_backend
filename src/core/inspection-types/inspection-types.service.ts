@@ -58,6 +58,11 @@ export class InspectionTypesService {
     ) {
         const transaction = await this.sequelize.transaction();
 
+        console.log(
+            "Create inspection type: " +
+                JSON.stringify(createInspectionTypeDto),
+        );
+
         try {
             const berthType = await this.create(
                 createInspectionTypeDto,

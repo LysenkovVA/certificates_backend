@@ -13,7 +13,6 @@ export const AuthUser = createParamDecorator(
                 "AuthUser: Пользователь не определен!",
             );
         }
-
         return user;
     },
 );

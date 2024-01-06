@@ -70,8 +70,6 @@ export const inspectionTableAttributes: Array<string> = [
     "notes",
 ];
 
-export const organizationTableAttributes: Array<string> = ["id", "name"];
-
 export const profileTableAttributes: Array<string> = [
     "id",
     "surname",

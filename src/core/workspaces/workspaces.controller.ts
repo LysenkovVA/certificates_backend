@@ -8,8 +8,10 @@ import {
     Patch,
     Post,
     Res,
+    UseGuards,
 } from "@nestjs/common";
 import { Response } from "express";
+import { AuthGuard } from "../auth/auth.guard";
 import { User } from "../users/entity/users.entity";
 import { AuthUser } from "../users/user.decorator";
 import { CreateWorkspaceExtendedDto } from "./dto/createWorkspaceExtended.dto";
@@ -17,6 +19,7 @@ import { UpdateWorkspaceExtendedDto } from "./dto/updateWorkspaceExtended.dto";
 import { WorkspacesService } from "./workspaces.service";
 
 @Controller("workspaces")
+@UseGuards(AuthGuard)
 export class WorkspacesController {
     constructor(private readonly workspacesService: WorkspacesService) {}
 

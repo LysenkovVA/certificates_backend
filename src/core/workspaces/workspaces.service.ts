@@ -6,7 +6,11 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
-import { workspaceTableAttributes } from "../../infrastructure/const/tableAttributes";
+import {
+    userTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
+import { User } from "../users/entity/users.entity";
 import { CreateWorkspaceDto } from "./dto/create-workspace.dto";
 import { CreateWorkspaceExtendedDto } from "./dto/createWorkspaceExtended.dto";
 import { UpdateWorkspaceDto } from "./dto/update-workspace.dto";
@@ -23,6 +27,12 @@ export class WorkspacesService {
         private sequelize: Sequelize,
     ) {
         this.attributes = workspaceTableAttributes;
+        this.include = [
+            {
+                model: User,
+                attributes: userTableAttributes,
+            },
+        ];
     }
 
     async create(
@@ -62,11 +72,19 @@ export class WorkspacesService {
     async findAll(userId: number, transaction?: Transaction) {
         try {
             return await this.workspaceRepository.findAndCountAll({
-                where: {
-                    "$user.id$": userId,
-                },
+                // where: {
+                //     $users$: { id: userId },
+                // },
                 attributes: this.attributes,
-                // include: this.include,
+                include: [
+                    {
+                        model: User,
+                        attributes: userTableAttributes,
+                        where: {
+                            id: userId,
+                        },
+                    },
+                ],
                 order: [["name", "ASC"]],
                 distinct: true,
                 transaction,
@@ -80,7 +98,7 @@ export class WorkspacesService {
         try {
             const candidate = await this.workspaceRepository.findByPk(id, {
                 attributes: this.attributes,
-                // include: this.include,
+                include: this.include,
                 order: [["name", "ASC"]],
                 transaction,
             });
