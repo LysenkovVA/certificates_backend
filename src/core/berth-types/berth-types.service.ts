@@ -6,8 +6,10 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction, ValidationError } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
-import { berthTypeTableAttributes } from "../../infrastructure/const/tableAttributes";
-import { Organization } from "../organizations/entities/organization.entity";
+import {
+    berthTypeTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateBerthTypeDto } from "./dto/create-berth-type.dto";
 import { UpdateBerthTypeDto } from "./dto/update-berth-type.dto";
@@ -24,7 +26,9 @@ export class BerthTypesService {
     ) {
         // Параметры запросов к БД
         this.attributes = berthTypeTableAttributes;
-        this.include = [{ model: Workspace }, { model: Organization }];
+        this.include = [
+            { model: Workspace, attributes: workspaceTableAttributes },
+        ];
     }
 
     async create(
@@ -47,7 +51,6 @@ export class BerthTypesService {
     async createExtended(
         createBerthTypeDto: CreateBerthTypeDto,
         workspaceId: number,
-        organizationId?: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
@@ -61,12 +64,6 @@ export class BerthTypesService {
                 transaction,
             });
 
-            if (organizationId) {
-                await berthType.$set("organization", [organizationId], {
-                    transaction,
-                });
-            }
-
             await transaction.commit();
 
             // Возвращаем полностью объект
@@ -79,36 +76,18 @@ export class BerthTypesService {
         }
     }
 
-    async findAll(
-        workspaceId: number,
-        organizationId?: number,
-        transaction?: Transaction,
-    ) {
+    async findAll(workspaceId: number, transaction?: Transaction) {
         try {
-            if (!organizationId) {
-                return await this.berthTypeRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                    },
-                    attributes: this.attributes,
-                    include: this.include,
-                    order: [["value", "ASC"]],
-                    distinct: true,
-                    transaction,
-                });
-            } else {
-                return await this.berthTypeRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                        "$organization.id$": +organizationId,
-                    },
-                    attributes: this.attributes,
-                    include: this.include,
-                    order: [["value", "ASC"]],
-                    distinct: true,
-                    transaction,
-                });
-            }
+            return await this.berthTypeRepository.findAndCountAll({
+                where: {
+                    "$workspace.id$": workspaceId,
+                },
+                attributes: this.attributes,
+                include: this.include,
+                order: [["value", "ASC"]],
+                distinct: true,
+                transaction,
+            });
         } catch (e) {
             throw new InternalServerErrorException(e);
         }

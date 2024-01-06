@@ -1,7 +1,5 @@
 import {
     BadRequestException,
-    forwardRef,
-    Inject,
     Injectable,
     InternalServerErrorException,
 } from "@nestjs/common";
@@ -12,8 +10,6 @@ import {
     departmentTableAttributes,
     workspaceTableAttributes,
 } from "../../infrastructure/const/tableAttributes";
-import { Organization } from "../organizations/entities/organization.entity";
-import { OrganizationsService } from "../organizations/organizations.service";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { WorkspacesService } from "../workspaces/workspaces.service";
 import { CreateDepartmentDto } from "./dto/createDepartment.dto";
@@ -31,8 +27,6 @@ export class DepartmentsService {
         private departmentsRepository: typeof Department,
         private sequelize: Sequelize,
         private workspaceService: WorkspacesService,
-        @Inject(forwardRef(() => OrganizationsService))
-        private organizationService: OrganizationsService,
     ) {
         // Параметры запросов к БД
         this.attributes = departmentTableAttributes;
@@ -48,7 +42,6 @@ export class DepartmentsService {
             //     attributes: employeeTableAttributes,
             //     required: false,
             // },
-            { model: Organization, required: false },
         ];
     }
 
@@ -81,26 +74,6 @@ export class DepartmentsService {
             );
 
             await department.$set("workspace", [workspaceId], {
-                transaction,
-            });
-
-            if (!createDepartmentDto.organization) {
-                throw new BadRequestException("Организация не задана!");
-            }
-
-            const organization = await this.organizationService.findOne(
-                createDepartmentDto.organization.id,
-                transaction,
-            );
-
-            if (!organization) {
-                throw new InternalServerErrorException(
-                    "Организация не найдена!",
-                );
-            }
-
-            // Связываем с организацией
-            await department.$set("organization", [organization.id], {
                 transaction,
             });
 
@@ -159,66 +132,35 @@ export class DepartmentsService {
 
     async findAll(
         workspaceId: number,
-        organizationId?: number,
         limit?: number,
         offset?: number,
         transaction?: Transaction,
     ) {
         try {
             if (!limit || !offset) {
-                if (!organizationId) {
-                    return await this.departmentsRepository.findAndCountAll({
-                        where: {
-                            "$workspace.id$": workspaceId,
-                        },
-                        attributes: this.attributes,
-                        include: this.include,
-                        order: [["name", "ASC"]],
-                        distinct: true,
-                        transaction,
-                    });
-                } else {
-                    return await this.departmentsRepository.findAndCountAll({
-                        where: {
-                            "$workspace.id$": workspaceId,
-                            "$organization.id$": +organizationId,
-                        },
-                        attributes: this.attributes,
-                        include: this.include,
-                        order: [["name", "ASC"]],
-                        distinct: true,
-                        transaction,
-                    });
-                }
+                return await this.departmentsRepository.findAndCountAll({
+                    where: {
+                        "$workspace.id$": workspaceId,
+                    },
+                    attributes: this.attributes,
+                    include: this.include,
+                    order: [["name", "ASC"]],
+                    distinct: true,
+                    transaction,
+                });
             } else {
-                if (!organizationId) {
-                    return await this.departmentsRepository.findAndCountAll({
-                        where: {
-                            "$workspace.id$": workspaceId,
-                        },
-                        limit,
-                        offset,
-                        attributes: this.attributes,
-                        include: this.include,
-                        order: [["name", "ASC"]],
-                        distinct: true,
-                        transaction,
-                    });
-                } else {
-                    return await this.departmentsRepository.findAndCountAll({
-                        where: {
-                            "$workspace.id$": workspaceId,
-                            "$organization.id$": +organizationId,
-                        },
-                        limit,
-                        offset,
-                        attributes: this.attributes,
-                        include: this.include,
-                        order: [["name", "ASC"]],
-                        distinct: true,
-                        transaction,
-                    });
-                }
+                return await this.departmentsRepository.findAndCountAll({
+                    where: {
+                        "$workspace.id$": workspaceId,
+                    },
+                    limit,
+                    offset,
+                    attributes: this.attributes,
+                    include: this.include,
+                    order: [["name", "ASC"]],
+                    distinct: true,
+                    transaction,
+                });
             }
         } catch (e) {
             throw e;

@@ -54,14 +54,12 @@ export class DepartmentsController {
     async findAll(
         @Res({ passthrough: true }) response: Response,
         @Query("workspaceId", ParseIntPipe) workspaceId: number,
-        @Query("organizationId") organizationId?: number,
         @Query("limit") limit?: number,
         @Query("offset") offset?: number,
     ) {
         try {
             const result = await this.departmentsService.findAll(
                 workspaceId,
-                organizationId,
                 limit,
                 offset,
             );

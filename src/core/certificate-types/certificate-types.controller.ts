@@ -35,13 +35,11 @@ export class CertificateTypesController {
         @Body() createCertificateTypeDto: CreateCertificateTypeDto,
         @Res({ passthrough: true }) response: Response,
         @Query("workspaceId", ParseIntPipe) workspaceId: number,
-        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.certificateTypesService.createExtended(
                 createCertificateTypeDto,
                 workspaceId,
-                organizationId,
             );
 
             if (result) {
@@ -58,13 +56,10 @@ export class CertificateTypesController {
     async findAll(
         @Res({ passthrough: true }) response: Response,
         @Query("workspaceId", ParseIntPipe) workspaceId: number,
-        @Query("organizationId") organizationId?: number,
     ) {
         try {
-            const result = await this.certificateTypesService.findAll(
-                workspaceId,
-                organizationId,
-            );
+            const result =
+                await this.certificateTypesService.findAll(workspaceId);
 
             if (result) {
                 response.status(200);

@@ -9,11 +9,9 @@ import { Sequelize } from "sequelize-typescript";
 import {
     certificateTableAttributes,
     certificateTypeTableAttributes,
-    organizationTableAttributes,
     workspaceTableAttributes,
 } from "../../infrastructure/const/tableAttributes";
 import { CertificateType } from "../certificate-types/entities/certificate-type.entity";
-import { Organization } from "../organizations/entities/organization.entity";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateCertificateDto } from "./dto/create-certificate.dto";
 import { CreateCertificateExtendedDto } from "./dto/createCertificateExtended.dto";
@@ -39,7 +37,6 @@ export class CertificatesService {
                 attributes: workspaceTableAttributes,
                 required: true,
             },
-            { model: Organization, attributes: organizationTableAttributes },
             {
                 model: CertificateType,
                 attributes: certificateTypeTableAttributes,
@@ -66,7 +63,6 @@ export class CertificatesService {
     async createExtended(
         createCertificateExtendedDto: CreateCertificateExtendedDto,
         workspaceId: number,
-        organizationId?: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
@@ -79,12 +75,6 @@ export class CertificatesService {
             await certificate.$set("workspace", [workspaceId], {
                 transaction,
             });
-
-            if (organizationId) {
-                await certificate.$set("organization", [organizationId], {
-                    transaction,
-                });
-            }
 
             if (createCertificateExtendedDto.certificateType) {
                 await certificate.$set(
@@ -109,36 +99,18 @@ export class CertificatesService {
         }
     }
 
-    async findAll(
-        workspaceId: number,
-        organizationId?: number,
-        transaction?: Transaction,
-    ) {
+    async findAll(workspaceId: number, transaction?: Transaction) {
         try {
-            if (!organizationId) {
-                return await this.certificateRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                    },
-                    attributes: this.attributes,
-                    include: this.include,
-                    order: [["number", "ASC"]],
-                    distinct: true,
-                    transaction,
-                });
-            } else {
-                return await this.certificateRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                        "$organization.id$": +organizationId,
-                    },
-                    attributes: this.attributes,
-                    include: this.include,
-                    order: [["number", "ASC"]],
-                    distinct: true,
-                    transaction,
-                });
-            }
+            return await this.certificateRepository.findAndCountAll({
+                where: {
+                    "$workspace.id$": workspaceId,
+                },
+                attributes: this.attributes,
+                include: this.include,
+                order: [["number", "ASC"]],
+                distinct: true,
+                transaction,
+            });
         } catch (e) {
             throw new InternalServerErrorException(e);
         }

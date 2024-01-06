@@ -33,13 +33,11 @@ export class BerthesController {
         @Body() createBertheDto: CreateBerthExtendedDto,
         @Res({ passthrough: true }) response: Response,
         @Query("workspaceId", ParseIntPipe) workspaceId: number,
-        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.berthesService.createExtended(
                 createBertheDto,
                 workspaceId,
-                organizationId,
             );
 
             if (result) {
@@ -56,13 +54,9 @@ export class BerthesController {
     async findAll(
         @Res({ passthrough: true }) response: Response,
         @Query("workspaceId", ParseIntPipe) workspaceId: number,
-        @Query("organizationId") organizationId?: number,
     ) {
         try {
-            const result = await this.berthesService.findAll(
-                workspaceId,
-                organizationId,
-            );
+            const result = await this.berthesService.findAll(workspaceId);
 
             if (result) {
                 response.status(200);

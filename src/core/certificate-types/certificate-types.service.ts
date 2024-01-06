@@ -6,8 +6,10 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
-import { certificateTypeTableAttributes } from "../../infrastructure/const/tableAttributes";
-import { Organization } from "../organizations/entities/organization.entity";
+import {
+    certificateTypeTableAttributes,
+    workspaceTableAttributes,
+} from "../../infrastructure/const/tableAttributes";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateCertificateTypeDto } from "./dto/create-certificate-type.dto";
 import { UpdateCertificateTypeDto } from "./dto/update-certificate-type.dto";
@@ -25,7 +27,9 @@ export class CertificateTypesService {
     ) {
         // Параметры запросов к БД
         this.attributes = certificateTypeTableAttributes;
-        this.include = [{ model: Workspace }, { model: Organization }];
+        this.include = [
+            { model: Workspace, attributes: workspaceTableAttributes },
+        ];
     }
 
     async create(
@@ -47,7 +51,6 @@ export class CertificateTypesService {
     async createExtended(
         createCertificateTypeDto: CreateCertificateTypeDto,
         workspaceId: number,
-        organizationId?: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
@@ -61,12 +64,6 @@ export class CertificateTypesService {
                 transaction,
             });
 
-            if (organizationId) {
-                await certificateType.$set("organization", [organizationId], {
-                    transaction,
-                });
-            }
-
             await transaction.commit();
 
             // Возвращаем полностью объект
@@ -79,36 +76,18 @@ export class CertificateTypesService {
         }
     }
 
-    async findAll(
-        workspaceId: number,
-        organizationId?: number,
-        transaction?: Transaction,
-    ) {
+    async findAll(workspaceId: number, transaction?: Transaction) {
         try {
-            if (!organizationId) {
-                return await this.certificateTypeRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                    },
-                    attributes: this.attributes,
-                    include: this.include,
-                    order: [["value", "ASC"]],
-                    distinct: true,
-                    transaction,
-                });
-            } else {
-                return await this.certificateTypeRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                        "$organization.id$": +organizationId,
-                    },
-                    attributes: this.attributes,
-                    include: this.include,
-                    order: [["value", "ASC"]],
-                    distinct: true,
-                    transaction,
-                });
-            }
+            return await this.certificateTypeRepository.findAndCountAll({
+                where: {
+                    "$workspace.id$": workspaceId,
+                },
+                attributes: this.attributes,
+                include: this.include,
+                order: [["value", "ASC"]],
+                distinct: true,
+                transaction,
+            });
         } catch (e) {
             throw new InternalServerErrorException(e);
         }

@@ -8,7 +8,6 @@ import {
     Table,
 } from "sequelize-typescript";
 import { Employee } from "../../employees/entities/employee.entity";
-import { Organization } from "../../organizations/entities/organization.entity";
 import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface IDepartmentCreationAttrs {}
@@ -51,9 +50,6 @@ export class Department extends Model<Department, IDepartmentCreationAttrs> {
 
     @HasMany(() => Employee, "departmentId")
     employees: Employee[];
-
-    @BelongsTo(() => Organization, "organizationId")
-    organization: Organization;
 
     @BelongsTo(() => Workspace, "workspaceId")
     workspace: Workspace;

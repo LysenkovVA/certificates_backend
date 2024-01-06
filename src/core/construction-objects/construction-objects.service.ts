@@ -57,7 +57,6 @@ export class ConstructionObjectsService {
     async createExtended(
         createConstructionObjectExtendedDto: CreateConstructionObjectExtendedDto,
         workspaceId: number,
-        organizationId?: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
@@ -71,12 +70,6 @@ export class ConstructionObjectsService {
                 transaction,
             });
 
-            if (organizationId) {
-                await co.$set("organization", [organizationId], {
-                    transaction,
-                });
-            }
-
             await transaction.commit();
 
             return await this.findOne(co.id);
@@ -86,40 +79,18 @@ export class ConstructionObjectsService {
         }
     }
 
-    async findAll(
-        workspaceId: number,
-        organizationId?: number,
-        transaction?: Transaction,
-    ) {
+    async findAll(workspaceId: number, transaction?: Transaction) {
         try {
-            if (!organizationId) {
-                return await this.constructionObjectsRepository.findAndCountAll(
-                    {
-                        where: {
-                            "$workspace.id$": workspaceId,
-                        },
-                        attributes: this.attributes,
-                        include: this.include,
-                        order: [["name", "ASC"]],
-                        distinct: true,
-                        transaction,
-                    },
-                );
-            } else {
-                return await this.constructionObjectsRepository.findAndCountAll(
-                    {
-                        where: {
-                            "$workspace.id$": workspaceId,
-                            "$organization.id$": +organizationId,
-                        },
-                        attributes: this.attributes,
-                        include: this.include,
-                        order: [["name", "ASC"]],
-                        distinct: true,
-                        transaction,
-                    },
-                );
-            }
+            return await this.constructionObjectsRepository.findAndCountAll({
+                where: {
+                    "$workspace.id$": workspaceId,
+                },
+                attributes: this.attributes,
+                include: this.include,
+                order: [["name", "ASC"]],
+                distinct: true,
+                transaction,
+            });
         } catch (e) {
             throw new InternalServerErrorException(e);
         }

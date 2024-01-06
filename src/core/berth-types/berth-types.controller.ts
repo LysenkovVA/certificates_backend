@@ -33,13 +33,11 @@ export class BerthTypesController {
         @Body() createBerthTypeDto: CreateBerthTypeDto,
         @Res({ passthrough: true }) response: Response,
         @Query("workspaceId", ParseIntPipe) workspaceId: number,
-        @Query("organizationId") organizationId?: number,
     ) {
         try {
             const result = await this.berthTypesService.createExtended(
                 createBerthTypeDto,
                 workspaceId,
-                organizationId,
             );
 
             if (result) {
@@ -56,13 +54,9 @@ export class BerthTypesController {
     async findAll(
         @Res({ passthrough: true }) response: Response,
         @Query("workspaceId", ParseIntPipe) workspaceId: number,
-        @Query("organizationId") organizationId?: number,
     ) {
         try {
-            const result = await this.berthTypesService.findAll(
-                workspaceId,
-                organizationId,
-            );
+            const result = await this.berthTypesService.findAll(workspaceId);
 
             if (result) {
                 response.status(200);

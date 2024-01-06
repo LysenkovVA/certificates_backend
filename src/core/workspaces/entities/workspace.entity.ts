@@ -16,7 +16,6 @@ import { Department } from "../../departments/entities/department.entity";
 import { Employee } from "../../employees/entities/employee.entity";
 import { InspectionType } from "../../inspection-types/entities/inspection-type.entity";
 import { Inspection } from "../../inspections/entities/inspection.entity";
-import { Organization } from "../../organizations/entities/organization.entity";
 import { UserWorkspaces } from "../../user-workspaces/entities/user-workspaces.entity";
 import { User } from "../../users/entity/users.entity";
 
@@ -52,35 +51,32 @@ export class Workspace extends Model<Workspace, IWorkspaceCreationAttrs> {
     name: string;
 
     @BelongsToMany(() => User, () => UserWorkspaces)
-    users: User[];
+    users: Array<User>;
 
     @HasMany(() => Inspection, "workspaceId")
-    inspections: Inspection[];
+    inspections: Array<Inspection>;
 
     @HasMany(() => Certificate, "workspaceId")
-    certificates: Certificate[];
-
-    @HasMany(() => Organization, "workspaceId")
-    organizations: Organization[];
+    certificates: Array<Certificate>;
 
     @HasMany(() => ConstructionObject, "workspaceId")
-    constructionObjects: ConstructionObject[];
+    constructionObjects: Array<ConstructionObject>;
 
     @HasMany(() => Department, "workspaceId")
-    departments: Department[];
+    departments: Array<Department>;
 
     @HasMany(() => Employee, "workspaceId")
-    employees: Organization[];
+    employees: Array<Employee>;
 
     @HasMany(() => Berth, "workspaceId")
-    berthes: Berth[];
+    berthes: Array<Berth>;
 
     @HasMany(() => BerthType, "workspaceId")
-    berthTypes: BerthType[];
+    berthTypes: Array<BerthType>;
 
     @HasMany(() => CertificateType, "workspaceId")
-    certificateTypes: CertificateType[];
+    certificateTypes: Array<CertificateType>;
 
     @HasMany(() => InspectionType, "workspaceId")
-    inspectionTypes: InspectionType[];
+    inspectionTypes: Array<InspectionType>;
 }

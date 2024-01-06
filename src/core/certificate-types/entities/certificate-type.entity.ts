@@ -8,7 +8,6 @@ import {
     Table,
 } from "sequelize-typescript";
 import { Certificate } from "../../certificates/entities/certificate.entity";
-import { Organization } from "../../organizations/entities/organization.entity";
 import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface ICertificateTypeCreationsAttrs {}
@@ -71,7 +70,4 @@ export class CertificateType extends Model<
 
     @BelongsTo(() => Workspace, "workspaceId")
     workspace: Workspace;
-
-    @BelongsTo(() => Organization, "organizationId")
-    organization: Organization;
 }

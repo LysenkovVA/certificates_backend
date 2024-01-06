@@ -9,11 +9,9 @@ import { Sequelize } from "sequelize-typescript";
 import {
     berthTableAttributes,
     berthTypeTableAttributes,
-    organizationTableAttributes,
     workspaceTableAttributes,
 } from "../../infrastructure/const/tableAttributes";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
-import { Organization } from "../organizations/entities/organization.entity";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateBerthDto } from "./dto/create-berth.dto";
 import { CreateBerthExtendedDto } from "./dto/createBerthExtended.dto";
@@ -34,7 +32,6 @@ export class BerthesService {
         this.attributes = berthTableAttributes;
         this.include = [
             { model: Workspace, attributes: workspaceTableAttributes },
-            { model: Organization, attributes: organizationTableAttributes },
             { model: BerthType, attributes: berthTypeTableAttributes },
         ];
     }
@@ -52,7 +49,6 @@ export class BerthesService {
     async createExtended(
         createBertheDto: CreateBerthExtendedDto,
         workspaceId: number,
-        organizationId?: number,
     ) {
         const transaction = await this.sequelize.transaction();
 
@@ -65,12 +61,6 @@ export class BerthesService {
             await berth.$set("workspace", [workspaceId], {
                 transaction,
             });
-
-            if (organizationId) {
-                await berth.$set("organization", [organizationId], {
-                    transaction,
-                });
-            }
 
             if (createBertheDto.berthType) {
                 await berth.$set("berthType", [createBertheDto.berthType.id], {
@@ -87,36 +77,18 @@ export class BerthesService {
         }
     }
 
-    async findAll(
-        workspaceId: number,
-        organizationId?: number,
-        transaction?: Transaction,
-    ) {
+    async findAll(workspaceId: number, transaction?: Transaction) {
         try {
-            if (!organizationId) {
-                return await this.berthRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                    },
-                    attributes: this.attributes,
-                    include: this.include,
-                    order: [["value", "ASC"]],
-                    distinct: true,
-                    transaction,
-                });
-            } else {
-                return await this.berthRepository.findAndCountAll({
-                    where: {
-                        "$workspace.id$": workspaceId,
-                        "$organization.id$": +organizationId,
-                    },
-                    attributes: this.attributes,
-                    include: this.include,
-                    order: [["value", "ASC"]],
-                    distinct: true,
-                    transaction,
-                });
-            }
+            return await this.berthRepository.findAndCountAll({
+                where: {
+                    "$workspace.id$": workspaceId,
+                },
+                attributes: this.attributes,
+                include: this.include,
+                order: [["value", "ASC"]],
+                distinct: true,
+                transaction,
+            });
         } catch (e) {
             throw new InternalServerErrorException(e);
         }

@@ -39,8 +39,6 @@ import { InspectionViolationsModule } from "./core/inspection-violations/inspect
 import { Inspection } from "./core/inspections/entities/inspection.entity";
 import { InspectionsModule } from "./core/inspections/inspections.module";
 import { Inspector } from "./core/inspectors/entities/inspectors.entity";
-import { Organization } from "./core/organizations/entities/organization.entity";
-import { OrganizationsModule } from "./core/organizations/organizations.module";
 import { Profile } from "./core/profiles/entities/profile.entity";
 import { ProfilesModule } from "./core/profiles/profiles.module";
 import { Protocol } from "./core/protocols/entities/protocols.entity";
@@ -100,7 +98,6 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
                 UserRoles,
                 Subscription,
                 UserSubscription,
-                Organization,
                 ConstructionObject,
                 Department,
                 Employee,
@@ -154,7 +151,6 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
         UserRolesModule,
         AuthModule,
         SubscriptionsModule,
-        OrganizationsModule,
         ConstructionObjectsModule,
         DepartmentsModule,
         EmployeesModule,

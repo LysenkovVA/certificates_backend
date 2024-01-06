@@ -14,7 +14,6 @@ import {
     departmentTableAttributes,
     employeeTableAttributes,
     fileTableAttributes,
-    organizationTableAttributes,
     workspaceTableAttributes,
 } from "../../infrastructure/const/tableAttributes";
 import { BerthType } from "../berth-types/entities/berth-type.entity";
@@ -22,7 +21,6 @@ import { Berth } from "../berthes/entities/berth.entity";
 import { Department } from "../departments/entities/department.entity";
 import { File } from "../files/entities/file.entity";
 import { FilesService } from "../files/files.service";
-import { Organization } from "../organizations/entities/organization.entity";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateEmployeeDto } from "./dto/createEmployee.dto";
 import { CreateEmployeeExtendedDto } from "./dto/createEmployeeExtended.dto";
@@ -48,11 +46,6 @@ export class EmployeesService {
                 model: Workspace,
                 attributes: workspaceTableAttributes,
                 required: true,
-            },
-            {
-                model: Organization,
-                attributes: organizationTableAttributes,
-                required: false,
             },
             {
                 model: Berth,
@@ -178,19 +171,6 @@ export class EmployeesService {
                 transaction,
             });
 
-            // Организация
-            if (createEmployeeDto.organization?.id) {
-                await employee.$set(
-                    "organization",
-                    [createEmployeeDto.organization?.id],
-                    {
-                        transaction,
-                    },
-                );
-            } else {
-                await employee.$set("organization", null, { transaction });
-            }
-
             // Должность
             if (createEmployeeDto.berth?.id) {
                 await employee.$set("berth", [createEmployeeDto.berth?.id], {
@@ -255,19 +235,6 @@ export class EmployeesService {
                 updateEmployeeDto as UpdateEmployeeDto,
                 transaction,
             );
-
-            // Организация
-            if (updateEmployeeDto.organization?.id) {
-                await employee.$set(
-                    "organization",
-                    [updateEmployeeDto.organization?.id],
-                    {
-                        transaction,
-                    },
-                );
-            } else {
-                await employee.$set("organization", null, { transaction });
-            }
 
             // Должность
             if (updateEmployeeDto.berth?.id) {

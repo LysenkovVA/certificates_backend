@@ -10,7 +10,6 @@ import {
 import { CertificateType } from "../../certificate-types/entities/certificate-type.entity";
 import { Employee } from "../../employees/entities/employee.entity";
 import { File } from "../../files/entities/file.entity";
-import { Organization } from "../../organizations/entities/organization.entity";
 import { Protocol } from "../../protocols/entities/protocols.entity";
 import { Scan } from "../../scans/entities/scans.entity";
 import { Workspace } from "../../workspaces/entities/workspace.entity";
@@ -77,7 +76,4 @@ export class Certificate extends Model<Certificate, ICertificateCreationAttrs> {
 
     @BelongsTo(() => Workspace, "workspaceId")
     workspace: Workspace;
-
-    @BelongsTo(() => Organization, "organizationId")
-    organization: Organization;
 }
