@@ -20,6 +20,12 @@ export const certificateTableAttributes: Array<string> = [
     "group",
 ];
 
+export const checkListTableAttributes: Array<string> = [
+    "id",
+    "name",
+    "description",
+];
+
 export const checkGroupsTableAttributes: Array<string> = ["id", "value"];
 
 export const constructionObjectsTableAttributes: Array<string> = [

@@ -97,7 +97,7 @@ export class AuthService {
 
             // Добавляем рабочее пространство
             const workSpace = await this.workspaceService.create({
-                name: "Моё рабочее пространство",
+                name: "Моя организация",
             });
 
             if (workSpace) {

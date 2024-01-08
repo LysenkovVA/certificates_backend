@@ -11,6 +11,7 @@ import { BerthType } from "../../berth-types/entities/berth-type.entity";
 import { Berth } from "../../berthes/entities/berth.entity";
 import { CertificateType } from "../../certificate-types/entities/certificate-type.entity";
 import { Certificate } from "../../certificates/entities/certificate.entity";
+import { CheckList } from "../../check-lists/entities/check-list.entity";
 import { ConstructionObject } from "../../construction-objects/entities/construction-object.entity";
 import { Department } from "../../departments/entities/department.entity";
 import { Employee } from "../../employees/entities/employee.entity";
@@ -79,4 +80,7 @@ export class Workspace extends Model<Workspace, IWorkspaceCreationAttrs> {
 
     @HasMany(() => InspectionType, "workspaceId")
     inspectionTypes: Array<InspectionType>;
+
+    @HasMany(() => CheckList, "workspaceId")
+    checkLists: Array<CheckList>;
 }

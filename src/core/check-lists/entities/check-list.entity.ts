@@ -1,6 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import {
+    BelongsTo,
+    Column,
+    DataType,
+    HasMany,
+    Model,
+    Table,
+} from "sequelize-typescript";
 import { CheckListGroup } from "../../check-list-groups/entities/check-list-group.entity";
+import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface ICheckListCreationAttrs {}
 
@@ -43,4 +51,7 @@ export class CheckList extends Model<CheckList, ICheckListCreationAttrs> {
 
     @HasMany(() => CheckListGroup, "checkListId")
     checkListGroups: CheckListGroup[];
+
+    @BelongsTo(() => Workspace, "workspaceId")
+    workspace: Workspace;
 }
