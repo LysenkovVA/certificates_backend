@@ -5,6 +5,7 @@ import {
     HttpException,
 } from "@nestjs/common";
 import { Request, Response } from "express";
+import { ConsoleColor, ConsoleLogger } from "../helpers/ConsoleLogger";
 
 @Catch()
 export class ExceptionsLoggerFilter implements ExceptionFilter {
@@ -23,16 +24,16 @@ export class ExceptionsLoggerFilter implements ExceptionFilter {
             stack: exception.stack,
         });
 
-        console.log(
-            ">>> ExceptionsLoggerFilter:\n" +
-                JSON.stringify({
-                    statusCode: status,
-                    timestamp: new Date().toISOString(),
-                    method: request.method,
-                    path: request.url,
-                    error: exception.message,
-                    stack: exception.stack,
-                }),
+        ConsoleLogger.PrintMessage(
+            JSON.stringify({
+                statusCode: status,
+                timestamp: new Date().toISOString(),
+                method: request.method,
+                path: request.url,
+                error: exception.message,
+                stack: exception.stack,
+            }),
+            ConsoleColor.RED,
         );
     }
 }

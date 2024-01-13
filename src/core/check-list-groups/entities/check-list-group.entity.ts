@@ -1,6 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
-import { CheckListCheck } from "../../check-list-checks/entities/check-list-check.entity";
+import {
+    BelongsTo,
+    Column,
+    DataType,
+    HasMany,
+    Model,
+    Table,
+} from "sequelize-typescript";
+import { CheckList } from "../../check-lists/entities/check-list.entity";
+import { Check } from "../../checks/entities/check.entity";
 
 export interface ICheckListGroupCreationAttrs {}
 
@@ -24,6 +32,16 @@ export class CheckListGroup extends Model<
     id: number;
 
     @ApiProperty({
+        example: "Электробезопасность",
+        description: "Название группы",
+    })
+    @Column({
+        type: DataType.STRING,
+        allowNull: false,
+    })
+    value: string;
+
+    @ApiProperty({
         example: "1",
         description: "Позиция группы в списке",
     })
@@ -33,6 +51,12 @@ export class CheckListGroup extends Model<
     })
     position: number;
 
-    @HasMany(() => CheckListCheck, "checkListGroupId")
-    checkListChecks: CheckListCheck[];
+    @BelongsTo(() => CheckList, "checkListId")
+    checkList: CheckList;
+
+    @HasMany(() => Check, {
+        foreignKey: "checkListGroupId",
+        onDelete: "CASCADE",
+    })
+    checks: Check[];
 }

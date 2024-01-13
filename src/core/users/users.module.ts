@@ -1,6 +1,5 @@
 import { forwardRef, Global, Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
-import { SeederModule } from "nestjs-sequelize-seeder";
 import { AuthModule } from "../auth/auth.module";
 import { Profile } from "../profiles/entities/profile.entity";
 import { Role } from "../roles/entities/roles.entity";
@@ -11,7 +10,6 @@ import { UserSubscription } from "../user-subscriptions/entities/user-subscripti
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { User } from "./entity/users.entity";
 import { UsersController } from "./users.controller";
-import { SeedUser } from "./users.seeder";
 import { UsersService } from "./users.service";
 
 @Global()
@@ -28,7 +26,9 @@ import { UsersService } from "./users.service";
             Profile,
             Workspace,
         ]),
-        SeederModule.forFeature([SeedUser]),
+        // TODO ИЗ-ЗА СИДА не переключается идентификатор в БД и первый пользователь
+        // создается с ошибкой
+        // SeederModule.forFeature([SeedUser]),
         RolesModule,
         forwardRef(() => AuthModule),
     ],

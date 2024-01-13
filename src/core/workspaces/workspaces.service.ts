@@ -1,5 +1,7 @@
 import {
     BadRequestException,
+    forwardRef,
+    Inject,
     Injectable,
     InternalServerErrorException,
 } from "@nestjs/common";
@@ -7,9 +9,12 @@ import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import {
+    fileTableAttributes,
     userTableAttributes,
     workspaceTableAttributes,
 } from "../../infrastructure/const/tableAttributes";
+import { File } from "../files/entities/file.entity";
+import { FilesService } from "../files/files.service";
 import { User } from "../users/entity/users.entity";
 import { CreateWorkspaceDto } from "./dto/create-workspace.dto";
 import { CreateWorkspaceExtendedDto } from "./dto/createWorkspaceExtended.dto";
@@ -25,6 +30,8 @@ export class WorkspacesService {
     constructor(
         @InjectModel(Workspace) private workspaceRepository: typeof Workspace,
         private sequelize: Sequelize,
+        @Inject(forwardRef(() => FilesService))
+        private fileService: FilesService,
     ) {
         this.attributes = workspaceTableAttributes;
         this.include = [
@@ -32,7 +39,67 @@ export class WorkspacesService {
                 model: User,
                 attributes: userTableAttributes,
             },
+            { model: File, attributes: fileTableAttributes },
         ];
+    }
+
+    async uploadLogo(logo: Express.Multer.File, workspaceId: number) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const workspace = await this.findOne(workspaceId, transaction);
+
+            if (!workspace) {
+                throw new InternalServerErrorException(
+                    "Организация не найдена!",
+                );
+            }
+
+            const file = await this.fileService.uploadFile(
+                logo,
+                workspace.organizationLogo?.id,
+                transaction,
+            );
+
+            await workspace.$set("organizationLogo", [file.id], {
+                transaction,
+            });
+
+            await transaction.commit();
+
+            return this.fileService.findOne(file.id);
+        } catch (e) {
+            await transaction.rollback();
+            throw new InternalServerErrorException(e);
+        }
+    }
+
+    async deleteLogo(workspaceId: number) {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const workspace = await this.findOne(workspaceId, transaction);
+
+            if (!workspace) {
+                throw new InternalServerErrorException("Сотрудник не найден!");
+            }
+
+            if (workspace.organizationLogo) {
+                await this.fileService.remove(
+                    workspace.organizationLogo.id,
+                    transaction,
+                );
+            }
+
+            await workspace.$set("organizationLogo", null, { transaction });
+
+            await transaction.commit();
+
+            return true;
+        } catch (e) {
+            await transaction.rollback();
+            throw new InternalServerErrorException(e);
+        }
     }
 
     async create(

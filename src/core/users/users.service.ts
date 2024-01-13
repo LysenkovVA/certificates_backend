@@ -69,13 +69,13 @@ export class UsersService {
             throw new BadRequestException("Пароль пользователя не указан!");
         }
 
-        const candidate = await this.getUserByEmail(dto.email, transaction);
-
-        if (candidate) {
-            throw new BadRequestException(
-                `Пользователь c e-mail '${dto.email}' уже зарегистрирован!`,
-            );
-        }
+        // const candidate = await this.getUserByEmail(dto.email, transaction);
+        //
+        // if (candidate) {
+        //     throw new BadRequestException(
+        //         `Пользователь c e-mail '${dto.email}' уже зарегистрирован!`,
+        //     );
+        // }
 
         return await this.userRepository.create(dto, { transaction });
     }

@@ -18,4 +18,10 @@ export class CreateCheckDto {
         description: "Устарело или нет",
     })
     readonly isDeprecated: boolean;
+
+    @ApiProperty({
+        example: "1",
+        description: "Позиция группы в списке",
+    })
+    readonly position: number;
 }

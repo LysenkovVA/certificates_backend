@@ -15,21 +15,6 @@ export class ChecksService {
         });
     }
 
-    async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.checksRepository.findAll({
-            limit,
-            offset,
-            transaction,
-        });
-    }
-
-    async findOne(id: number, transaction?: Transaction) {
-        return await this.checksRepository.findOne({
-            where: { id },
-            transaction,
-        });
-    }
-
     async update(
         id: number,
         updateCheckDto: UpdateCheckDto,

@@ -1,5 +1,9 @@
+import { InternalServerErrorException } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
+import fs from "fs";
+import path from "path";
 import {
+    BeforeDestroy,
     BelongsToMany,
     Column,
     DataType,
@@ -13,10 +17,20 @@ import { InspectionViolation } from "../../inspection-violations/entities/inspec
 import { Protocol } from "../../protocols/entities/protocols.entity";
 import { Scan } from "../../scans/entities/scans.entity";
 import { ViolationPhoto } from "../../violation-photos/entities/violation-photos.entity";
+import { Workspace } from "../../workspaces/entities/workspace.entity";
+import { FILES_PATH } from "../storage/storage";
 
 export interface IFileCreationAttrs {}
 
-@Table({ tableName: "files" })
+@Table({
+    tableName: "files",
+    // Для срабатывания индивидуальных хуков, нужно включить нужную опцию
+    hooks: {
+        beforeBulkDestroy: (options) => {
+            options.individualHooks = true;
+        },
+    },
+})
 export class File extends Model<File, IFileCreationAttrs> {
     @ApiProperty({
         example: "1",
@@ -85,4 +99,29 @@ export class File extends Model<File, IFileCreationAttrs> {
 
     @HasMany(() => Employee, "fileId")
     employees: Employee[];
+
+    @HasMany(() => Workspace, "fileId")
+    workspace: Workspace;
+
+    /**
+     * После удаления записи из БД
+     * Необходимо включить индивидуальные хуки в Table-декораторе
+     * @param instance
+     */
+    @BeforeDestroy
+    static deleteFileFromStorage(instance: File) {
+        // Удаляем старый файл из хранилища файлов
+        const filePath = path.resolve(FILES_PATH, instance.path);
+
+        try {
+            // Удаляем физический файл синхронно
+            if (fs.existsSync(filePath)) {
+                fs.rmSync(filePath);
+            }
+        } catch {
+            throw new InternalServerErrorException(
+                "Ошибка при удалении физического файла!",
+            );
+        }
+    }
 }

@@ -22,21 +22,6 @@ export class CheckListGroupsService {
         );
     }
 
-    async findAll(limit: number, offset: number, transaction?: Transaction) {
-        return await this.checkListGroupsRepository.findAll({
-            limit,
-            offset,
-            transaction,
-        });
-    }
-
-    async findOne(id: number, transaction?: Transaction) {
-        return await this.checkListGroupsRepository.findOne({
-            where: { id },
-            transaction,
-        });
-    }
-
     async update(
         id: number,
         updateCheckListGroupDto: UpdateCheckListGroupDto,

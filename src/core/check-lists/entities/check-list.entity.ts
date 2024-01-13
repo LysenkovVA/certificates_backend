@@ -49,7 +49,10 @@ export class CheckList extends Model<CheckList, ICheckListCreationAttrs> {
     })
     description: string;
 
-    @HasMany(() => CheckListGroup, "checkListId")
+    @HasMany(() => CheckListGroup, {
+        foreignKey: "checkListId",
+        onDelete: "CASCADE",
+    })
     checkListGroups: CheckListGroup[];
 
     @BelongsTo(() => Workspace, "workspaceId")

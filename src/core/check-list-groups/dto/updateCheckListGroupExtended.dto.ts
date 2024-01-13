@@ -1,8 +1,8 @@
 import { ApiProperty, PartialType } from "@nestjs/swagger";
-import { CreateCheckListGroupDto } from "./create-check-list-group.dto";
+import { CreateCheckListGroupExtendedDto } from "./createCheckListGroupExtended.dto";
 
-export class UpdateCheckListGroupDto extends PartialType(
-    CreateCheckListGroupDto,
+export class UpdateCheckListGroupExtendedDto extends PartialType(
+    CreateCheckListGroupExtendedDto,
 ) {
     @ApiProperty({
         example: "1",

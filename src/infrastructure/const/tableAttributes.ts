@@ -26,6 +26,20 @@ export const checkListTableAttributes: Array<string> = [
     "description",
 ];
 
+export const checkListGroupTableAttributes: Array<string> = [
+    "id",
+    "value",
+    "position",
+];
+
+export const checkTableAttributes: Array<string> = [
+    "id",
+    "description",
+    "normativeDocument",
+    "isDeprecated",
+    "position",
+];
+
 export const checkGroupsTableAttributes: Array<string> = ["id", "value"];
 
 export const constructionObjectsTableAttributes: Array<string> = [
@@ -102,7 +116,24 @@ export const subscriptionTableAttributes: Array<string> = [
 
 export const tokenTableAttributes: Array<string> = ["id", "refreshToken"];
 
-export const workspaceTableAttributes: Array<string> = ["id", "name"];
+export const workspaceTableAttributes: Array<string> = [
+    "id",
+    "name",
+    "organizationName",
+    "organizationAddress",
+    "organizationPhone",
+    "organizationEmail",
+    "organizationWeb",
+    "organizationINN",
+    "organizationKPP",
+    "organizationBank",
+    "organizationRS",
+    "organizationKS",
+    "organizationBIK",
+    "organizationOKPO",
+    "organizationOKVED",
+    "organizationOGRN",
+];
 
 export const userTableAttributes: Array<string> = ["id", "email", "password"]; //
 

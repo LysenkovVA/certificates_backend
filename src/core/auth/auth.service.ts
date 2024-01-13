@@ -41,11 +41,13 @@ export class AuthService {
      * @param createUserDto
      */
     async register(createUserDto: CreateUserDto) {
+        console.log("Searching candidate...");
         const candidate = await this.userService.getUserByEmail(
             createUserDto.email,
         );
 
         if (candidate) {
+            console.log("Candidate exists!");
             throw new BadRequestException({
                 message: `Пользователь с e-mail ${createUserDto.email} уже зарегистрирован!`,
             });
@@ -56,11 +58,13 @@ export class AuthService {
 
         try {
             // Создаем нового пользователя
+            console.log("Creating user...");
             const user = await this.userService.createUser(
                 createUserDto,
                 transaction,
             );
 
+            console.log("Adding role...");
             // Добавляем роль пользователя
             const userRole = await this.roleService.getRoleByValue(
                 RoleTypes.USER,
@@ -68,25 +72,30 @@ export class AuthService {
             );
 
             if (!userRole) {
+                console.log("Role not found...");
                 throw new InternalServerErrorException(
                     `Роль ${RoleTypes.USER} отсутствует в системе!`,
                 );
             }
 
+            console.log("Add role to user...");
             await user.$add("roles", [userRole.id], { transaction });
 
             // Добавляем подписку
+            console.log("Adding subscription...");
             const freeSubscription =
                 await this.subscriptionService.findSubscriptionByValue(
                     SubscriptionType.FREE,
                 );
 
             if (!freeSubscription) {
+                console.log("Subscription not found!");
                 throw new InternalServerErrorException(
                     `Подписка ${SubscriptionType.FREE} отсутствует в системе!`,
                 );
             }
 
+            console.log("Adding subscription to user...");
             await user.$add("subscriptions", [freeSubscription.id], {
                 transaction,
                 through: {
@@ -96,42 +105,51 @@ export class AuthService {
             });
 
             // Добавляем рабочее пространство
+            console.log("Creating user workspace...");
             const workSpace = await this.workspaceService.create({
                 name: "Моя организация",
             });
 
             if (workSpace) {
+                console.log("Adding workspace to user...");
                 await user.$add("workspaces", [workSpace.id], { transaction });
             }
 
             // Создаем профиль пользователя
+            console.log("Creating profile...");
             const profile = await this.profileService.create(
                 { surname: null, name: null, birthDate: null },
                 transaction,
             );
 
             if (profile) {
+                console.log("Adding profile to user...");
                 await user.$set("profile", [profile.id], { transaction });
             }
 
             // TODO - Отправка подтверждения на email
 
             // Генерируем токены
+            console.log("Generate tokens...");
             const accessToken = await this.generateAccessToken(user);
             const refreshToken = await this.generateRefreshToken(user);
 
             // Создаем токен и добавляем пользователю
+            console.log("Creating refresh token...");
             const token = await this.tokenService.create(
                 { refreshToken },
                 transaction,
             );
-            await user.$add("tokens", [token], {
+
+            console.log("Add refresh token to user...");
+            await user.$add("tokens", [token.id], {
                 transaction,
             });
 
             // Коммит
             await transaction.commit();
 
+            console.log("Getting user by id...");
             const createdUser = await this.userService.getUserById(user.id);
 
             return {

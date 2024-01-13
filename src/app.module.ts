@@ -12,10 +12,6 @@ import { CertificateTypesModule } from "./core/certificate-types/certificate-typ
 import { CertificateType } from "./core/certificate-types/entities/certificate-type.entity";
 import { CertificatesModule } from "./core/certificates/certificates.module";
 import { Certificate } from "./core/certificates/entities/certificate.entity";
-import { CheckGroupsModule } from "./core/check-groups/check-groups.module";
-import { CheckGroup } from "./core/check-groups/entities/check-group.entity";
-import { CheckListChecksModule } from "./core/check-list-checks/check-list-checks.module";
-import { CheckListCheck } from "./core/check-list-checks/entities/check-list-check.entity";
 import { CheckListGroupsModule } from "./core/check-list-groups/check-list-groups.module";
 import { CheckListGroup } from "./core/check-list-groups/entities/check-list-group.entity";
 import { CheckListsModule } from "./core/check-lists/check-lists.module";
@@ -113,7 +109,6 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
                 File,
                 Protocol,
                 Scan,
-                CheckGroup,
                 Check,
                 InspectionViolation,
                 CheckStatus,
@@ -123,7 +118,6 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
                 ViolationEmployeeComment,
                 CheckList,
                 CheckListGroup,
-                CheckListCheck,
                 Profile,
                 Token,
                 Workspace,
@@ -162,7 +156,6 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
         CertificatesModule,
         CertificateTypesModule,
         FilesModule,
-        CheckGroupsModule,
         ChecksModule,
         InspectionViolationsModule,
         CheckStatusesModule,
@@ -170,7 +163,6 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
         ViolationEmployeeCommentsModule,
         CheckListsModule,
         CheckListGroupsModule,
-        CheckListChecksModule,
         ProfilesModule,
         TokensModule,
         WorkspacesModule,

@@ -7,9 +7,21 @@ import { InjectModel } from "@nestjs/sequelize";
 import { IncludeOptions, Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import {
+    checkListGroupTableAttributes,
     checkListTableAttributes,
+    checkTableAttributes,
     workspaceTableAttributes,
 } from "../../infrastructure/const/tableAttributes";
+import {
+    ConsoleColor,
+    ConsoleLogger,
+} from "../../infrastructure/helpers/ConsoleLogger";
+import { CheckListGroupsService } from "../check-list-groups/check-list-groups.service";
+import { CreateCheckListGroupDto } from "../check-list-groups/dto/create-check-list-group.dto";
+import { CheckListGroup } from "../check-list-groups/entities/check-list-group.entity";
+import { ChecksService } from "../checks/checks.service";
+import { CreateCheckDto } from "../checks/dto/create-check.dto";
+import { Check } from "../checks/entities/check.entity";
 import { Workspace } from "../workspaces/entities/workspace.entity";
 import { CreateCheckListDto } from "./dto/create-check-list.dto";
 import { CreateCheckListExtendedDto } from "./dto/createCheckListExtended.dto";
@@ -25,11 +37,18 @@ export class CheckListsService {
     constructor(
         @InjectModel(CheckList) private checkListRepository: typeof CheckList,
         private sequelize: Sequelize,
+        private checkListGroupService: CheckListGroupsService,
+        private checkService: ChecksService,
     ) {
         // Параметры запросов к БД
         this.attributes = checkListTableAttributes;
         this.include = [
             { model: Workspace, attributes: workspaceTableAttributes },
+            {
+                model: CheckListGroup,
+                attributes: checkListGroupTableAttributes,
+                include: [{ model: Check, attributes: checkTableAttributes }],
+            },
         ];
     }
 
@@ -50,6 +69,11 @@ export class CheckListsService {
         createCheckListExtendedDto: CreateCheckListExtendedDto,
         workspaceId: number,
     ) {
+        ConsoleLogger.PrintMessage(
+            JSON.stringify(createCheckListExtendedDto),
+            ConsoleColor.GREEN,
+        );
+
         const transaction = await this.sequelize.transaction();
 
         try {
@@ -61,6 +85,49 @@ export class CheckListsService {
             await item.$set("workspace", [workspaceId], {
                 transaction,
             });
+
+            if (createCheckListExtendedDto.checkListGroups) {
+                let groupPosition = 0;
+                for (const checkListGroup of createCheckListExtendedDto.checkListGroups) {
+                    const newCheckListGroup =
+                        await this.checkListGroupService.create(
+                            {
+                                ...(checkListGroup as CreateCheckListGroupDto),
+                                position: groupPosition,
+                            },
+                            transaction,
+                        );
+
+                    await item.$add("checkListGroups", [newCheckListGroup.id], {
+                        transaction,
+                    });
+
+                    if (checkListGroup.checks) {
+                        let checkPosition = 0;
+                        for (const check of checkListGroup.checks) {
+                            const newCheck = await this.checkService.create(
+                                {
+                                    ...(check as CreateCheckDto),
+                                    position: checkPosition,
+                                },
+                                transaction,
+                            );
+
+                            await newCheckListGroup.$add(
+                                "checks",
+                                [newCheck.id],
+                                {
+                                    transaction,
+                                },
+                            );
+
+                            checkPosition++;
+                        }
+                    }
+
+                    groupPosition++;
+                }
+            }
 
             await transaction.commit();
 
@@ -147,6 +214,107 @@ export class CheckListsService {
                 updateCheckListExtendedDto as UpdateCheckListDto,
                 transaction,
             );
+
+            // Удаляем старое
+            for (const group of candidate.checkListGroups) {
+                await this.checkListGroupService.remove(group.id, transaction);
+            }
+
+            // Создаем новое
+            for (const checkListGroup of updateCheckListExtendedDto.checkListGroups) {
+                const newCheckListGroup =
+                    await this.checkListGroupService.create(
+                        checkListGroup as CreateCheckListGroupDto,
+                        transaction,
+                    );
+
+                await candidate.$add(
+                    "checkListGroups",
+                    [newCheckListGroup.id],
+                    {
+                        transaction,
+                    },
+                );
+
+                for (const check of checkListGroup.checks) {
+                    const newCheck = await this.checkService.create(
+                        check as CreateCheckDto,
+                        transaction,
+                    );
+
+                    await newCheckListGroup.$add("checks", [newCheck.id], {
+                        transaction,
+                    });
+                }
+            }
+
+            // // Удаляем группы, которые больше не связаны со списком
+            // for (const group of candidate.checkListGroups) {
+            //     // Ищем группу, которую нужно обновить
+            //     const groupsDto =
+            //         updateCheckListExtendedDto.checkListGroups.filter(
+            //             (groupDto) => groupDto.id === group.id,
+            //         );
+            //
+            //     // Группа не найдена, значит ее надо удалить
+            //     if (!groupsDto || groupsDto.length === 0) {
+            //         // Удаляем группу
+            //         await this.checkListGroupService.remove(
+            //             group.id,
+            //             transaction,
+            //         );
+            //     } else {
+            //         // Группа найдена
+            //         for (const groupDto of groupsDto) {
+            //             await this.checkListGroupService.update(
+            //                 groupDto.id,
+            //                 groupDto as UpdateCheckListGroupDto,
+            //                 transaction,
+            //             );
+            //
+            //             // Ищем проверки
+            //             for (const checkDto of groupDto.checks) {
+            //                 // Ищем проверку, которую нужно обновить
+            //                 const checksDto =
+            //                   groupDto.checks.filter(
+            //                     (checkDto) => checkDto.id === checkDto.id,
+            //                   );
+            //             }
+            //         }
+            //     }
+            // }
+            //
+            // for (const checkListGroup of updateCheckListExtendedDto.checkListGroups) {
+            //     // Создаем новые группы
+            //     if (!checkListGroup.id) {
+            //         const newCheckListGroup =
+            //             await this.checkListGroupService.create(
+            //                 checkListGroup as CreateCheckListGroupDto,
+            //                 transaction,
+            //             );
+            //
+            //         await candidate.$add(
+            //             "checkListGroups",
+            //             [newCheckListGroup.id],
+            //             {
+            //                 transaction,
+            //             },
+            //         );
+            //
+            //         for (const check of checkListGroup.checks) {
+            //             const newCheck = await this.checkService.create(
+            //                 check as CreateCheckDto,
+            //                 transaction,
+            //             );
+            //
+            //             await newCheckListGroup.$add("checks", [newCheck.id], {
+            //                 transaction,
+            //             });
+            //         }
+            //     } else {
+            //         // Обновление
+            //     }
+            // }
 
             await transaction.commit();
 

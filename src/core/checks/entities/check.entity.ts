@@ -1,7 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
-import { CheckListCheck } from "../../check-list-checks/entities/check-list-check.entity";
-import { InspectionViolation } from "../../inspection-violations/entities/inspection-violation.entity";
+import {
+    BelongsTo,
+    Column,
+    DataType,
+    Model,
+    Table,
+} from "sequelize-typescript";
+import { CheckListGroup } from "../../check-list-groups/entities/check-list-group.entity";
 
 export interface ICheckCreationAttrs {}
 
@@ -52,9 +57,16 @@ export class Check extends Model<Check, ICheckCreationAttrs> {
     })
     readonly isDeprecated: boolean;
 
-    @HasMany(() => InspectionViolation, "checkId")
-    inspectionViolations: InspectionViolation[];
+    @ApiProperty({
+        example: "1",
+        description: "Позиция группы в списке",
+    })
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false,
+    })
+    position: number;
 
-    @HasMany(() => CheckListCheck, "checkId")
-    checkListChecks: CheckListCheck[];
+    @BelongsTo(() => CheckListGroup, "checkListGroupId")
+    checkListGroup: CheckListGroup;
 }

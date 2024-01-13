@@ -8,10 +8,14 @@ import {
     Patch,
     Post,
     Res,
+    UploadedFile,
     UseGuards,
+    UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { Response } from "express";
 import { AuthGuard } from "../auth/auth.guard";
+import { storage } from "../files/storage/storage";
 import { User } from "../users/entity/users.entity";
 import { AuthUser } from "../users/user.decorator";
 import { CreateWorkspaceExtendedDto } from "./dto/createWorkspaceExtended.dto";
@@ -34,6 +38,45 @@ export class WorkspacesController {
                 createWorkspaceExtendedDto,
                 user.id,
             );
+
+            if (result) {
+                response.status(200);
+                return result;
+            }
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    @Post("upload/logo/:workspaceId")
+    @UseInterceptors(FileInterceptor("logo", { storage }))
+    async uploadLogo(
+        @Param("workspaceId", ParseIntPipe) workspaceId: number,
+        @UploadedFile() logo: Express.Multer.File,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const file = await this.workspacesService.uploadLogo(
+                logo,
+                workspaceId,
+            );
+
+            if (file) {
+                response.status(200);
+                return file;
+            }
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    @Post("delete/logo/:workspaceId")
+    async deleteLogo(
+        @Param("workspaceId", ParseIntPipe) workspaceId: number,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        try {
+            const result = await this.workspacesService.deleteLogo(workspaceId);
 
             if (result) {
                 response.status(200);

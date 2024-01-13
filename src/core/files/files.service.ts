@@ -1,7 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import fs from "fs";
-import path from "path";
 import { IncludeOptions, Transaction } from "sequelize";
 import { File } from "./entities/file.entity";
 import { FILES_PATH } from "./storage/storage";
@@ -31,35 +29,7 @@ export class FilesService {
         try {
             // Обновляем существующий файл (запись в БД)
             if (fileId) {
-                const existingFile = await this.fileRepository.findByPk(fileId);
-
-                if (!existingFile) {
-                    throw new BadRequestException(
-                        `Файл с идентификатором ${fileId} не найден в БД!`,
-                    );
-                }
-
-                // Удаляем старый файл из хранилища файлов
-                const filePath = path.resolve(FILES_PATH, existingFile.path);
-                if (fs.existsSync(filePath)) {
-                    fs.rmSync(filePath);
-                }
-
-                // Обновляем запись в БД о новом файле
-                await existingFile.update(
-                    {
-                        name: fileToUpload.filename,
-                        path: fileToUpload.path
-                            .replace(FILES_PATH, "")
-                            .replace("/", ""),
-                        format: fileToUpload.mimetype,
-                        sizeAtBytes: fileToUpload.size,
-                    },
-                    { transaction },
-                );
-
-                // Возвращаем обновленный файл
-                return existingFile;
+                await this.remove(fileId, transaction);
             }
 
             // Запись о файле еще не существует в БД, создаем новую
@@ -81,21 +51,6 @@ export class FilesService {
 
     async remove(id: number, transaction?: Transaction) {
         try {
-            if (id) {
-                const existingFile = await this.fileRepository.findByPk(id);
-
-                if (!existingFile) {
-                    throw new BadRequestException(
-                        `Файл с идентификатором ${id} не найден в БД!`,
-                    );
-                }
-                // Удаляем старый файл из хранилища файлов
-                const filePath = path.resolve(FILES_PATH, existingFile.path);
-                if (fs.existsSync(filePath)) {
-                    fs.rmSync(filePath);
-                }
-            }
-
             return await this.fileRepository.destroy({
                 where: { id },
                 transaction,
