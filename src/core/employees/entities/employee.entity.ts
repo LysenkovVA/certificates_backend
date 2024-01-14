@@ -16,9 +16,6 @@ import { InspectionViolation } from "../../inspection-violations/entities/inspec
 import { Inspection } from "../../inspections/entities/inspection.entity";
 import { Inspector } from "../../inspectors/entities/inspectors.entity";
 import { RepresentativeEmployee } from "../../representative-employees/entities/representative-employees.entity";
-import { ViolationComment } from "../../violation-comments/entities/violation-comment.entity";
-import { ViolationEmployeeComment } from "../../violation-employee-comments/entities/violation-employee-comment.entity";
-import { ViolationViewedBy } from "../../violation_viewed_by/entities/violation_viewed_by.entity";
 import { Workspace } from "../../workspaces/entities/workspace.entity";
 
 export interface IEmployeeCreationAttrs {}
@@ -120,15 +117,6 @@ export class Employee extends Model<Employee, IEmployeeCreationAttrs> {
 
     @HasMany(() => InspectionViolation, "responsibleForEliminationId")
     inspectionViolationsWhereResponsible: InspectionViolation[];
-
-    @HasMany(() => ViolationComment, "employeeId")
-    violationComments: ViolationComment[];
-
-    @BelongsToMany(() => InspectionViolation, () => ViolationViewedBy)
-    viewedInspectionViolations: InspectionViolation[];
-
-    @HasMany(() => ViolationEmployeeComment, "employeeId")
-    employeeComments: ViolationEmployeeComment[];
 
     @BelongsTo(() => Berth, "berthId")
     berth: Berth;

@@ -6,8 +6,6 @@ import { FilesModule } from "../files/files.module";
 import { Inspection } from "../inspections/entities/inspection.entity";
 import { Inspector } from "../inspectors/entities/inspectors.entity";
 import { RepresentativeEmployee } from "../representative-employees/entities/representative-employees.entity";
-import { ViolationEmployeeComment } from "../violation-employee-comments/entities/violation-employee-comment.entity";
-import { ViolationViewedBy } from "../violation_viewed_by/entities/violation_viewed_by.entity";
 import { EmployeesController } from "./employees.controller";
 import { EmployeesService } from "./employees.service";
 import { Employee } from "./entities/employee.entity";
@@ -21,8 +19,6 @@ import { Employee } from "./entities/employee.entity";
             RepresentativeEmployee,
             Inspection,
             Inspector,
-            ViolationViewedBy,
-            ViolationEmployeeComment,
             File,
             Certificate,
         ]),

@@ -3,16 +3,11 @@ import {
     BelongsToMany,
     Column,
     DataType,
-    HasMany,
     Model,
     Table,
 } from "sequelize-typescript";
-import { Employee } from "../../employees/entities/employee.entity";
 import { File } from "../../files/entities/file.entity";
-import { ViolationComment } from "../../violation-comments/entities/violation-comment.entity";
-import { ViolationEmployeeComment } from "../../violation-employee-comments/entities/violation-employee-comment.entity";
 import { ViolationPhoto } from "../../violation-photos/entities/violation-photos.entity";
-import { ViolationViewedBy } from "../../violation_viewed_by/entities/violation_viewed_by.entity";
 
 export interface IInspectionViolationCreationAttrs {}
 
@@ -55,15 +50,6 @@ export class InspectionViolation extends Model<
     })
     readonly isEliminated: boolean;
 
-    @HasMany(() => ViolationComment, "inspectionViolationId")
-    violationComments: ViolationComment[];
-
     @BelongsToMany(() => File, () => ViolationPhoto)
     photos: File[];
-
-    @BelongsToMany(() => Employee, () => ViolationViewedBy)
-    viewedBy: Employee[];
-
-    @HasMany(() => ViolationEmployeeComment, "inspectionViolationId")
-    employeeComments;
 }

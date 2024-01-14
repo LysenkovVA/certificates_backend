@@ -54,12 +54,7 @@ import { UserSubscription } from "./core/user-subscriptions/entities/user-subscr
 import { UserWorkspaces } from "./core/user-workspaces/entities/user-workspaces.entity";
 import { User } from "./core/users/entity/users.entity";
 import { UsersModule } from "./core/users/users.module";
-import { ViolationComment } from "./core/violation-comments/entities/violation-comment.entity";
-import { ViolationCommentsModule } from "./core/violation-comments/violation-comments.module";
-import { ViolationEmployeeComment } from "./core/violation-employee-comments/entities/violation-employee-comment.entity";
-import { ViolationEmployeeCommentsModule } from "./core/violation-employee-comments/violation-employee-comments.module";
 import { ViolationPhoto } from "./core/violation-photos/entities/violation-photos.entity";
-import { ViolationViewedBy } from "./core/violation_viewed_by/entities/violation_viewed_by.entity";
 import { Workspace } from "./core/workspaces/entities/workspace.entity";
 import { WorkspacesModule } from "./core/workspaces/workspaces.module";
 
@@ -112,10 +107,7 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
                 Check,
                 InspectionViolation,
                 CheckStatus,
-                ViolationComment,
                 ViolationPhoto,
-                ViolationViewedBy,
-                ViolationEmployeeComment,
                 CheckList,
                 CheckListGroup,
                 Profile,
@@ -159,8 +151,6 @@ import { WorkspacesModule } from "./core/workspaces/workspaces.module";
         ChecksModule,
         InspectionViolationsModule,
         CheckStatusesModule,
-        ViolationCommentsModule,
-        ViolationEmployeeCommentsModule,
         CheckListsModule,
         CheckListGroupsModule,
         ProfilesModule,
